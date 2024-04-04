@@ -1,0 +1,88 @@
+[tool.poetry]
+name = "inventory-embeddings"
+version = "0.1.0"
+description = ""
+authors = ["must1d"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.10"
+ruff = "^0.3.5"
+pre-commit = "^3.7.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 120
+lint.select = [
+    "F",
+    "E",
+    # "C90",
+    "W",
+    "I",
+    "N",
+    "UP",
+    "YTT",
+    "ANN",
+    "ASYNC",
+    "TRIO",
+    # "S",
+    "BLE",
+    # "FBT",
+    "B",
+    "A",
+    "COM",
+    # "CPY",
+    "C4",
+    "DTZ",
+    "T10",
+    "DJ",
+    "EM",
+    "EXE",
+    "FA",
+    "ISC",
+    # "FA",
+    "ICN",
+    "G",
+    "INP",
+    "PIE",
+    # "T20",
+    "PYI",
+    "PT",
+    "Q",
+    "RSE",
+    "RET",
+    "SLF",
+    "SLOT",
+    "SIM",
+    "TID",
+    "TCH",
+    "INT",
+    "ARG",
+    "PTH",
+    "TD",
+    "FIX",
+    "ERA",
+    "PD",
+    "PGH",
+    "PL",
+    "TRY",
+    "FLY",
+    "NPY",
+    "AIR",
+    "PERF",
+    # "FURB",
+    "LOG",
+    "RUF"
+]
+lint.ignore = [
+    "ANN101",  # ANN101 Missing type annotation for `self` in method
+    "ANN102",  # ANN101 Missing type annotation for `self` in method
+    "FA102", # FA102 Missing `from __future__ import annotations`, but uses PEP 585 collectio
+    "TCH001", # TCH001 Move application import `...` into a type-checking block
+]
+
