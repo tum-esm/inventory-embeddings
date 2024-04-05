@@ -10,7 +10,13 @@ package-mode = false
 python = "^3.10"
 ruff = "^0.3.5"
 pre-commit = "^3.7.0"
+numpy = "^1.26.4"
+pandas = "^2.2.1"
+matplotlib = "^3.8.4"
 
+
+[tool.poetry.group.torch.dependencies]
+torch = "^2.2.2"
 
 [build-system]
 requires = ["poetry-core"]
