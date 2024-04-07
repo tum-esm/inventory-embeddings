@@ -13,6 +13,7 @@ pre-commit = "^3.7.0"
 numpy = "^1.26.4"
 pandas = "^2.2.1"
 matplotlib = "^3.8.4"
+alive-progress = "^3.1.5"
 
 
 [tool.poetry.group.torch.dependencies]
@@ -91,5 +92,6 @@ lint.ignore = [
     "FA102", # FA102 Missing `from __future__ import annotations`, but uses PEP 585 collectio
     "TCH001", # TCH001 Move application import `...` into a type-checking block
     "INP001", # INP001 File `...` is part of an implicit namespace package. Add an `__init__.py`.
+    "E741", # E741 Ambiguous variable name: `I`
 ]
 
