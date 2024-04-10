@@ -1,6 +1,5 @@
-from __future__ import annotations
-
 from enum import Enum
+from typing import Self
 
 
 class GnfrSectorType(Enum):
@@ -23,10 +22,10 @@ class GnfrSectorType(Enum):
     def to_index(self) -> int:
         return self.value - 1
 
-    @staticmethod
-    def from_index(index: int) -> GnfrSectorType:
+    @classmethod
+    def from_index(cls, index: int) -> Self:
         return GnfrSectorType(value=index + 1)
 
-    @staticmethod
-    def from_str(sector: str) -> GnfrSectorType:
+    @classmethod
+    def from_str(cls, sector: str) -> Self:
         return GnfrSectorType[sector]

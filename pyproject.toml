@@ -11,9 +11,9 @@ python = "^3.11"
 ruff = "^0.3.5"
 pre-commit = "^3.7.0"
 numpy = "^1.26.4"
-pandas = "^2.2.1"
 matplotlib = "^3.8.4"
 alive-progress = "^3.1.5"
+polars = "^0.20.19"
 
 
 [tool.poetry.group.torch.dependencies]
@@ -87,11 +87,12 @@ lint.select = [
     "RUF"
 ]
 lint.ignore = [
-    "ANN101",  # ANN101 Missing type annotation for `self` in method
-    "ANN102",  # ANN101 Missing type annotation for `self` in method
-    "FA102", # FA102 Missing `from __future__ import annotations`, but uses PEP 585 collectio
-    "TCH001", # TCH001 Move application import `...` into a type-checking block
-    "INP001", # INP001 File `...` is part of an implicit namespace package. Add an `__init__.py`.
-    "E741", # E741 Ambiguous variable name: `I`
+    "ANN101",   # ANN101 Missing type annotation for `self` in method
+    "ANN102",   # ANN101 Missing type annotation for `self` in method
+    "FA102",    # FA102 Missing `from __future__ import annotations`, but uses PEP 585 collectio
+    "TCH001",   # TCH001 Move application import `...` into a type-checking block
+    "INP001",   # INP001 File `...` is part of an implicit namespace package. Add an `__init__.py`.
+    "E741",     # E741 Ambiguous variable name: `I`,
+    "PLR0913",  # PLR0913 too many arguments
 ]
 
