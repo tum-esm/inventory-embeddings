@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Self
 
-from src.gnfr_sector_type import GnfrSectorType
+from embeddings.data_preprocessing.gnfr_sector_type import GnfrSectorType
 
 
 @dataclass

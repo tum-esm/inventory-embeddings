@@ -6,9 +6,9 @@ from pathlib import Path
 import polars as pl
 from alive_progress import alive_bar
 
-from src.constants import TNO_LAT_STEP, TNO_LONG_STEP
-from src.gnfr_sector_type import GnfrSectorType
-from src.helper_dataclasses import Cell, GhgSource
+from embeddings.data_preprocessing.constants import TNO_LAT_STEP, TNO_LONG_STEP
+from embeddings.data_preprocessing.gnfr_sector_type import GnfrSectorType
+from embeddings.data_preprocessing.helper_dataclasses import Cell, GhgSource
 
 
 @dataclass
@@ -86,7 +86,7 @@ def _convert_index_to_coordinates(index: int, grid_width: int) -> tuple[int, int
     return x, y
 
 
-def filter_cities(
+def filter_tno_data_by_cities(
     tno_data_csv: Path,
     out_csv: Path,
     *,
