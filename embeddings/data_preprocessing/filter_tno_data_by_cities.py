@@ -54,14 +54,14 @@ def _extract_cells_from_city_data(
 def _write_csv_header(out_csv: Path) -> None:
     with out_csv.open("w") as file:
         csv_writer = csv.writer(file, delimiter=";")
-        csv_writer.writerow(["City", "x", "y", "co2_ff", "co2_bf", "ch4"])
+        csv_writer.writerow(["City", "x", "y", "lat", "lon", "co2_ff", "co2_bf", "ch4"])
 
 
 def _write_cells_to_csv(out_csv: Path, city: City, cells: dict[tuple[int, int], Cell]) -> None:
     with out_csv.open("a") as file:
         csv_writer = csv.writer(file, delimiter=";")
         for (x, y), cell in cells.items():
-            csv_writer.writerow([city.name, x, y, cell.co2_ff_str, cell.co2_bf_str, cell.ch4_str])
+            csv_writer.writerow([city.name, x, y, cell.lat, cell.lon, cell.co2_ff_str, cell.co2_bf_str, cell.ch4_str])
 
 
 def _convert_index_to_coordinates(index: int, grid_width: int) -> tuple[int, int]:
