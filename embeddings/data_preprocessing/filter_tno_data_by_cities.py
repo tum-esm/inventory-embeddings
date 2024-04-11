@@ -1,67 +1,21 @@
 import csv
-from dataclasses import dataclass
 from math import floor
 from pathlib import Path
 
 import polars as pl
 from alive_progress import alive_bar
 
-from embeddings.common.paths import OpenDataSoftPaths
-from embeddings.data_preprocessing.constants import TNO_LAT_STEP, TNO_LON_STEP
-from embeddings.data_preprocessing.gnfr_sector_type import GnfrSectorType
-from embeddings.data_preprocessing.helper_dataclasses import Cell, GhgSource
-
-
-@dataclass
-class _City:
-    name: str
-    lat: float
-    lon: float
-
-
-def _coordinates_to_float(coordinates: str) -> tuple[float, float]:
-    lat, lon = coordinates.split(",")
-    return float(lat), float(lon)
-
-
-def _are_coordinates_within_range(
-    coordinates: str,
-    lat_range: tuple[float, float],
-    lon_range: tuple[float, float],
-) -> bool:
-    lat, lon = _coordinates_to_float(coordinates)
-    return lat_range[0] <= lat <= lat_range[1] and lon_range[0] <= lon <= lon_range[1]
-
-
-def _get_all_cities(
-    min_population_size: int,
-    lat_range: tuple[float, float],
-    lon_range: tuple[float, float],
-) -> list[_City]:
-    res = pl.read_csv(OpenDataSoftPaths.OPEN_DATA_SOFT_GEONAMES_CSV, separator=";", infer_schema_length=10000)
-
-    filtered_cities = res.filter(
-        (pl.col("Population") >= min_population_size),
-        (
-            pl.col("Coordinates").map_elements(
-                function=lambda val: _are_coordinates_within_range(val, lat_range=lat_range, lon_range=lon_range),
-                return_dtype=bool,
-            ),
-        ),
-    )
-
-    cities = []
-
-    for city in filtered_cities.iter_rows(named=True):
-        lat, lon = _coordinates_to_float(city["Coordinates"])
-        cities.append(_City(name=city["Name"], lat=lat, lon=lon))
-
-    return cities
+from embeddings.common.gnfr_sector_type import GnfrSectorType
+from embeddings.data_preprocessing.city_filtering import filter_cities_from_open_data_soft_data
+from embeddings.data_preprocessing.data_classes.cell import Cell
+from embeddings.data_preprocessing.data_classes.city import City
+from embeddings.data_preprocessing.data_classes.ghg_source import GhgSource
+from embeddings.data_preprocessing.tno_constants import TNO_LAT_STEP, TNO_LON_STEP
 
 
 def _filter_city_by_latitude_and_longitude(
     tno_data: pl.DataFrame,
-    city: _City,
+    city: City,
     height: int,
     width: int,
 ) -> pl.DataFrame:
@@ -103,7 +57,7 @@ def _write_csv_header(out_csv: Path) -> None:
         csv_writer.writerow(["City", "x", "y", "co2_ff", "co2_bf", "ch4"])
 
 
-def _write_cells_to_csv(out_csv: Path, city: _City, cells: dict[tuple[int, int], Cell]) -> None:
+def _write_cells_to_csv(out_csv: Path, city: City, cells: dict[tuple[int, int], Cell]) -> None:
     with out_csv.open("a") as file:
         csv_writer = csv.writer(file, delimiter=";")
         for (x, y), cell in cells.items():
@@ -116,6 +70,13 @@ def _convert_index_to_coordinates(index: int, grid_width: int) -> tuple[int, int
     return x, y
 
 
+def _get_min_max(data: pl.DataFrame, column: str, margin: float) -> tuple[float, float]:
+    return (
+        data[column].min() + margin / 2,
+        data[column].max() - margin / 2,
+    )
+
+
 def filter_tno_data_by_cities(
     tno_data_csv: Path,
     out_csv: Path,
@@ -126,16 +87,10 @@ def filter_tno_data_by_cities(
 ) -> None:
     tno_data = pl.read_csv(tno_data_csv, separator=";")
 
-    cites = _get_all_cities(
+    cites = filter_cities_from_open_data_soft_data(
         min_population_size=min_population_size,
-        lat_range=(
-            tno_data["Lat"].min() + TNO_LAT_STEP * grid_height / 2,
-            tno_data["Lat"].max() - TNO_LAT_STEP * grid_height / 2,
-        ),
-        lon_range=(
-            tno_data["Lon"].min() + TNO_LON_STEP * grid_width / 2,
-            tno_data["Lon"].max() - TNO_LON_STEP * grid_width / 2,
-        ),
+        lat_range=_get_min_max(tno_data, column="Lat", margin=TNO_LAT_STEP * grid_height),
+        lon_range=_get_min_max(tno_data, column="Lon", margin=TNO_LON_STEP * grid_width),
     )
 
     _write_csv_header(out_csv=out_csv)

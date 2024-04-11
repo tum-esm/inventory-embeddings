@@ -1,15 +1,7 @@
 from dataclasses import dataclass
 from typing import Self
 
-from embeddings.data_preprocessing.gnfr_sector_type import GnfrSectorType
-
-
-@dataclass
-class GhgSource:
-    sector: GnfrSectorType
-    co2_ff: float
-    co2_bf: float
-    ch4: float
+from embeddings.data_preprocessing.data_classes.ghg_source import GhgSource
 
 
 @dataclass
