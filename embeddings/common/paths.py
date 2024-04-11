@@ -1,6 +1,7 @@
 from pathlib import Path
 
-_DATA = Path("data")
+_REPOSITORY_ROOT = Path(__file__).parent.parent.parent
+_DATA = _REPOSITORY_ROOT / "data"
 
 
 class TnoPaths:
