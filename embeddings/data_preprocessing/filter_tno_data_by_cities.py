@@ -6,7 +6,8 @@ from pathlib import Path
 import polars as pl
 from alive_progress import alive_bar
 
-from embeddings.data_preprocessing.constants import TNO_LAT_STEP, TNO_LONG_STEP
+from embeddings.common.paths import OpenDataSoftPaths
+from embeddings.data_preprocessing.constants import TNO_LAT_STEP, TNO_LON_STEP
 from embeddings.data_preprocessing.gnfr_sector_type import GnfrSectorType
 from embeddings.data_preprocessing.helper_dataclasses import Cell, GhgSource
 
@@ -18,15 +19,44 @@ class _City:
     lon: float
 
 
+def _coordinates_to_float(coordinates: str) -> tuple[float, float]:
+    lat, lon = coordinates.split(",")
+    return float(lat), float(lon)
+
+
+def _are_coordinates_within_range(
+    coordinates: str,
+    lat_range: tuple[float, float],
+    lon_range: tuple[float, float],
+) -> bool:
+    lat, lon = _coordinates_to_float(coordinates)
+    return lat_range[0] <= lat <= lat_range[1] and lon_range[0] <= lon <= lon_range[1]
+
+
 def _get_all_cities(
-    min_population_size: int,  # noqa: ARG001
-    lat_range: tuple[float, float],  # noqa: ARG001
-    lon_range: tuple[float, float],  # noqa: ARG001
+    min_population_size: int,
+    lat_range: tuple[float, float],
+    lon_range: tuple[float, float],
 ) -> list[_City]:
-    return [
-        _City("Munich", 48.13743, 11.57549),
-        _City("Paris", 48.85341, 2.3488),
-    ]
+    res = pl.read_csv(OpenDataSoftPaths.OPEN_DATA_SOFT_GEONAMES_CSV, separator=";", infer_schema_length=10000)
+
+    filtered_cities = res.filter(
+        (pl.col("Population") >= min_population_size),
+        (
+            pl.col("Coordinates").map_elements(
+                function=lambda val: _are_coordinates_within_range(val, lat_range=lat_range, lon_range=lon_range),
+                return_dtype=bool,
+            ),
+        ),
+    )
+
+    cities = []
+
+    for city in filtered_cities.iter_rows(named=True):
+        lat, lon = _coordinates_to_float(city["Coordinates"])
+        cities.append(_City(name=city["Name"], lat=lat, lon=lon))
+
+    return cities
 
 
 def _filter_city_by_latitude_and_longitude(
@@ -38,15 +68,15 @@ def _filter_city_by_latitude_and_longitude(
     return tno_data.filter(
         (pl.col("Lat") >= city.lat - (height / 2) * TNO_LAT_STEP)
         & (pl.col("Lat") <= city.lat + (height / 2) * TNO_LAT_STEP)
-        & (pl.col("Lon") >= city.lon - (width / 2) * TNO_LONG_STEP)
-        & (pl.col("Lon") <= city.lon + (width / 2) * TNO_LONG_STEP),
+        & (pl.col("Lon") >= city.lon - (width / 2) * TNO_LON_STEP)
+        & (pl.col("Lon") <= city.lon + (width / 2) * TNO_LON_STEP),
     )
 
 
 def _extract_cells_from_city_data(
     city_data: pl.DataFrame,
 ) -> list[Cell]:
-    # Important: must also check for point sources
+    # TODO: must also check for point sources  # noqa: FIX002, TD002, TD003
     city_area_sources_data = city_data.filter(pl.col("SourceType") == "A")
     cells_data = city_area_sources_data.group_by(["Lon", "Lat"])
 
@@ -92,14 +122,20 @@ def filter_tno_data_by_cities(
     *,
     grid_width: int = 61,
     grid_height: int = 61,
-    min_population_size: int = 1_000_000,
+    min_population_size: int = 500_000,
 ) -> None:
     tno_data = pl.read_csv(tno_data_csv, separator=";")
 
     cites = _get_all_cities(
         min_population_size=min_population_size,
-        lat_range=(0, 90),
-        lon_range=(0, 90),
+        lat_range=(
+            tno_data["Lat"].min() + TNO_LAT_STEP * grid_height / 2,
+            tno_data["Lat"].max() - TNO_LAT_STEP * grid_height / 2,
+        ),
+        lon_range=(
+            tno_data["Lon"].min() + TNO_LON_STEP * grid_width / 2,
+            tno_data["Lon"].max() - TNO_LON_STEP * grid_width / 2,
+        ),
     )
 
     _write_csv_header(out_csv=out_csv)
@@ -110,8 +146,13 @@ def filter_tno_data_by_cities(
             cells = _extract_cells_from_city_data(city_data=city_sources_data)
 
             if len(cells) != grid_width * grid_height:
-                error_ms = f"There are not enough cells in {city.name} {city.lon, city.lat}!"
-                raise ValueError(error_ms)
+                warning = (
+                    f"Warning: There are not enough cells in {city.name} {city.lat, city.lon}! "
+                    f"Expected:{grid_width * grid_height}; Got:{len(cells)}.\n"
+                    f"\tSkipping {city.name}"
+                )
+                print(warning)
+                continue
 
             cells.sort(key=lambda c: (-c.lat, c.lon))
 
