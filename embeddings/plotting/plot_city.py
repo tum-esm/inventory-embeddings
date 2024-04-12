@@ -5,7 +5,7 @@ import polars as pl
 
 from embeddings.common.gnfr_sector import GnfrSector
 from embeddings.common.paths import PlotPaths, TnoPaths
-from embeddings.dataset.city_emission_grid import CityEmissionField
+from embeddings.dataset.city_emission_field import CityEmissionField
 
 if __name__ == "__main__":
     tno_data = pl.read_csv(TnoPaths.TNO_BY_CITY_2015_CSV, separator=";")
