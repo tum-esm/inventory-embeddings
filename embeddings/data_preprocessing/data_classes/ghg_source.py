@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from embeddings.common.gnfr_sector_type import GnfrSector
+from embeddings.common.gnfr_sector import GnfrSector
 
 
 @dataclass

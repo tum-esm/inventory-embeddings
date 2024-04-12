@@ -3,8 +3,6 @@ from pathlib import Path
 _REPOSITORY_ROOT = Path(__file__).parent.parent.parent
 _DATA = _REPOSITORY_ROOT / "data"
 
-PLOTS = _REPOSITORY_ROOT / "plots"
-
 
 class TnoPaths:
     _TNO_HIGH_RES = _DATA / "TNO-GHGco-1km"
@@ -19,3 +17,7 @@ class TnoPaths:
 class OpenDataSoftPaths:
     _OPEN_DATA_SOFT = _DATA / "OpenDataSoft"
     OPEN_DATA_SOFT_GEONAMES_CSV = _OPEN_DATA_SOFT / "geonames-all-cities-with-a-population-1000.csv"
+
+
+class PlotPaths:
+    PLOTS = _REPOSITORY_ROOT / "plots"

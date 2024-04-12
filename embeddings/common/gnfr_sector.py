@@ -1,6 +1,8 @@
 from enum import Enum
 from typing import Self
 
+NUM_GNFR_SECTORS = 15
+
 
 class GnfrSector(Enum):
     A = 1

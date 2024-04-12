@@ -4,7 +4,7 @@ from pathlib import Path
 import polars as pl
 from alive_progress import alive_bar
 
-from embeddings.common.gnfr_sector_type import GnfrSector
+from embeddings.common.gnfr_sector import GnfrSector
 from embeddings.data_preprocessing.city_filtering import filter_cities_from_open_data_soft_data
 from embeddings.data_preprocessing.data_classes.cell import Cell, CellBuilder
 from embeddings.data_preprocessing.data_classes.city import City
