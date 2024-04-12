@@ -4,7 +4,7 @@ from pathlib import Path
 import polars as pl
 from alive_progress import alive_bar
 
-from embeddings.common.gnfr_sector_type import GnfrSector
+from embeddings.common.gnfr_sector import GnfrSector
 from embeddings.data_preprocessing.city_filtering import filter_cities_from_open_data_soft_data
 from embeddings.data_preprocessing.data_classes.cell import Cell, CellBuilder
 from embeddings.data_preprocessing.data_classes.city import City
@@ -106,7 +106,7 @@ def filter_tno_data_by_cities(
 
     with alive_bar(total=len(cites)) as bar:
         for city in cites:
-            city_sources_data = _filter_city_by_latitude_and_longitude(tno_data, city, grid_width, grid_height)
+            city_sources_data = _filter_city_by_latitude_and_longitude(tno_data, city, grid_height, grid_width)
             cells = _extract_cells_from_city_data(city_data=city_sources_data)
 
             if len(cells) != grid_width * grid_height:
