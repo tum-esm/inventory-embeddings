@@ -161,6 +161,7 @@ cython_debug/
 
 # Specific to project
 data/**
+plots/**
 
 # Exception for all .gitkeep files in any directory
 !**/.gitkeep

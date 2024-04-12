@@ -106,7 +106,7 @@ def filter_tno_data_by_cities(
 
     with alive_bar(total=len(cites)) as bar:
         for city in cites:
-            city_sources_data = _filter_city_by_latitude_and_longitude(tno_data, city, grid_width, grid_height)
+            city_sources_data = _filter_city_by_latitude_and_longitude(tno_data, city, grid_height, grid_width)
             cells = _extract_cells_from_city_data(city_data=city_sources_data)
 
             if len(cells) != grid_width * grid_height:

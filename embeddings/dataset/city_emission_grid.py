@@ -22,6 +22,10 @@ class CityEmissionField:
                 self._co2_ff_tensor[p["x"], p["y"], i] = float(co_2ff_sector)
 
     @property
+    def city_name(self) -> str:
+        return self._name
+
+    @property
     def as_tensor(self) -> Tensor:
         return self._co2_ff_tensor
 
@@ -39,3 +43,6 @@ class CityEmissionField:
             extent=(tl_corner[1], br_corner[1], br_corner[0], tl_corner[0]),
             aspect=aspect_ratio,
         )
+
+        title = f"{self._name}; {sector}" if sector else f"{self._name}; sum of all sectors"
+        ax.set_title(title)
