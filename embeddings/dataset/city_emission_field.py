@@ -9,12 +9,12 @@ from embeddings.common.gnfr_sector import NUM_GNFR_SECTORS, GnfrSector
 class CityEmissionField:
     def __init__(self, city_data: pl.DataFrame) -> None:
         self._name = city_data["City"][0]
-        self._max_grid_width = city_data["x"].max() + 1
-        self._max_grid_height = city_data["y"].max() + 1
+        self._width = city_data["x"].max() + 1
+        self._height = city_data["y"].max() + 1
 
         self._pixel_coordinates_to_lat_lon_map = {}
 
-        self._co2_ff_tensor = torch.zeros(self._max_grid_width, self._max_grid_height, NUM_GNFR_SECTORS)
+        self._co2_ff_tensor = torch.zeros(self._width, self._height, NUM_GNFR_SECTORS)
 
         for p in city_data.iter_rows(named=True):
             self._pixel_coordinates_to_lat_lon_map[(p["x"], p["y"])] = (p["lat"], p["lon"])
@@ -29,19 +29,43 @@ class CityEmissionField:
     def as_tensor(self) -> Tensor:
         return self._co2_ff_tensor
 
+    def crop(
+        self,
+        center_offset_x: int,
+        center_offset_y: int,
+        width: int,
+        height: int,
+    ) -> None:
+        center_x = self._width // 2 + center_offset_x
+        center_y = self._height // 2 + center_offset_y
+
+        self._width = width
+        self._height = height
+
+        start_x = center_x - width // 2
+        start_y = center_y - height // 2
+        end_x = start_x + width
+        end_y = start_y + height
+
+        self._co2_ff_tensor = self._co2_ff_tensor[start_x:end_x, start_y:end_y, :]
+
+        self._pixel_coordinates_to_lat_lon_map = {
+            (x - start_x, y - start_y): v
+            for (x, y), v in self._pixel_coordinates_to_lat_lon_map.items()
+            if start_x <= x < end_x and start_y <= y < end_y
+        }
+
     def plot(self, ax: Axes, sector: GnfrSector | None = None) -> None:
         to_plot = self._co2_ff_tensor[:, :, sector.to_index()] if sector else self._co2_ff_tensor.sum(2)
 
         tl_corner = self._pixel_coordinates_to_lat_lon_map[(0, 0)]
-        br_corner = self._pixel_coordinates_to_lat_lon_map[(self._max_grid_width - 1, self._max_grid_height - 1)]
-
-        aspect_ratio = 2 * self._max_grid_width / self._max_grid_width
+        br_corner = self._pixel_coordinates_to_lat_lon_map[(self._width - 1, self._height - 1)]
 
         ax.imshow(
             to_plot.T,
             cmap=colormaps["plasma"],
             extent=(tl_corner[1], br_corner[1], br_corner[0], tl_corner[0]),
-            aspect=aspect_ratio,
+            aspect=2,
         )
 
         title = f"{self._name}; {sector}" if sector else f"{self._name}; sum of all sectors"
