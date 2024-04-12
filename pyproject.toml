@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "embeddings"}]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.11,<3.13"
 ruff = "^0.3.5"
 pre-commit = "^3.7.0"
 numpy = "^1.26.4"

@@ -3,6 +3,8 @@ from pathlib import Path
 _REPOSITORY_ROOT = Path(__file__).parent.parent.parent
 _DATA = _REPOSITORY_ROOT / "data"
 
+PLOTS = _REPOSITORY_ROOT / "plots"
+
 
 class TnoPaths:
     _TNO_HIGH_RES = _DATA / "TNO-GHGco-1km"

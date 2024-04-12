@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Self
 
 
-class GnfrSectorType(Enum):
+class GnfrSector(Enum):
     A = 1
     B = 2
     C = 3
@@ -24,8 +24,8 @@ class GnfrSectorType(Enum):
 
     @classmethod
     def from_index(cls, index: int) -> Self:
-        return GnfrSectorType(value=index + 1)
+        return GnfrSector(value=index + 1)
 
     @classmethod
     def from_str(cls, sector: str) -> Self:
-        return GnfrSectorType[sector]
+        return GnfrSector[sector]
