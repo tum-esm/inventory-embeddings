@@ -23,7 +23,7 @@ def filter_cities_from_open_data_soft_data(
     lat_range: tuple[float, float],
     lon_range: tuple[float, float],
 ) -> list[City]:
-    res = pl.read_csv(OpenDataSoftPaths.OPEN_DATA_SOFT_GEONAMES_CSV, separator=";", infer_schema_length=10000)
+    res = pl.read_csv(OpenDataSoftPaths.GEONAMES_CSV, separator=";", infer_schema_length=10000)
 
     filtered_cities = res.filter(
         (pl.col("Population") >= min_population_size),

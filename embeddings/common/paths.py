@@ -5,18 +5,23 @@ _DATA = _REPOSITORY_ROOT / "data"
 
 
 class TnoPaths:
-    _TNO_HIGH_RES = _DATA / "TNO-GHGco-1km"
+    _HIGH_RES = _DATA / "TNO-GHGco-1km"
 
-    _TNO_HIGH_RES_2015 = _TNO_HIGH_RES / "TNO_highres_2015"
-    TNO_HIGH_RES_2015_CSV = _TNO_HIGH_RES_2015 / "TNO_GHGco_2015_highres_v1_1.csv"
+    _HIGH_RES_2015 = _HIGH_RES / "TNO_highres_2015"
+    HIGH_RES_2015_CSV = _HIGH_RES_2015 / "TNO_GHGco_2015_highres_v1_1.csv"
 
-    _TNO_BY_CITY = _TNO_HIGH_RES / "TNO-by-city"
-    TNO_BY_CITY_2015_CSV = _TNO_BY_CITY / "TNO_GHGco_2015_highres_v1_1_by_city.csv"
+    _BY_CITY = _HIGH_RES / "TNO_by_city"
+    BY_CITY_2015_CSV = _BY_CITY / "TNO_GHGco_2015_highres_v1_1_by_city.csv"
+
+    _TIME_PROFILES = _HIGH_RES / "TNO_timeprofiles"
+    HOUR_TIME_PROFILE = _TIME_PROFILES / "timeprofiles-hour-in-day_GNFR.csv"
+    DAY_TIME_PROFILE = _TIME_PROFILES / "timeprofiles-day-in-week_GNFR.csv"
+    MONTH_TIME_PROFILE = _TIME_PROFILES / "timeprofiles-month-in-year_GNFR.csv"
 
 
 class OpenDataSoftPaths:
     _OPEN_DATA_SOFT = _DATA / "OpenDataSoft"
-    OPEN_DATA_SOFT_GEONAMES_CSV = _OPEN_DATA_SOFT / "geonames-all-cities-with-a-population-1000.csv"
+    GEONAMES_CSV = _OPEN_DATA_SOFT / "geonames-all-cities-with-a-population-1000.csv"
 
 
 class PlotPaths:

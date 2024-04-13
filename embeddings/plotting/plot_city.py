@@ -9,7 +9,7 @@ from embeddings.dataset.city_emission_field import CityEmissionField
 from embeddings.dataset.emission_field_transforms import CropTransform
 
 if __name__ == "__main__":
-    tno_data = pl.read_csv(TnoPaths.TNO_BY_CITY_2015_CSV, separator=";")
+    tno_data = pl.read_csv(TnoPaths.BY_CITY_2015_CSV, separator=";")
     cites = list(tno_data["City"].unique())
 
     transform = CropTransform(center_offset_x=-10, center_offset_y=10, width=32, height=32)
