@@ -1,6 +1,6 @@
 from embeddings.dataset.city_emission_field import CityEmissionField
 
-from ._emission_field_transforms import EmissionFieldTransform
+from ._emission_field_transform import EmissionFieldTransform
 
 
 class CropTransform(EmissionFieldTransform):
