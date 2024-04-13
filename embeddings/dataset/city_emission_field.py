@@ -1,3 +1,4 @@
+import numpy as np
 import polars as pl
 import torch
 from matplotlib.pyplot import Axes, colormaps
@@ -12,12 +13,11 @@ class CityEmissionField:
         self._width = city_data["x"].max() + 1
         self._height = city_data["y"].max() + 1
 
-        self._pixel_coordinates_to_lat_lon_map = {}
-
         self._co2_ff_tensor = torch.zeros(self._width, self._height, NUM_GNFR_SECTORS)
+        self._lat_lon_array = np.zeros((self._width, self._height, 2))
 
         for p in city_data.iter_rows(named=True):
-            self._pixel_coordinates_to_lat_lon_map[(p["x"], p["y"])] = (p["lat"], p["lon"])
+            self._lat_lon_array[(p["x"], p["y"])] = [p["lat"], p["lon"]]
             for i, co_2ff_sector in enumerate(p["co2_ff"].split(",")):
                 self._co2_ff_tensor[p["x"], p["y"], i] = float(co_2ff_sector)
 
@@ -48,23 +48,18 @@ class CityEmissionField:
         end_y = start_y + height
 
         self._co2_ff_tensor = self._co2_ff_tensor[start_x:end_x, start_y:end_y, :]
-
-        self._pixel_coordinates_to_lat_lon_map = {
-            (x - start_x, y - start_y): v
-            for (x, y), v in self._pixel_coordinates_to_lat_lon_map.items()
-            if start_x <= x < end_x and start_y <= y < end_y
-        }
+        self._lat_lon_array = self._lat_lon_array[start_x:end_x, start_y:end_y, :]
 
     def plot(self, ax: Axes, sector: GnfrSector | None = None) -> None:
         to_plot = self._co2_ff_tensor[:, :, sector.to_index()] if sector else self._co2_ff_tensor.sum(2)
 
-        tl_corner = self._pixel_coordinates_to_lat_lon_map[(0, 0)]
-        br_corner = self._pixel_coordinates_to_lat_lon_map[(self._width - 1, self._height - 1)]
+        tl_corner = self._lat_lon_array[0, 0]
+        br_corner = self._lat_lon_array[self._width - 1, self._height - 1]
 
         ax.imshow(
             to_plot.T,
             cmap=colormaps["plasma"],
-            extent=(tl_corner[1], br_corner[1], br_corner[0], tl_corner[0]),
+            extent=(float(tl_corner[1]), float(br_corner[1]), float(br_corner[0]), float(tl_corner[0])),
             aspect=2,
         )
 
