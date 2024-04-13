@@ -5,6 +5,7 @@ from matplotlib.pyplot import Axes, colormaps
 from torch import Tensor
 
 from embeddings.common.gnfr_sector import NUM_GNFR_SECTORS, GnfrSector
+from embeddings.data_preprocessing.tno_constants import ASPECT_RATIO
 
 
 class CityEmissionField:
@@ -22,45 +23,46 @@ class CityEmissionField:
                 self._co2_ff_tensor[p["x"], p["y"], i] = float(co_2ff_sector)
 
     @property
+    def width(self) -> int:
+        return self._width
+
+    @property
+    def height(self) -> int:
+        return self._height
+
+    @property
     def city_name(self) -> str:
         return self._name
 
     @property
-    def as_tensor(self) -> Tensor:
+    def co2_ff_tensor(self) -> Tensor:
         return self._co2_ff_tensor
 
-    def crop(
-        self,
-        center_offset_x: int,
-        center_offset_y: int,
-        width: int,
-        height: int,
-    ) -> None:
-        center_x = self._width // 2 + center_offset_x
-        center_y = self._height // 2 + center_offset_y
+    @co2_ff_tensor.setter
+    def co2_ff_tensor(self, value: Tensor) -> None:
+        self._width = value.shape[0]
+        self._height = value.shape[1]
+        self._co2_ff_tensor = value
 
-        self._width = width
-        self._height = height
+    @property
+    def lat_lon_array(self) -> np.array:
+        return self._lat_lon_array
 
-        start_x = center_x - width // 2
-        start_y = center_y - height // 2
-        end_x = start_x + width
-        end_y = start_y + height
-
-        self._co2_ff_tensor = self._co2_ff_tensor[start_x:end_x, start_y:end_y, :]
-        self._lat_lon_array = self._lat_lon_array[start_x:end_x, start_y:end_y, :]
+    @lat_lon_array.setter
+    def lat_lon_array(self, value: Tensor) -> None:
+        self._lat_lon_array = value
 
     def plot(self, ax: Axes, sector: GnfrSector | None = None) -> None:
         to_plot = self._co2_ff_tensor[:, :, sector.to_index()] if sector else self._co2_ff_tensor.sum(2)
 
-        tl_corner = self._lat_lon_array[0, 0]
-        br_corner = self._lat_lon_array[self._width - 1, self._height - 1]
+        bl_corner = self._lat_lon_array[0, self._height - 1]
+        tr_corner = self._lat_lon_array[self._width - 1, 0]
 
         ax.imshow(
             to_plot.T,
             cmap=colormaps["plasma"],
-            extent=(float(tl_corner[1]), float(br_corner[1]), float(br_corner[0]), float(tl_corner[0])),
-            aspect=2,
+            extent=(float(bl_corner[1]), float(tr_corner[1]), float(bl_corner[0]), float(tr_corner[0])),
+            aspect=ASPECT_RATIO,
         )
 
         title = f"{self._name}; {sector}" if sector else f"{self._name}; sum of all sectors"
