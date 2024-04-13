@@ -24,7 +24,6 @@ class HourTransform(EmissionFieldTransform):
             if row[str(hour)]:
                 sector = GnfrSector.from_str(row["TNO GNFR sectors Sept 2018"])
                 self._scaling_factors[sector.to_index()] = row[str(hour)]
-        print(self._scaling_factors)
 
     def __call__(self, emission_field: CityEmissionField) -> CityEmissionField:
         for sector, scaling_factor in enumerate(self._scaling_factors):
