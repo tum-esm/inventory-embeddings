@@ -1,7 +1,9 @@
 from embeddings.dataset.city_emission_field import CityEmissionField
 
+from ._emission_field_transforms import EmissionFieldTransform
 
-class CropTransform:
+
+class CropTransform(EmissionFieldTransform):
     def __init__(self, center_offset_x: int, center_offset_y: int, width: int, height: int) -> None:
         self._center_offset_x = center_offset_x
         self._center_offset_y = center_offset_y
