@@ -4,8 +4,8 @@ import torch
 from matplotlib.pyplot import Axes, colormaps
 from torch import Tensor
 
+from embeddings.common.constants import LON_LAT_ASPECT_RATIO
 from embeddings.common.gnfr_sector import NUM_GNFR_SECTORS, GnfrSector
-from embeddings.common.tno_constants import ASPECT_RATIO
 
 
 class CityEmissionField:
@@ -60,9 +60,9 @@ class CityEmissionField:
 
         ax.imshow(
             to_plot.T,
-            cmap=colormaps["plasma"],
+            cmap=colormaps["viridis"],
             extent=(float(bl_corner[1]), float(tr_corner[1]), float(bl_corner[0]), float(tr_corner[0])),
-            aspect=ASPECT_RATIO,
+            aspect=LON_LAT_ASPECT_RATIO,
         )
 
         title = f"{self._name}; {sector}" if sector else f"{self._name}; sum of all sectors"

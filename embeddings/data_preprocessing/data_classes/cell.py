@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Self
 
-from embeddings.common.tno_constants import TNO_LAT_STEP, TNO_LON_STEP
+from embeddings.common.constants import TNO_LAT_STEP, TNO_LON_STEP
 from embeddings.data_preprocessing.data_classes.ghg_source import GhgSource
 
 
@@ -60,9 +60,9 @@ class CellBuilder:
         co2_bf_list = [0.0 for _ in range(15)]
         ch4_list = [0.0 for _ in range(15)]
         for source in self._ghg_sources:
-            co2_ff_list[source.sector.to_index()] = source.co2_ff
-            co2_bf_list[source.sector.to_index()] = source.co2_bf
-            ch4_list[source.sector.to_index()] = source.ch4
+            co2_ff_list[source.sector.to_index()] += source.co2_ff
+            co2_bf_list[source.sector.to_index()] += source.co2_bf
+            ch4_list[source.sector.to_index()] += source.ch4
         x, y = self._compute_pixel_coordinates()
         return Cell(
             lat=self._lat,
