@@ -15,7 +15,7 @@ Get the installation command from the [official website](https://pytorch.org/get
 
 Example:
 ```bash
-poetry run pip install torch --index-url https://download.pytorch.org/whl/cu121
+poetry run pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
 ```
 
 # Usage

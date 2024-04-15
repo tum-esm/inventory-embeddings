@@ -5,7 +5,7 @@ from matplotlib.pyplot import Axes, colormaps
 from torch import Tensor
 
 from embeddings.common.gnfr_sector import NUM_GNFR_SECTORS, GnfrSector
-from embeddings.data_preprocessing.tno_constants import ASPECT_RATIO
+from embeddings.common.tno_constants import ASPECT_RATIO
 
 
 class CityEmissionField:

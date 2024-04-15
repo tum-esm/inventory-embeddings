@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Self
 
+from embeddings.common.tno_constants import TNO_LAT_STEP, TNO_LON_STEP
 from embeddings.data_preprocessing.data_classes.ghg_source import GhgSource
-from embeddings.data_preprocessing.tno_constants import TNO_LAT_STEP, TNO_LON_STEP
 
 
 @dataclass

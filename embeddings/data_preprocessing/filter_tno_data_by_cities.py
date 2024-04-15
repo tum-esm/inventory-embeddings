@@ -5,11 +5,11 @@ import polars as pl
 from alive_progress import alive_bar
 
 from embeddings.common.gnfr_sector import GnfrSector
+from embeddings.common.tno_constants import TNO_LAT_STEP, TNO_LON_STEP
 from embeddings.data_preprocessing.city_filtering import filter_cities_from_open_data_soft_data
 from embeddings.data_preprocessing.data_classes.cell import Cell, CellBuilder
 from embeddings.data_preprocessing.data_classes.city import City
 from embeddings.data_preprocessing.data_classes.ghg_source import GhgSource
-from embeddings.data_preprocessing.tno_constants import TNO_LAT_STEP, TNO_LON_STEP
 
 
 def _filter_city_by_latitude_and_longitude(
