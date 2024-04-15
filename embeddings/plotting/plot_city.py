@@ -36,7 +36,7 @@ if __name__ == "__main__":
 
     emission_field = CityEmissionField(city_data=city_data)
     emission_field = transform(emission_field)
-    emission_field.plot(ax=ax1, sector=None)
+    emission_field.plot(ax=ax1)
     emission_field.plot(ax=ax2, sector=GnfrSector.F1)
 
     plt.savefig(PlotPaths.PLOTS / "city_plot.png")
