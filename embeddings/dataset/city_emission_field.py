@@ -14,13 +14,13 @@ class CityEmissionField:
         self._width = city_data["x"].max() + 1
         self._height = city_data["y"].max() + 1
 
-        self._co2_ff_tensor = torch.zeros(self._width, self._height, NUM_GNFR_SECTORS)
+        self._co2_ff_field = np.zeros((self._width, self._height, NUM_GNFR_SECTORS))
         self._lat_lon_array = np.zeros((self._width, self._height, 2))
 
         for p in city_data.iter_rows(named=True):
             self._lat_lon_array[(p["x"], p["y"])] = [p["lat"], p["lon"]]
             for i, co_2ff_sector in enumerate(p["co2_ff"].split(",")):
-                self._co2_ff_tensor[p["x"], p["y"], i] = float(co_2ff_sector)
+                self._co2_ff_field[p["x"], p["y"], i] = float(co_2ff_sector)
 
     @property
     def width(self) -> int:
@@ -36,13 +36,17 @@ class CityEmissionField:
 
     @property
     def co2_ff_tensor(self) -> Tensor:
-        return self._co2_ff_tensor
+        return torch.tensor(self._co2_ff_field)
 
-    @co2_ff_tensor.setter
-    def co2_ff_tensor(self, value: Tensor) -> None:
+    @property
+    def co2_ff_array(self) -> np.array:
+        return self._co2_ff_field
+
+    @co2_ff_array.setter
+    def co2_ff_array(self, value: np.array) -> None:
         self._width = value.shape[0]
         self._height = value.shape[1]
-        self._co2_ff_tensor = value
+        self._co2_ff_field = np.array(value)
 
     @property
     def lat_lon_array(self) -> np.array:
@@ -53,7 +57,7 @@ class CityEmissionField:
         self._lat_lon_array = value
 
     def plot(self, ax: Axes, sector: GnfrSector | None = None) -> None:
-        to_plot = self._co2_ff_tensor[:, :, sector.to_index()] if sector else self._co2_ff_tensor.sum(2)
+        to_plot = self._co2_ff_field[:, :, sector.to_index()] if sector else self._co2_ff_field.sum(2)
 
         bl_corner = self._lat_lon_array[0, self._height - 1]
         tr_corner = self._lat_lon_array[self._width - 1, 0]

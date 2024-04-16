@@ -19,6 +19,6 @@ class CropTransform(EmissionFieldTransform):
         end_x = start_x + self._width
         end_y = start_y + self._height
 
-        emission_field.co2_ff_tensor = emission_field.co2_ff_tensor[start_x:end_x, start_y:end_y, :]
+        emission_field.co2_ff_array = emission_field.co2_ff_array[start_x:end_x, start_y:end_y, :]
         emission_field.lat_lon_array = emission_field.lat_lon_array[start_x:end_x, start_y:end_y, :]
         return emission_field
