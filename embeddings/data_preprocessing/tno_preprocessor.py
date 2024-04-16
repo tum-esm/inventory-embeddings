@@ -7,6 +7,7 @@ from alive_progress import alive_bar
 
 from embeddings.common.constants import TNO_LAT_STEP, TNO_LON_STEP
 from embeddings.common.gnfr_sector import GnfrSector
+from embeddings.common.log import logger
 from embeddings.data_preprocessing.city_filtering import filter_cities_from_open_data_soft_data
 from embeddings.data_preprocessing.data_classes.cell import Cell, CellBuilder
 from embeddings.data_preprocessing.data_classes.city import City
@@ -41,7 +42,7 @@ class TnoPreprocessor:
         city_sources_data = self._filter_city_by_latitude_and_longitude(tno_data, city)
         cells = self._extract_cells_from_city_data(city_data=city_sources_data)
 
-        self._print_warning_if_required(city=city, cells=cells)
+        self._log_warning_if_required(city=city, cells=cells)
 
         cells.sort(key=lambda c: (-c.lat, c.lon))
 
@@ -81,10 +82,10 @@ class TnoPreprocessor:
             & (pl.col("Lon") <= city.lon + (self._options.grid_width / 2) * TNO_LON_STEP),
         )
 
-    def _print_warning_if_required(self, city: City, cells: list[Cell]) -> None:
+    def _log_warning_if_required(self, city: City, cells: list[Cell]) -> None:
         if self._options.show_warnings and len(cells) != self._options.grid_width * self._options.grid_height:
-            print(
-                f"Warning: Number of cells for {city.name} {city.lat, city.lon} does not match expected! "
+            logger.warning(
+                f"Number of cells for {city.name} {city.lat, city.lon} does not match expected! "
                 f"Expected:{self._options.grid_width * self._options.grid_height}; Got:{len(cells)}.\n",
             )
 
