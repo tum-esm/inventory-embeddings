@@ -1,5 +1,6 @@
 import argparse
 
+from embeddings.common.log import logger
 from embeddings.common.paths import TnoPaths
 from embeddings.data_preprocessing.tno_preprocessor import TnoPreprocessor, TnoPreprocessorOptions
 
@@ -28,7 +29,10 @@ def preprocess() -> None:
     )
 
     preprocessor = TnoPreprocessor(options=options)
+
+    tno_high_res_2015 = TnoPaths.HIGH_RES_2015_CSV
+    logger.info(f"Preprocessing TNO data at '{tno_high_res_2015}'")
     preprocessor.preprocess(
-        tno_csv=TnoPaths.HIGH_RES_2015_CSV,
+        tno_csv=tno_high_res_2015,
         out_csv=TnoPaths.BY_CITY_2015_CSV,
     )

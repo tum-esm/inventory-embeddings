@@ -23,6 +23,10 @@ poetry run pip install torch torchvision --index-url https://download.pytorch.or
 ```bash
 poetry run preprocess-tno
 ```
+For help on arguments, run:
+```bash
+poetry run preprocess-tno -h
+```
 
 # Development
 
