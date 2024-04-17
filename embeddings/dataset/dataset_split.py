@@ -4,10 +4,8 @@ from embeddings.dataset.tno_dataset import TnoDataset
 
 
 def _get_all_unique_cities(dataset: TnoDataset) -> list[str]:
-    cities = set()
-    for field in dataset.city_emission_fields:
-        cities.add(field.city_name)
-    return list(cities)
+    cities = [field.city_name for field in dataset.city_emission_fields]
+    return list(dict.fromkeys(cities))
 
 
 def _split(list_: list, split: list[float]) -> list[list]:
@@ -26,8 +24,8 @@ def _create_tno_data_set_splits(dataset: TnoDataset, city_splits: list[list[str]
     datasets = []
     city_emission_fields = dataset.city_emission_fields
     for split in city_splits:
-        city_emission_fields = [c for c in city_emission_fields if c.city_name in split]
-        datasets.append(TnoDataset(city_emission_fields))
+        fields = [c for c in city_emission_fields if c.city_name in split]
+        datasets.append(TnoDataset(fields))
     return tuple(datasets)
 
 
