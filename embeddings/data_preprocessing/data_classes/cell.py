@@ -30,11 +30,11 @@ class Cell:
 
 class CellBuilder:
     def __init__(self) -> None:
-        self._lat = None
-        self._lon = None
-        self._lon_or = None
-        self._lat_or = None
-        self._ghg_sources = None
+        self._lat = 0.0
+        self._lon = 0.0
+        self._lon_or = 0.0
+        self._lat_or = 0.0
+        self._ghg_sources: list[GhgSource] = []
 
     def with_coordinates(self, lat: float, lon: float) -> Self:
         self._lat = lat

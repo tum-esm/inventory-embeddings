@@ -1,5 +1,6 @@
 from copy import deepcopy
 from pathlib import Path
+from typing import Self
 
 import polars as pl
 from alive_progress import alive_bar
@@ -19,25 +20,29 @@ from embeddings.dataset.emission_field_transforms import (
 
 
 class TnoDataset(Dataset[CityEmissionField]):
-    def __init__(self, path: Path) -> None:
-        logger.info(f"Loading data from '{path}'")
+    def __init__(self, city_emission_fields: list[CityEmissionField]) -> None:
+        self.city_emission_fields = city_emission_fields
 
-        tno_data = pl.read_csv(path, separator=";")
-
-        self._load_data(tno_data)
         self._initialize_transforms()
 
-        self._num_fields = self._compute_number_of_emission_field_variations()
+    @classmethod
+    def from_csv(cls, path: Path) -> Self:
+        logger.info(f"Loading TNO data from '{path}'")
+        tno_data = pl.read_csv(path, separator=";")
+        city_emission_fields = cls._load_data(tno_data)
+        return TnoDataset(city_emission_fields)
 
-    def _load_data(self, tno_data: pl.DataFrame) -> None:
-        self._city_emission_fields = []
+    @classmethod
+    def _load_data(cls, tno_data: pl.DataFrame) -> list[CityEmissionField]:
+        city_emission_fields = []
         cities = list(tno_data["City"].unique(maintain_order=True))
         with alive_bar(len(cities)) as bar:
             for city in cities:
                 city_data = tno_data.filter(pl.col("City") == city)
                 original = CityEmissionField(city_data=city_data)
-                self._city_emission_fields.append(original)
+                city_emission_fields.append(original)
                 bar()
+        return city_emission_fields
 
     def _initialize_transforms(self) -> None:
         self._crop_transforms = [
@@ -53,7 +58,7 @@ class TnoDataset(Dataset[CityEmissionField]):
 
     def _compute_number_of_emission_field_variations(self) -> int:
         return (
-            len(self._city_emission_fields)
+            len(self.city_emission_fields)
             * len(self._crop_transforms)
             * len(self._hour_transforms)
             * len(self._day_transforms)
@@ -61,10 +66,10 @@ class TnoDataset(Dataset[CityEmissionField]):
         )
 
     def __len__(self) -> int:
-        return self._num_fields
+        return self._compute_number_of_emission_field_variations()
 
     def _validate_index_is_in_range(self, index: int) -> None:
-        if not 0 <= index < self._num_fields:
+        if not 0 <= index < len(self):
             key_error = f"Index {index} out of range!"
             raise IndexError(key_error)
 
@@ -88,9 +93,9 @@ class TnoDataset(Dataset[CityEmissionField]):
     def __getitem__(self, index: int) -> CityEmissionField:
         self._validate_index_is_in_range(index)
 
-        original_data = self._city_emission_fields[index % len(self._city_emission_fields)]
+        original_data = self.city_emission_fields[index % len(self.city_emission_fields)]
 
-        remaining = index // len(self._city_emission_fields)
+        remaining = index // len(self.city_emission_fields)
         transform = self._compose_transform_based_on_index(index=remaining)
 
         copy = deepcopy(original_data)

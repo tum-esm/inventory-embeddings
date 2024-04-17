@@ -100,4 +100,3 @@ lint.ignore = [
     "E741",     # E741 Ambiguous variable name: `I`,
     "PLR0913",  # PLR0913 too many arguments
 ]
-
