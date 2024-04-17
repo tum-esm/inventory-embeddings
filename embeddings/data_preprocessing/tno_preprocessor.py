@@ -50,8 +50,8 @@ class TnoPreprocessor:
 
     def _get_min_max(self, data: pl.DataFrame, column: str, margin: float) -> tuple[float, float]:
         return (
-            data[column].min() + margin / 2,
-            data[column].max() - margin / 2,
+            data[column].min() + margin / 2,  # type: ignore[operator]
+            data[column].max() - margin / 2,  # type: ignore[operator]
         )
 
     def _filter_cities(self, tno_data: pl.DataFrame) -> list[City]:
@@ -111,13 +111,13 @@ class TnoPreprocessor:
 
         cells = []
 
-        for (lon, lat), data in cells_data:
+        for (lon, lat), data in cells_data:  # type: ignore[misc]
             sources = self._extract_sources_from(sources_data=data)
             cell = (
                 CellBuilder()
                 .with_ghg_sources(sources)
-                .with_coordinates(lat=lat, lon=lon)
-                .with_coordinates_origin(lon=min_lon, lat=max_lat)
+                .with_coordinates(lat=lat, lon=lon)  # type: ignore[arg-type]
+                .with_coordinates_origin(lon=min_lon, lat=max_lat)  # type: ignore[arg-type]
                 .build()
             )
             cells.append(cell)

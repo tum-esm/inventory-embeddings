@@ -20,6 +20,7 @@ torchvision = "^0.17.2"
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.3.7"
 pre-commit = "^3.7.0"
+mypy = "^1.9.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -100,3 +101,7 @@ lint.ignore = [
     "E741",     # E741 Ambiguous variable name: `I`,
     "PLR0913",  # PLR0913 too many arguments
 ]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true

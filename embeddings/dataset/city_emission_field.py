@@ -11,8 +11,8 @@ from embeddings.common.gnfr_sector import NUM_GNFR_SECTORS, GnfrSector
 class CityEmissionField:
     def __init__(self, city_data: pl.DataFrame) -> None:
         self._name = city_data["City"][0]
-        width = city_data["x"].max() + 1
-        height = city_data["y"].max() + 1
+        width: int = city_data["x"].max() + 1  # type: ignore[operator, assignment]
+        height: int = city_data["y"].max() + 1  # type: ignore[operator, assignment]
 
         self.co2_ff_field = np.zeros((width, height, NUM_GNFR_SECTORS))
         self.lat_lon_array = np.zeros((width, height, 2))

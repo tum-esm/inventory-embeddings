@@ -26,8 +26,8 @@ class GnfrSector(Enum):
 
     @classmethod
     def from_index(cls, index: int) -> Self:
-        return GnfrSector(value=index + 1)
+        return cls(value=index + 1)
 
     @classmethod
     def from_str(cls, sector: str) -> Self:
-        return GnfrSector[sector]
+        return cls[sector]

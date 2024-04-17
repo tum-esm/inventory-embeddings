@@ -30,7 +30,7 @@ def filter_cities_from_open_data_soft_data(
         (
             pl.col("Coordinates").map_elements(
                 function=lambda val: _are_coordinates_within_range(val, lat_range=lat_range, lon_range=lon_range),
-                return_dtype=bool,
+                return_dtype=pl.Boolean,
             )
         ),
     )

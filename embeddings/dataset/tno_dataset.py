@@ -30,7 +30,7 @@ class TnoDataset(Dataset[CityEmissionField]):
         logger.info(f"Loading TNO data from '{path}'")
         tno_data = pl.read_csv(path, separator=";")
         city_emission_fields = cls._load_data(tno_data)
-        return TnoDataset(city_emission_fields)
+        return cls(city_emission_fields)
 
     @classmethod
     def _load_data(cls, tno_data: pl.DataFrame) -> list[CityEmissionField]:
