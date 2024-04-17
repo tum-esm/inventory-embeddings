@@ -39,11 +39,11 @@ class CityEmissionField:
         return torch.tensor(self._co2_ff_field)
 
     @property
-    def co2_ff_array(self) -> np.array:
+    def co2_ff_field(self) -> np.array:
         return self._co2_ff_field
 
-    @co2_ff_array.setter
-    def co2_ff_array(self, value: np.array) -> None:
+    @co2_ff_field.setter
+    def co2_ff_field(self, value: np.array) -> None:
         self._width = value.shape[0]
         self._height = value.shape[1]
         self._co2_ff_field = np.array(value)
