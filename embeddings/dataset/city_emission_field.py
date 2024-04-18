@@ -36,7 +36,7 @@ class CityEmissionField:
 
     @property
     def co2_ff_tensor(self) -> Tensor:
-        return torch.tensor(self.co2_ff_field)
+        return torch.tensor(self.co2_ff_field, dtype=torch.float32)
 
     def plot(self, ax: Axes, sector: GnfrSector | None = None) -> None:
         to_plot = self.co2_ff_field[:, :, sector.to_index()] if sector else self.co2_ff_field.sum(2)

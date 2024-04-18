@@ -4,6 +4,7 @@ from typing import Self
 
 import polars as pl
 from alive_progress import alive_bar
+from torch import Tensor
 from torch.utils.data import Dataset
 from torchvision.transforms import Compose
 
@@ -17,13 +18,15 @@ from embeddings.dataset.emission_field_transforms import (
     MonthTransform,
     Weekday,
 )
+from embeddings.dataset.emission_field_transforms._emission_field_transform import EmissionFieldTransform
 
 
-class TnoDataset(Dataset[CityEmissionField]):
+class TnoDataset(Dataset[Tensor]):
     def __init__(self, city_emission_fields: list[CityEmissionField]) -> None:
         self.city_emission_fields = city_emission_fields
 
         self._initialize_transforms()
+        self._sampling_transforms: list[EmissionFieldTransform] = []
 
     @classmethod
     def from_csv(cls, path: Path) -> Self:
@@ -90,7 +93,7 @@ class TnoDataset(Dataset[CityEmissionField]):
             ],
         )
 
-    def __getitem__(self, index: int) -> CityEmissionField:
+    def _get_city_emission_field_variant(self, index: int) -> CityEmissionField:
         self._validate_index_is_in_range(index)
 
         original_data = self.city_emission_fields[index % len(self.city_emission_fields)]
@@ -101,3 +104,15 @@ class TnoDataset(Dataset[CityEmissionField]):
         copy = deepcopy(original_data)
         transform(copy)
         return copy
+
+    def _apply_sampling_transform(self, city_emission_field: CityEmissionField) -> CityEmissionField:
+        transform = Compose(self._sampling_transforms)
+        return transform(city_emission_field)
+
+    def get_city_emission_field(self, index: int) -> CityEmissionField:
+        return self._get_city_emission_field_variant(index)
+
+    def __getitem__(self, index: int) -> Tensor:
+        emission_field = self._get_city_emission_field_variant(index)
+        emission_field = self._apply_sampling_transform(emission_field)
+        return emission_field.co2_ff_tensor
