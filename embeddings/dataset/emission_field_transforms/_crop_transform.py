@@ -23,7 +23,7 @@ class CropTransform(EmissionFieldTransform):
             value_error = "Tried to crop beyond field border!"
             raise ValueError(value_error)
 
-        emission_field.co2_ff_field = emission_field.co2_ff_field[start_x:end_x, start_y:end_y, :]
+        emission_field.co2_ff_field = emission_field.co2_ff_field[:, start_x:end_x, start_y:end_y]
         emission_field.lat_lon_array = emission_field.lat_lon_array[start_x:end_x, start_y:end_y, :]
 
         assert emission_field.width == self._width

@@ -61,12 +61,12 @@ class TimeProfiles:
 
 class HourTransform(EmissionFieldTransform):
     def __init__(self, hour: int) -> None:
-        self._scaling_factors = np.ones((1, 1, NUM_GNFR_SECTORS))
+        self._scaling_factors = np.ones((NUM_GNFR_SECTORS, 1, 1))
         for row in TimeProfiles.get_hour_time_profile().iter_rows(named=True):
             factor = row[str(hour)]
             if factor:
                 sector = GnfrSector.from_str(row["TNO GNFR sectors Sept 2018"])
-                self._scaling_factors[0, 0, sector.to_index()] = factor
+                self._scaling_factors[sector.to_index(), 0, 0] = factor
 
     def __call__(self, emission_field: CityEmissionField) -> CityEmissionField:
         emission_field.co2_ff_field *= self._scaling_factors
@@ -75,12 +75,12 @@ class HourTransform(EmissionFieldTransform):
 
 class DayTransform(EmissionFieldTransform):
     def __init__(self, week_day: Weekday) -> None:
-        self._scaling_factors = np.ones((1, 1, NUM_GNFR_SECTORS))
+        self._scaling_factors = np.ones((NUM_GNFR_SECTORS, 1, 1))
         for row in TimeProfiles.get_day_time_profile().iter_rows(named=True):
             factor = row[week_day.value]
             if factor:
                 sector = GnfrSector.from_str(row["TNO GNFR sectors Sept 2018"])
-                self._scaling_factors[0, 0, sector.to_index()] = factor
+                self._scaling_factors[sector.to_index(), 0, 0] = factor
 
     def __call__(self, emission_field: CityEmissionField) -> CityEmissionField:
         emission_field.co2_ff_field *= self._scaling_factors
@@ -89,12 +89,12 @@ class DayTransform(EmissionFieldTransform):
 
 class MonthTransform(EmissionFieldTransform):
     def __init__(self, month: Month) -> None:
-        self._scaling_factors = np.ones((1, 1, NUM_GNFR_SECTORS))
+        self._scaling_factors = np.ones((NUM_GNFR_SECTORS, 1, 1))
         for row in TimeProfiles.get_month_time_profile().iter_rows(named=True):
             factor = row[month.value]
             if factor:
                 sector = GnfrSector.from_str(row["TNO GNFR sectors Sept 2018"])
-                self._scaling_factors[0, 0, sector.to_index()] = factor
+                self._scaling_factors[sector.to_index(), 0, 0] = factor
 
     def __call__(self, emission_field: CityEmissionField) -> CityEmissionField:
         emission_field.co2_ff_field *= self._scaling_factors
