@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from embeddings.common.gnfr_sector import GnfrSector
 from embeddings.common.paths import PlotPaths
 from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
+from embeddings.plotting.city_emission_field_plot import plot_emission_field
 
 if __name__ == "__main__":
     dataset_collection = TnoDatasetCollection()
@@ -14,7 +15,7 @@ if __name__ == "__main__":
     test_data = dataset_collection.test_data
 
     emission_field = test_data.get_city_emission_field(random.randint(0, len(test_data) - 1))
-    emission_field.plot(ax=ax1)
-    emission_field.plot(ax=ax2, sector=GnfrSector.F1)
+    plot_emission_field(emission_field=emission_field, ax=ax1)
+    plot_emission_field(emission_field=emission_field, ax=ax2, sector=GnfrSector.F1)
 
     plt.savefig(PlotPaths.PLOTS / "city_plot.png")
