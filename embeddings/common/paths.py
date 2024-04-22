@@ -1,7 +1,9 @@
+from datetime import UTC, datetime
 from pathlib import Path
 
 _REPOSITORY_ROOT = Path(__file__).parent.parent.parent
 _DATA = _REPOSITORY_ROOT / "data"
+_SAVES = _REPOSITORY_ROOT / "saves"
 
 
 class TnoPaths:
@@ -25,4 +27,19 @@ class OpenDataSoftPaths:
 
 
 class PlotPaths:
-    PLOTS = _REPOSITORY_ROOT / "plots"
+    PLOTS = _SAVES / "plots"
+
+
+class ModelPaths:
+    _MODELS = _SAVES / "models"
+    _VAE_MODELS = _MODELS / "vae"
+    VAE_LATEST = _VAE_MODELS / "latest"
+    VAE_LATEST_MODEL = VAE_LATEST / "model.pt"
+
+    @classmethod
+    def archive_latest_vae_model(cls) -> None:
+        if cls.VAE_LATEST.exists():
+            now = datetime.now(UTC)
+            timestamp = now.strftime("%Y_%m_%d_%H_%M_%S")
+            cls.VAE_LATEST.replace(target=cls._VAE_MODELS / f"archived_{timestamp}")
+        cls.VAE_LATEST.mkdir(exist_ok=True)
