@@ -13,12 +13,12 @@ from embeddings.dataset.city_emission_field import CityEmissionField
 from embeddings.dataset.emission_field_transforms import (
     CropTransform,
     DayTransform,
+    EmissionFieldTransform,
     HourTransform,
     Month,
     MonthTransform,
     Weekday,
 )
-from embeddings.dataset.emission_field_transforms._emission_field_transform import EmissionFieldTransform
 
 
 class TnoDataset(Dataset[Tensor]):
