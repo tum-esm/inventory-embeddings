@@ -51,7 +51,7 @@ class VaeTrainer:
 
             self._vae.eval()
             val_loss = self._validation()
-            logger.info(f"Average training loss:\t{train_loss}")
+            logger.info(f"Average training loss:\t\t{train_loss}")
             logger.info(f"Average validation loss:\t{val_loss}")
 
             train_losses.append(train_loss)
