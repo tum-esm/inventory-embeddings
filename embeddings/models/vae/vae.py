@@ -57,7 +57,6 @@ class Encoder(nn.Module):
 
     def forward(self, x: Tensor) -> tuple[Tensor, Tensor]:
         h = self._layers(x)
-        print(h.shape)
         mean = self._fully_connected_mean(h)
         log_var = self._fully_connected_var(h)
         return mean, log_var

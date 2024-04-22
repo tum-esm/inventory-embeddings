@@ -1,25 +1,15 @@
-from torch.utils.data import DataLoader
-from torchsummary import summary
+import torch
 
-from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
-from embeddings.models.device import device
-from embeddings.models.vae.vae import VariationalAutoEncoder
+from embeddings.common.log import logger
+from embeddings.common.paths import ModelPaths
+from embeddings.models.vae.vae_trainer import VaeTrainer
 
 
 def train() -> None:
-    print(device)
-    vae = VariationalAutoEncoder().to(device)
-    summary(model=vae, input_size=(15, 32, 32), device=device)
+    ModelPaths.archive_latest_vae_model()
 
-    tno_dataset = TnoDatasetCollection()
+    vae_trainer = VaeTrainer()
+    vae = vae_trainer.train(epochs=30)
 
-    batch_size = 32
-
-    train_data_loader = DataLoader(
-        dataset=tno_dataset.training_data,
-        batch_size=batch_size,
-        shuffle=True,
-    )
-
-    for data in iter(train_data_loader):
-        print(data.shape)
+    logger.info(f"Training done! Saving model to {ModelPaths.VAE_LATEST_MODEL}")
+    torch.save(vae.state_dict(), ModelPaths.VAE_LATEST_MODEL)
