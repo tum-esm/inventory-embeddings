@@ -1,4 +1,5 @@
 from copy import deepcopy
+from operator import attrgetter
 from pathlib import Path
 from typing import Self
 
@@ -33,6 +34,7 @@ class TnoDataset(Dataset[Tensor]):
         logger.info(f"Loading TNO data from '{path}'")
         tno_data = pl.read_csv(path, separator=";")
         city_emission_fields = cls._load_data(tno_data)
+        city_emission_fields.sort(key=attrgetter("city_name"))
         return cls(city_emission_fields)
 
     @classmethod

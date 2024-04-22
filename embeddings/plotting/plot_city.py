@@ -12,9 +12,9 @@ if __name__ == "__main__":
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
 
-    test_data = dataset_collection.test_data
+    data = dataset_collection.training_data
 
-    emission_field = test_data.get_city_emission_field(random.randint(0, len(test_data) - 1))
+    emission_field = data.get_city_emission_field(random.randint(0, len(data) - 1))
     plot_emission_field(emission_field=emission_field, ax=ax1)
     plot_emission_field(emission_field=emission_field, ax=ax2, sector=GnfrSector.F1)
 
