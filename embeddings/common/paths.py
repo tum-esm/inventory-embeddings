@@ -6,6 +6,14 @@ _DATA = _REPOSITORY_ROOT / "data"
 _SAVES = _REPOSITORY_ROOT / "saves"
 
 
+def _archive_dir(path: Path) -> None:
+    if path.exists():
+        now = datetime.now(UTC)
+        timestamp = now.strftime("%Y_%m_%d_%H_%M_%S")
+        path.replace(target=path.parent / f"archived_{timestamp}")
+    path.mkdir(exist_ok=True)
+
+
 class TnoPaths:
     _HIGH_RES = _DATA / "TNO-GHGco-1km"
 
@@ -38,8 +46,4 @@ class ModelPaths:
 
     @classmethod
     def archive_latest_vae_model(cls) -> None:
-        if cls.VAE_LATEST.exists():
-            now = datetime.now(UTC)
-            timestamp = now.strftime("%Y_%m_%d_%H_%M_%S")
-            cls.VAE_LATEST.replace(target=cls._VAE_MODELS / f"archived_{timestamp}")
-        cls.VAE_LATEST.mkdir(exist_ok=True)
+        _archive_dir(cls.VAE_LATEST)
