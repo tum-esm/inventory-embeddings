@@ -16,6 +16,7 @@ torchsummary = "^1.5.1"
 lightning = "^2.2.3"
 torch = "^2.2.2"
 torchvision = "^0.17.2"
+tensorboard = "^2.16.2"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.3.7"
