@@ -1,7 +1,10 @@
 import torch
+from lightning import LightningModule
+from lightning.pytorch.utilities.types import OptimizerLRScheduler
 from torch import Tensor, nn
 
 from embeddings.common.gnfr_sector import NUM_GNFR_SECTORS
+from embeddings.models.vae.loss import loss
 
 
 class _EncoderLayer(nn.Module):
@@ -79,7 +82,7 @@ class Decoder(nn.Module):
         return self._layers(intermediate)
 
 
-class VariationalAutoEncoder(nn.Module):
+class VariationalAutoEncoder(LightningModule):
     def __init__(self) -> None:
         super().__init__()
         self._encoder = Encoder()
@@ -103,3 +106,42 @@ class VariationalAutoEncoder(nn.Module):
         z = self._reparameterization(mean, log_var)
         x_hat = self._decoder(z)
         return x_hat, mean, log_var
+
+    def configure_optimizers(self) -> OptimizerLRScheduler:
+        learning_rate = 1e-2
+        return torch.optim.Adam(self.parameters(recurse=True), lr=learning_rate)
+
+    def training_step(self, x_batch: Tensor) -> Tensor:
+        x_hat_batch, mean_batch, log_var_batch = self.forward(x_batch)
+
+        train_loss = loss(
+            x_hat=x_hat_batch,
+            x=x_batch,
+            mean=mean_batch,
+            log_var=log_var_batch,
+        )
+
+        self.log("train_loss", train_loss)
+
+        return train_loss
+
+    def validation_step(self, x_val_batch: Tensor) -> Tensor:
+        x_val_hat_batch, mean_batch, log_var_batch = self.forward(x_val_batch)
+
+        val_loss = loss(
+            x_hat=x_val_hat_batch,
+            x=x_val_batch,
+            mean=mean_batch,
+            log_var=log_var_batch,
+        )
+
+        self.log("validation_loss", val_loss)
+
+        return val_loss
+
+    def reconstruct(self, x: Tensor) -> Tensor:
+        self.eval()
+        in_tensor = x.unsqueeze(0).to(self.device)
+        with torch.no_grad():
+            out_tensor, _, _ = self.forward(in_tensor)
+        return out_tensor.squeeze(0).cpu().detach()

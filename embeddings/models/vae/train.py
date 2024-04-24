@@ -1,15 +1,43 @@
 import torch
+from lightning import Trainer
+from lightning.pytorch.callbacks import ModelCheckpoint
+from torch.utils.data import DataLoader
 
 from embeddings.common.log import logger
 from embeddings.common.paths import ModelPaths
-from embeddings.models.vae.vae_trainer import VaeTrainer
+from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
+from embeddings.models.vae.vae import VariationalAutoEncoder
 
 
 def train() -> None:
     ModelPaths.archive_latest_vae_model()
 
-    vae_trainer = VaeTrainer()
-    vae = vae_trainer.train(epochs=30)
+    torch.set_float32_matmul_precision("high")
 
-    logger.info(f"Training done! Saving model to {ModelPaths.VAE_LATEST_MODEL}")
-    torch.save(vae.state_dict(), ModelPaths.VAE_LATEST_MODEL)
+    tno_dataset = TnoDatasetCollection()
+
+    train_data = DataLoader(
+        dataset=tno_dataset.training_data,
+        batch_size=32,
+        shuffle=True,
+        num_workers=16,
+    )
+
+    val_data = DataLoader(
+        dataset=tno_dataset.validation_data,
+        batch_size=128,
+        num_workers=16,
+    )
+
+    vae = VariationalAutoEncoder()
+
+    checkpoint_callback = ModelCheckpoint(
+        monitor="validation_loss",
+        dirpath=ModelPaths.VAE_LATEST_CHECKPOINTS,
+        filename="{epoch}-{validation_loss:.2f}",
+    )
+
+    trainer = Trainer(devices=[0], max_epochs=100, callbacks=[checkpoint_callback])
+    trainer.fit(model=vae, train_dataloaders=train_data, val_dataloaders=val_data)
+
+    logger.info("Training done!")

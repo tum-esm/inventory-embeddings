@@ -7,7 +7,7 @@ class TnoDatasetCollection:
     def __init__(self) -> None:
         tno_2015 = TnoDataset.from_csv(TnoPaths.BY_CITY_2015_CSV)
 
-        _, rest = deterministic_split(tno_2015, split=[0.3, 0.7])
+        _, rest = deterministic_split(tno_2015, split=[0.9, 0.1])
 
         val_split = 0.15
 

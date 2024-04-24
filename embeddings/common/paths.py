@@ -42,7 +42,7 @@ class ModelPaths:
     _MODELS = _SAVES / "models"
     _VAE_MODELS = _MODELS / "vae"
     VAE_LATEST = _VAE_MODELS / "latest"
-    VAE_LATEST_MODEL = VAE_LATEST / "model.pt"
+    VAE_LATEST_CHECKPOINTS = VAE_LATEST / "checkpoints"
 
     @classmethod
     def archive_latest_vae_model(cls) -> None:
