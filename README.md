@@ -5,18 +5,8 @@
 poetry install
 ```
 
-### Alternative Installation of PyTorch
-Setup dependencies without torch
-```bash
-poetry install --without torch
-```
-
-Get the installation command from the [official website](https://pytorch.org/get-started/locally/).
-
-Example:
-```bash
-poetry run pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
-```
+### Alternative Cuda Version / CPU Only
+T.bd.
 
 # Usage
 ### Preprocessing of TNO Data
