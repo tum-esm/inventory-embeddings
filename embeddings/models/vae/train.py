@@ -34,11 +34,12 @@ def train() -> None:
 
     tensorboard_logger = TensorBoardLogger(save_dir=ModelPaths.VAE_LATEST, name="logs", version="tensorboard")
     csv_logger = CSVLogger(save_dir=ModelPaths.VAE_LATEST, name="logs", version="csv")
-    wandb_logger = WandbLogger(save_dir=ModelPaths.VAE_LATEST, name="logs", version="wand")
+    wandb_logger = WandbLogger(save_dir=ModelPaths.VAE_LATEST / "logs")
     loggers = [tensorboard_logger, csv_logger, wandb_logger]
 
     checkpoint_callback = ModelCheckpoint(
         monitor="validation_loss",
+        mode="min",  # model with the smallest validation loss is saved
         dirpath=ModelPaths.VAE_LATEST_CHECKPOINTS,
         filename="{epoch}-{validation_loss:.2f}",
     )
