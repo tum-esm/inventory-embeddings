@@ -4,14 +4,17 @@ from embeddings.dataset.tno_dataset import TnoDataset
 
 
 class TnoDatasetCollection:
-    def __init__(self) -> None:
+    def __init__(self, deterministic: bool = False) -> None:
         tno_2015 = TnoDataset.from_csv(TnoPaths.BY_CITY_2015_CSV)
 
         _, rest = deterministic_split(tno_2015, split=[0.9, 0.1])
 
         val_split = 0.15
 
-        self._val, self._train = random_split(rest, split=[val_split, 1 - val_split])
+        if deterministic:
+            self._val, self._train = deterministic_split(rest, split=[val_split, 1 - val_split])
+        else:
+            self._val, self._train = random_split(rest, split=[val_split, 1 - val_split])
 
     @property
     def validation_data(self) -> TnoDataset:

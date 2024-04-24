@@ -1,7 +1,7 @@
 import torch
 from lightning import Trainer
 from lightning.pytorch.callbacks import ModelCheckpoint
-from lightning.pytorch.loggers import TensorBoardLogger
+from lightning.pytorch.loggers import CSVLogger, TensorBoardLogger, WandbLogger
 from torch.utils.data import DataLoader
 
 from embeddings.common.log import logger
@@ -15,7 +15,7 @@ def train() -> None:
 
     torch.set_float32_matmul_precision("high")
 
-    tno_dataset = TnoDatasetCollection()
+    tno_dataset = TnoDatasetCollection(deterministic=True)
 
     train_data = DataLoader(
         dataset=tno_dataset.training_data,
@@ -32,7 +32,10 @@ def train() -> None:
 
     vae = VariationalAutoEncoder()
 
-    train_logger = TensorBoardLogger(save_dir=ModelPaths.VAE_LATEST, name="lightning_logs")
+    tensorboard_logger = TensorBoardLogger(save_dir=ModelPaths.VAE_LATEST, name="logs", version="tensorboard")
+    csv_logger = CSVLogger(save_dir=ModelPaths.VAE_LATEST, name="logs", version="csv")
+    wandb_logger = WandbLogger(save_dir=ModelPaths.VAE_LATEST, name="logs", version="wand")
+    loggers = [tensorboard_logger, csv_logger, wandb_logger]
 
     checkpoint_callback = ModelCheckpoint(
         monitor="validation_loss",
@@ -40,7 +43,7 @@ def train() -> None:
         filename="{epoch}-{validation_loss:.2f}",
     )
 
-    trainer = Trainer(devices=[0], max_epochs=100, callbacks=[checkpoint_callback], logger=train_logger)
+    trainer = Trainer(devices=[0], max_epochs=100, callbacks=[checkpoint_callback], logger=loggers)
     trainer.fit(model=vae, train_dataloaders=train_data, val_dataloaders=val_data)
 
     logger.info("Training done!")

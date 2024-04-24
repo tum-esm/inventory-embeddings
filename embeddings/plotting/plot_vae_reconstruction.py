@@ -11,7 +11,7 @@ if __name__ == "__main__":
     first_check_point = next(ModelPaths.VAE_LATEST_CHECKPOINTS.iterdir())
     vae = VariationalAutoEncoder.load_from_checkpoint(checkpoint_path=first_check_point)
 
-    dataset_collection = TnoDatasetCollection()
+    dataset_collection = TnoDatasetCollection(deterministic=True)
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
 
