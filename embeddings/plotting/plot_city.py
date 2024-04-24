@@ -8,14 +8,22 @@ from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
 from embeddings.plotting.city_emission_field_plot import plot_emission_field
 
 if __name__ == "__main__":
-    dataset_collection = TnoDatasetCollection()
+    dataset_collection = TnoDatasetCollection(deterministic=True)
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(10, 10))
 
     data = dataset_collection.training_data
 
-    emission_field = data.get_city_emission_field(random.randint(0, len(data) - 1))
+    random_index = random.randint(0, len(data) - 1)
+
+    emission_field = data.get_city_emission_field(random_index)
+
+    transformed_emission_field = data.get_city_emission_field(random_index, apply_sampling_transforms=True)
+
     plot_emission_field(emission_field=emission_field, ax=ax1)
     plot_emission_field(emission_field=emission_field, ax=ax2, sector=GnfrSector.F1)
+
+    plot_emission_field(emission_field=transformed_emission_field, ax=ax3)
+    plot_emission_field(emission_field=transformed_emission_field, ax=ax4, sector=GnfrSector.F1)
 
     plt.savefig(PlotPaths.PLOTS / "city_plot.png")

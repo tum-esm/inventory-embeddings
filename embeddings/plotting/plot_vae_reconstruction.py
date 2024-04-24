@@ -17,11 +17,11 @@ if __name__ == "__main__":
 
     data = dataset_collection.training_data
 
-    emission_field = data.get_city_emission_field(random.randint(0, len(data) - 1))
+    emission_field = data[random.randint(0, len(data) - 1)]
 
-    reconstructed = vae.reconstruct(emission_field.co2_ff_tensor)
+    reconstructed = vae.reconstruct(emission_field)
 
-    plot_emission_field_tensor(emission_field=emission_field.co2_ff_tensor, ax=ax1)
+    plot_emission_field_tensor(emission_field=emission_field, ax=ax1)
     plot_emission_field_tensor(emission_field=reconstructed, ax=ax2)
 
     plt.savefig(PlotPaths.PLOTS / "vae_reconstructed.png")

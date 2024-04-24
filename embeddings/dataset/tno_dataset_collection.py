@@ -1,5 +1,6 @@
 from embeddings.common.paths import TnoPaths
 from embeddings.dataset.dataset_split import deterministic_split, random_split
+from embeddings.dataset.emission_field_transforms import CenterCropTransform, RandomCropTransform
 from embeddings.dataset.tno_dataset import TnoDataset
 
 
@@ -15,6 +16,12 @@ class TnoDatasetCollection:
             self._val, self._train = deterministic_split(rest, split=[val_split, 1 - val_split])
         else:
             self._val, self._train = random_split(rest, split=[val_split, 1 - val_split])
+
+        self._add_sampling_transforms()
+
+    def _add_sampling_transforms(self) -> None:
+        self._train.add_sampling_transform(RandomCropTransform(width=32, height=32))
+        self._val.add_sampling_transform(CenterCropTransform(width=32, height=32))
 
     @property
     def validation_data(self) -> TnoDataset:
