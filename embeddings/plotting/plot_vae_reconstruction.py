@@ -24,4 +24,4 @@ if __name__ == "__main__":
     plot_emission_field_tensor(emission_field=emission_field.co2_ff_tensor, ax=ax1)
     plot_emission_field_tensor(emission_field=reconstructed, ax=ax2)
 
-    plt.savefig(PlotPaths.PLOTS / "city_plot.png")
+    plt.savefig(PlotPaths.PLOTS / "vae_reconstructed.png")

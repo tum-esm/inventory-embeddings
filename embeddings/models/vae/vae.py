@@ -144,4 +144,11 @@ class VariationalAutoEncoder(LightningModule):
         in_tensor = x.unsqueeze(0).to(self.device)
         with torch.no_grad():
             out_tensor, _, _ = self.forward(in_tensor)
-        return out_tensor.squeeze(0).cpu().detach()
+        return out_tensor.squeeze(0).cpu()
+
+    def generate(self) -> Tensor:
+        self.eval()
+        with torch.no_grad():
+            noise = torch.randn(1, 1024).to(self.device)
+            generated = self.decoder(noise)
+        return generated.squeeze(0).cpu()
