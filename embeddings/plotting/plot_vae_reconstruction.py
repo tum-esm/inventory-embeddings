@@ -2,6 +2,7 @@ import random
 
 import matplotlib.pyplot as plt
 
+from embeddings.common.gnfr_sector import GnfrSector
 from embeddings.common.paths import ModelPaths, PlotPaths
 from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
 from embeddings.models.vae.vae import VariationalAutoEncoder
@@ -13,7 +14,7 @@ if __name__ == "__main__":
 
     dataset_collection = TnoDatasetCollection(deterministic=True)
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(10, 10))
 
     data = dataset_collection.training_data
 
@@ -22,6 +23,9 @@ if __name__ == "__main__":
     reconstructed = vae.reconstruct(emission_field)
 
     plot_emission_field_tensor(emission_field=emission_field, ax=ax1)
-    plot_emission_field_tensor(emission_field=reconstructed, ax=ax2)
+    plot_emission_field_tensor(emission_field=emission_field, ax=ax2, sector=GnfrSector.F1)
+
+    plot_emission_field_tensor(emission_field=reconstructed, ax=ax3)
+    plot_emission_field_tensor(emission_field=reconstructed, ax=ax4, sector=GnfrSector.F1)
 
     plt.savefig(PlotPaths.PLOTS / "vae_reconstructed.png")
