@@ -1,6 +1,11 @@
 from embeddings.common.paths import TnoPaths
 from embeddings.dataset.dataset_split import deterministic_split, random_split
-from embeddings.dataset.emission_field_transforms import CenterCropTransform, RandomCropTransform
+from embeddings.dataset.emission_field_transforms import (
+    CenterCropTransform,
+    RandomCropTransform,
+    RandomHorizontalFlipTransform,
+    RandomVerticalFlipTransform,
+)
 from embeddings.dataset.tno_dataset import TnoDataset
 
 
@@ -21,6 +26,9 @@ class TnoDatasetCollection:
 
     def _add_sampling_transforms(self) -> None:
         self._train.add_sampling_transform(RandomCropTransform(width=32, height=32))
+        self._train.add_sampling_transform(RandomHorizontalFlipTransform())
+        self._train.add_sampling_transform(RandomVerticalFlipTransform())
+
         self._val.add_sampling_transform(CenterCropTransform(width=32, height=32))
 
     @property
