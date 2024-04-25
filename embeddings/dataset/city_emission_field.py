@@ -42,4 +42,4 @@ class CityEmissionField:
 
     @property
     def co2_ff_tensor(self) -> Tensor:
-        return torch.tensor(self.co2_ff_field, dtype=torch.float32)
+        return torch.tensor(self.co2_ff_field.copy(), dtype=torch.float32)
