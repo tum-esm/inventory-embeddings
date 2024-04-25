@@ -8,8 +8,6 @@ from embeddings.data_preprocessing.tno_preprocessor import TnoPreprocessor, TnoP
 def preprocess() -> None:
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    TnoPaths.BY_CITY_2015_CSV.parent.mkdir(exist_ok=True)
-
     grid_width_help = "width of grid around city center"
     grid_height_help = "height of grid around city center"
     population_help = "minimum required population of cities"
@@ -20,6 +18,8 @@ def preprocess() -> None:
     parser.add_argument("-v", "--verbose", action="store_true")
 
     args = parser.parse_args()
+
+    TnoPaths.BY_CITY_2015_CSV.parent.mkdir(exist_ok=True)
 
     options = TnoPreprocessorOptions(
         grid_width=args.width,
