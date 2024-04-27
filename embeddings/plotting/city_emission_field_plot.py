@@ -33,6 +33,7 @@ def plot_emission_field(
 def plot_emission_field_tensor(
     emission_field: Tensor,
     ax: Axes,
+    vmax: float,
     sector: GnfrSector | None = None,
 ) -> None:
     to_plot = emission_field[sector.to_index(), :, :] if sector else emission_field.sum(0)
@@ -41,5 +42,5 @@ def plot_emission_field_tensor(
         to_plot.T,
         cmap=colormaps["viridis"],
         vmin=0,
-        vmax=20_000,
+        vmax=vmax,
     )

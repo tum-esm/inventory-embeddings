@@ -10,6 +10,9 @@ from embeddings.dataset.tno_dataset import TnoDataset
 
 
 class TnoDatasetCollection:
+    CROPPED_WIDTH = 32
+    CROPPED_HEIGHT = 32
+
     def __init__(self, deterministic: bool = False) -> None:
         tno_2015 = TnoDataset.from_csv(TnoPaths.BY_CITY_2015_CSV)
 
@@ -25,11 +28,11 @@ class TnoDatasetCollection:
         self._add_sampling_transforms()
 
     def _add_sampling_transforms(self) -> None:
-        self._train.add_sampling_transform(RandomCropTransform(width=32, height=32))
+        self._train.add_sampling_transform(RandomCropTransform(width=self.CROPPED_WIDTH, height=self.CROPPED_HEIGHT))
         self._train.add_sampling_transform(RandomHorizontalFlipTransform())
         self._train.add_sampling_transform(RandomVerticalFlipTransform())
 
-        self._val.add_sampling_transform(CenterCropTransform(width=32, height=32))
+        self._val.add_sampling_transform(CenterCropTransform(width=self.CROPPED_WIDTH, height=self.CROPPED_HEIGHT))
 
     @property
     def validation_data(self) -> TnoDataset:

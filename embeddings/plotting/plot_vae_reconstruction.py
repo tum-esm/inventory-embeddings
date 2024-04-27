@@ -1,6 +1,7 @@
 import random
 
 import matplotlib.pyplot as plt
+import torch
 
 from embeddings.common.gnfr_sector import GnfrSector
 from embeddings.common.paths import ModelPaths, PlotPaths
@@ -22,10 +23,12 @@ if __name__ == "__main__":
 
     reconstructed = vae.reconstruct(emission_field)
 
-    plot_emission_field_tensor(emission_field=emission_field, ax=ax1)
-    plot_emission_field_tensor(emission_field=emission_field, ax=ax2, sector=GnfrSector.F1)
+    vmax = float(torch.max(emission_field))
 
-    plot_emission_field_tensor(emission_field=reconstructed, ax=ax3)
-    plot_emission_field_tensor(emission_field=reconstructed, ax=ax4, sector=GnfrSector.F1)
+    plot_emission_field_tensor(emission_field=emission_field, ax=ax1, vmax=vmax)
+    plot_emission_field_tensor(emission_field=emission_field, ax=ax2, sector=GnfrSector.F1, vmax=vmax)
+
+    plot_emission_field_tensor(emission_field=reconstructed, ax=ax3, vmax=vmax)
+    plot_emission_field_tensor(emission_field=reconstructed, ax=ax4, sector=GnfrSector.F1, vmax=vmax)
 
     plt.savefig(PlotPaths.PLOTS / "vae_reconstructed.png")

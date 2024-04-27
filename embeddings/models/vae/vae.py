@@ -37,7 +37,6 @@ class _DecoderLayer(nn.Module):
                 stride=2,
                 padding=1,
             ),
-            nn.BatchNorm2d(out_channels),
             nn.LeakyReLU(),
         )
 
@@ -83,8 +82,8 @@ class Decoder(nn.Module):
 
 
 class VariationalAutoEncoder(LightningModule):
-    def __init__(self, normalization_mean: float, normalization_std: float) -> None:
-        super().__init__(normalization_mean=normalization_mean, normalization_std=normalization_std)
+    def __init__(self) -> None:
+        super().__init__()
         self._encoder = Encoder()
         self._decoder = Decoder()
 
