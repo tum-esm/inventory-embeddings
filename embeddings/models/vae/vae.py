@@ -37,6 +37,7 @@ class _DecoderLayer(nn.Module):
                 stride=2,
                 padding=1,
             ),
+            nn.BatchNorm2d(out_channels),
             nn.LeakyReLU(),
         )
 
