@@ -4,7 +4,6 @@ from lightning.pytorch.utilities.types import OptimizerLRScheduler
 from torch import Tensor, nn
 
 from embeddings.common.gnfr_sector import NUM_GNFR_SECTORS
-from embeddings.models.vae.loss import loss
 
 
 class _EncoderLayer(nn.Module):
@@ -55,8 +54,8 @@ class Encoder(nn.Module):
             _EncoderLayer(in_channels=256, out_channels=512),
             nn.Flatten(),
         )
-        self._fully_connected_mean = nn.Linear(2048, 128)
-        self._fully_connected_var = nn.Linear(2048, 128)
+        self._fully_connected_mean = nn.Linear(2048, 512)
+        self._fully_connected_var = nn.Linear(2048, 512)
 
     def forward(self, x: Tensor) -> tuple[Tensor, Tensor]:
         h = self._layers(x)
@@ -68,7 +67,7 @@ class Encoder(nn.Module):
 class Decoder(nn.Module):
     def __init__(self) -> None:
         super().__init__()
-        self._fully_connected_input = nn.Linear(128, 2048)
+        self._fully_connected_input = nn.Linear(512, 2048)
         self._layers = nn.Sequential(
             _DecoderLayer(in_channels=512, out_channels=256),
             _DecoderLayer(in_channels=256, out_channels=128),
@@ -87,6 +86,13 @@ class VariationalAutoEncoder(LightningModule):
         super().__init__()
         self._encoder = Encoder()
         self._decoder = Decoder()
+
+    @staticmethod
+    def loss(x: Tensor, x_hat: Tensor, mean: Tensor, log_var: Tensor) -> Tensor:
+        reproduction_loss = torch.nn.MSELoss(reduction="sum")(x_hat, x)
+        kld = -0.5 * torch.sum(1 + log_var - mean.pow(2) - log_var.exp())
+
+        return reproduction_loss + kld
 
     @property
     def encoder(self) -> Encoder:
@@ -114,7 +120,7 @@ class VariationalAutoEncoder(LightningModule):
     def training_step(self, x_batch: Tensor) -> Tensor:
         x_hat_batch, mean_batch, log_var_batch = self.forward(x_batch)
 
-        train_loss = loss(
+        train_loss = self.loss(
             x_hat=x_hat_batch,
             x=x_batch,
             mean=mean_batch,
@@ -128,7 +134,7 @@ class VariationalAutoEncoder(LightningModule):
     def validation_step(self, x_val_batch: Tensor) -> Tensor:
         x_val_hat_batch, mean_batch, log_var_batch = self.forward(x_val_batch)
 
-        val_loss = loss(
+        val_loss = self.loss(
             x_hat=x_val_hat_batch,
             x=x_val_batch,
             mean=mean_batch,
@@ -149,6 +155,6 @@ class VariationalAutoEncoder(LightningModule):
     def generate(self) -> Tensor:
         self.eval()
         with torch.no_grad():
-            noise = 1000 * torch.randn(1, 128).to(self.device)
+            noise = torch.randn(1, 512).to(self.device)
             generated = self.decoder(noise)
         return generated.squeeze(0).cpu()
