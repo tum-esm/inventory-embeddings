@@ -26,7 +26,7 @@ class CityEmissionField:
         for p in city_data.iter_rows(named=True):
             self.lat_lon_array[(p["x"], p["y"])] = [p["lat"], p["lon"]]
             for i, co_2ff_sector in enumerate(p["co2_ff"].split(",")):
-                self.co2_ff_field[i, p["x"], p["y"]] = float(co_2ff_sector) / 1000
+                self.co2_ff_field[i, p["x"], p["y"]] = float(co_2ff_sector) / 1_000
 
     @property
     def width(self) -> int:

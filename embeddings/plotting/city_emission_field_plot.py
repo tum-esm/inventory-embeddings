@@ -40,4 +40,6 @@ def plot_emission_field_tensor(
     ax.imshow(
         to_plot.T,
         cmap=colormaps["viridis"],
+        vmin=0,
+        vmax=20_000,
     )

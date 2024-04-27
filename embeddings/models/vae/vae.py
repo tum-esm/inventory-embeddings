@@ -49,14 +49,14 @@ class Encoder(nn.Module):
     def __init__(self) -> None:
         super().__init__()
         self._layers = nn.Sequential(
-            _EncoderLayer(in_channels=NUM_GNFR_SECTORS, out_channels=32),
-            _EncoderLayer(in_channels=32, out_channels=64),
+            _EncoderLayer(in_channels=NUM_GNFR_SECTORS, out_channels=64),
             _EncoderLayer(in_channels=64, out_channels=128),
-            _EncoderLayer(in_channels=128, out_channels=128),
+            _EncoderLayer(in_channels=128, out_channels=256),
+            _EncoderLayer(in_channels=256, out_channels=512),
             nn.Flatten(),
         )
-        self._fully_connected_mean = nn.Linear(512, 1024)
-        self._fully_connected_var = nn.Linear(512, 1024)
+        self._fully_connected_mean = nn.Linear(2048, 128)
+        self._fully_connected_var = nn.Linear(2048, 128)
 
     def forward(self, x: Tensor) -> tuple[Tensor, Tensor]:
         h = self._layers(x)
@@ -68,23 +68,23 @@ class Encoder(nn.Module):
 class Decoder(nn.Module):
     def __init__(self) -> None:
         super().__init__()
-        self._fully_connected_input = nn.Linear(1024, 512)
+        self._fully_connected_input = nn.Linear(128, 2048)
         self._layers = nn.Sequential(
-            _DecoderLayer(in_channels=128, out_channels=128),
+            _DecoderLayer(in_channels=512, out_channels=256),
+            _DecoderLayer(in_channels=256, out_channels=128),
             _DecoderLayer(in_channels=128, out_channels=64),
-            _DecoderLayer(in_channels=64, out_channels=32),
-            _DecoderLayer(in_channels=32, out_channels=NUM_GNFR_SECTORS),
+            _DecoderLayer(in_channels=64, out_channels=NUM_GNFR_SECTORS),
         )
 
     def forward(self, z: Tensor) -> Tensor:
         intermediate = self._fully_connected_input(z)
-        intermediate = intermediate.view(-1, 128, 2, 2)
+        intermediate = intermediate.view(-1, 512, 2, 2)
         return self._layers(intermediate)
 
 
 class VariationalAutoEncoder(LightningModule):
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, normalization_mean: float, normalization_std: float) -> None:
+        super().__init__(normalization_mean=normalization_mean, normalization_std=normalization_std)
         self._encoder = Encoder()
         self._decoder = Decoder()
 
@@ -108,7 +108,7 @@ class VariationalAutoEncoder(LightningModule):
         return x_hat, mean, log_var
 
     def configure_optimizers(self) -> OptimizerLRScheduler:
-        learning_rate = 1e-2
+        learning_rate = 1e-3
         return torch.optim.Adam(self.parameters(recurse=True), lr=learning_rate)
 
     def training_step(self, x_batch: Tensor) -> Tensor:
@@ -149,6 +149,6 @@ class VariationalAutoEncoder(LightningModule):
     def generate(self) -> Tensor:
         self.eval()
         with torch.no_grad():
-            noise = torch.randn(1, 1024).to(self.device)
+            noise = 1000 * torch.randn(1, 128).to(self.device)
             generated = self.decoder(noise)
         return generated.squeeze(0).cpu()
