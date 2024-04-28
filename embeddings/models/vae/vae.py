@@ -127,7 +127,9 @@ class VariationalAutoEncoder(LightningModule):
             log_var=log_var_batch,
         )
 
-        self.log("train_loss", train_loss, on_step=False, on_epoch=True, prog_bar=True)
+        batch_size = x_batch.size(0)
+
+        self.log("train_loss", train_loss / batch_size, on_step=False, on_epoch=True, prog_bar=True)
 
         return train_loss
 
@@ -141,7 +143,9 @@ class VariationalAutoEncoder(LightningModule):
             log_var=log_var_batch,
         )
 
-        self.log("validation_loss", val_loss)
+        batch_size = x_val_batch.size(0)
+
+        self.log("validation_loss", val_loss / batch_size)
 
         return val_loss
 
