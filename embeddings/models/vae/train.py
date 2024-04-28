@@ -36,7 +36,7 @@ def train() -> None:
 
     val_data = DataLoader(
         dataset=tno_dataset.validation_data,
-        batch_size=128,
+        batch_size=32,
         num_workers=16,
     )
 
