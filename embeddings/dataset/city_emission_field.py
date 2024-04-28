@@ -7,7 +7,7 @@ from embeddings.common.gnfr_sector import NUM_GNFR_SECTORS
 
 
 class CityEmissionField:
-    ROBUST_SCALING_FACTOR = 1 / 2_500_000  # determined using 95th percentile
+    ROBUST_SCALING_FACTOR = 1 / 2_500_000  # determined using average of 95th percentile per city in training data
 
     def __init__(self, city_data: pl.DataFrame) -> None:
         """
