@@ -82,7 +82,7 @@ class Decoder(nn.Module):
 
 
 class VariationalAutoEncoder(LightningModule):
-    LATENT_DIMENSION = 512
+    LATENT_DIMENSION = 256
 
     def __init__(self) -> None:
         super().__init__()
@@ -161,6 +161,6 @@ class VariationalAutoEncoder(LightningModule):
     def generate(self) -> Tensor:
         self.eval()
         with torch.no_grad():
-            noise = torch.randn(1, 512).to(self.device)
+            noise = torch.randn(1, self.LATENT_DIMENSION).to(self.device)
             generated = self.decoder(noise)
         return generated.squeeze(0).cpu()
