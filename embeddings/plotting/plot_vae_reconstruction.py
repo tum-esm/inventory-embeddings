@@ -17,7 +17,7 @@ if __name__ == "__main__":
 
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(10, 10))
 
-    data = dataset_collection.training_data
+    data = dataset_collection.validation_data
 
     emission_field = data[random.randint(0, len(data) - 1)]
 

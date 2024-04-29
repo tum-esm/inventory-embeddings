@@ -13,9 +13,9 @@ class _EncoderLayer(nn.Module):
             nn.Conv2d(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                kernel_size=4,
+                kernel_size=2,
                 stride=2,
-                padding=1,
+                padding=0,
             ),
             nn.BatchNorm2d(out_channels),
             nn.LeakyReLU(),
@@ -32,9 +32,9 @@ class _DecoderLayer(nn.Module):
             nn.ConvTranspose2d(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                kernel_size=4,
+                kernel_size=2,
                 stride=2,
-                padding=1,
+                padding=0,
             ),
             nn.BatchNorm2d(out_channels),
             nn.LeakyReLU(),
