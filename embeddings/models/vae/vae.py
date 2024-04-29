@@ -45,7 +45,7 @@ class _DecoderLayer(nn.Module):
 
 
 class Encoder(nn.Module):
-    def __init__(self) -> None:
+    def __init__(self, latent_dim: int) -> None:
         super().__init__()
         self._layers = nn.Sequential(
             _EncoderLayer(in_channels=NUM_GNFR_SECTORS, out_channels=64),
@@ -54,8 +54,8 @@ class Encoder(nn.Module):
             _EncoderLayer(in_channels=256, out_channels=512),
             nn.Flatten(),
         )
-        self._fully_connected_mean = nn.Linear(2048, 512)
-        self._fully_connected_var = nn.Linear(2048, 512)
+        self._fully_connected_mean = nn.Linear(2048, latent_dim)
+        self._fully_connected_var = nn.Linear(2048, latent_dim)
 
     def forward(self, x: Tensor) -> tuple[Tensor, Tensor]:
         h = self._layers(x)
@@ -65,9 +65,9 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self) -> None:
+    def __init__(self, latent_dim: int) -> None:
         super().__init__()
-        self._fully_connected_input = nn.Linear(512, 2048)
+        self._fully_connected_input = nn.Linear(latent_dim, 2048)
         self._layers = nn.Sequential(
             _DecoderLayer(in_channels=512, out_channels=256),
             _DecoderLayer(in_channels=256, out_channels=128),
@@ -82,10 +82,12 @@ class Decoder(nn.Module):
 
 
 class VariationalAutoEncoder(LightningModule):
+    LATENT_DIMENSION = 512
+
     def __init__(self) -> None:
         super().__init__()
-        self._encoder = Encoder()
-        self._decoder = Decoder()
+        self._encoder = Encoder(latent_dim=self.LATENT_DIMENSION)
+        self._decoder = Decoder(latent_dim=self.LATENT_DIMENSION)
 
     @staticmethod
     def loss(x: Tensor, x_hat: Tensor, mean: Tensor, log_var: Tensor) -> Tensor:
