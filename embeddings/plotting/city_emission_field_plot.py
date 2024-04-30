@@ -19,7 +19,7 @@ def plot_emission_field(
     tr_corner = emission_field.lat_lon_array[emission_field.width - 1, 0]
 
     ax.imshow(
-        to_plot.T,
+        to_plot,
         cmap=colormaps["viridis"],
         extent=(float(bl_corner[1]), float(tr_corner[1]), float(bl_corner[0]), float(tr_corner[0])),
         aspect=LON_LAT_ASPECT_RATIO,
@@ -39,7 +39,7 @@ def plot_emission_field_tensor(
     to_plot = emission_field[sector.to_index(), :, :] if sector else emission_field.sum(0)
 
     ax.imshow(
-        to_plot.T,
+        to_plot,
         cmap=colormaps["viridis"],
         vmin=None if vmax is None else 0,
         vmax=vmax,
