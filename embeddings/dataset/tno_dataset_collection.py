@@ -4,6 +4,7 @@ from embeddings.dataset.emission_field_transforms import (
     CenterCropTransform,
     RandomCropTransform,
     RandomHorizontalFlipTransform,
+    RandomRotationTransform,
     RandomVerticalFlipTransform,
 )
 from embeddings.dataset.tno_dataset import TnoDataset
@@ -31,6 +32,7 @@ class TnoDatasetCollection:
         self._train.add_sampling_transform(RandomCropTransform(width=self.CROPPED_WIDTH, height=self.CROPPED_HEIGHT))
         self._train.add_sampling_transform(RandomHorizontalFlipTransform())
         self._train.add_sampling_transform(RandomVerticalFlipTransform())
+        self._train.add_sampling_transform(RandomRotationTransform())
 
         self._val.add_sampling_transform(CenterCropTransform(width=self.CROPPED_WIDTH, height=self.CROPPED_HEIGHT))
 
