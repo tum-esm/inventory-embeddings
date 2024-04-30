@@ -14,8 +14,8 @@ class CityEmissionField:
         An emission field have dimension SxHxW (typical representations of images in numpy and torch).
 
         S: Number of sectors (for GNFR 15)
-        H: Width
-        W: Height
+        H: Height
+        W: Width
 
         The corresponding latitude and longitude array has dimensions WxH.
         """
