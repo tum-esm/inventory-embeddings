@@ -1,3 +1,4 @@
+from embeddings.common.log import logger
 from embeddings.common.paths import TnoPaths
 from embeddings.dataset.dataset_split import deterministic_split, random_split
 from embeddings.dataset.emission_field_transforms import (
@@ -25,6 +26,9 @@ class TnoDatasetCollection:
             self._val, self._train = deterministic_split(rest, split=[val_split, 1 - val_split])
         else:
             self._val, self._train = random_split(rest, split=[val_split, 1 - val_split])
+
+        logger.info(f"Validation Set has {len(self._val.city_emission_fields)} cites!")
+        logger.info(f"Training Set has {len(self._train.city_emission_fields)} cites!")
 
         self._add_sampling_transforms()
 
