@@ -12,9 +12,9 @@ from embeddings.plotting.city_emission_field_plot import plot_emission_field_ten
 
 
 class CompressedSensingExperiment:
-    def __init__(self) -> None:
-        self._dataset = TnoDatasetCollection(deterministic=True).validation_data
-        self._num_measurements = 100
+    def __init__(self, num_measurements: int) -> None:
+        self._dataset = TnoDatasetCollection(deterministic=True).training_data
+        self._num_measurements = num_measurements
         self._emission_field_width = TnoDatasetCollection.CROPPED_WIDTH
         self._emission_field_height = TnoDatasetCollection.CROPPED_HEIGHT
         self._emission_field_depth = NUM_GNFR_SECTORS
@@ -44,12 +44,14 @@ class CompressedSensingExperiment:
 
 
 if __name__ == "__main__":
+    num_measurements = 250
+
     solver = GenerativeModelSolver()
-    experiment = CompressedSensingExperiment()
+    experiment = CompressedSensingExperiment(num_measurements=250)
 
     x, x_rec = experiment.run_inverse_problem(solver=solver)
 
-    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(10, 10))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 10))
 
     sector = GnfrSector.F1
 
@@ -57,9 +59,8 @@ if __name__ == "__main__":
     vmax_sector = 1.1 * float(torch.max(x[sector.to_index(), :, :]))
 
     plot_emission_field_tensor(emission_field=x, ax=ax1, vmax=vmax)
-    plot_emission_field_tensor(emission_field=x, ax=ax2, sector=sector, vmax=vmax_sector)
-
-    plot_emission_field_tensor(emission_field=x_rec, ax=ax3, vmax=vmax)
-    plot_emission_field_tensor(emission_field=x_rec, ax=ax4, sector=sector, vmax=vmax_sector)
+    ax1.title.set_text("Original Emission Field")
+    plot_emission_field_tensor(emission_field=x_rec, ax=ax2, vmax=vmax)
+    ax2.title.set_text(f"Reconstructed Emission Field\nWith {num_measurements} measurements")
 
     plt.savefig(PlotPaths.PLOTS / "inverse_problem.png")

@@ -103,6 +103,7 @@ lint.ignore = [
     "INP001",   # INP001 File `...` is part of an implicit namespace package. Add an `__init__.py`.
     "E741",     # E741 Ambiguous variable name: `I`,
     "PLR0913",  # PLR0913 too many arguments
+    "G004",     # G004 Logging Statement uses f-string
 ]
 
 [tool.mypy]

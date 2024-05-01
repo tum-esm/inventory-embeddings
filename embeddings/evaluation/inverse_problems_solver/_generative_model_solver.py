@@ -1,20 +1,91 @@
+from copy import copy
+
 import torch
+from matplotlib import pyplot as plt
 from torch import Tensor
 
-from embeddings.common.paths import ModelPaths
+from embeddings.common.log import logger
+from embeddings.common.paths import ModelPaths, PlotPaths
 from embeddings.models.vae.vae import VariationalAutoEncoder
 
 from ._inverse_problem_solver import InverseProblemSolver
 
+# Empirically determined
+LEARNING_RATES = {
+    250: 3e-3,
+}
+
 
 class GenerativeModelSolver(InverseProblemSolver):
+    MAX_STEPS = 10_000
+    STOP_AFTER = 500
+
     def __init__(self) -> None:
         self._load_generator()
 
     def _load_generator(self) -> None:
         first_check_point = next(ModelPaths.VAE_LATEST_CHECKPOINTS.iterdir())
         vae = VariationalAutoEncoder.load_from_checkpoint(checkpoint_path=first_check_point)
+        self._device = vae.device
         self._generator = vae.decoder
 
-    def solve(self, A: Tensor, y: Tensor) -> Tensor:  # noqa: ARG002, N803
-        return torch.randn(15 * 32 * 32)
+    def _generate(self, z: Tensor) -> Tensor:
+        x_rec = self._generator(z)
+        return x_rec.view(15 * 32 * 32)
+
+    def _target(self, A: Tensor, y: Tensor, z: Tensor) -> Tensor:  # noqa: N803
+        loss = torch.norm(y - A @ self._generate(z)).pow(2)
+        regularization = torch.norm(z).pow(2)
+        return loss + regularization
+
+    def solve(self, A: Tensor, y: Tensor) -> Tensor:  # noqa: N803
+        z = torch.randn(256).to(self._device)
+        z.requires_grad = True
+        a_on_device = A.to(self._device)
+        y_on_device = y.to(self._device)
+
+        num_measurements = len(y)
+        learning_rate = LEARNING_RATES[num_measurements]
+
+        optimizer = torch.optim.Adam(params=[z], lr=learning_rate)
+
+        losses = []
+
+        cur_best_z = z
+        min_loss = float("inf")
+
+        no_improvements = 0
+
+        stopped_at = -1
+
+        for iteration in range(self.MAX_STEPS):
+            loss = self._target(A=a_on_device, y=y_on_device, z=z)
+            loss.backward()
+            optimizer.step()
+
+            if loss.item() < min_loss:
+                no_improvements = 0
+                cur_best_z = copy(z)
+                min_loss = loss.item()
+            else:
+                no_improvements += 1
+
+            losses.append(loss.item())
+
+            if no_improvements == self.STOP_AFTER:
+                stopped_at = iteration
+                break
+
+        if stopped_at >= 0:
+            logger.info(f"Optimization stopped at iteration {stopped_at} with minimum loss {min_loss}!")
+        else:
+            logger.warning(
+                f"Optimization stopped with minimum loss {min_loss}. "
+                f"However, the loss was still decreasing. "
+                f"Consider increasing the learning rate!",
+            )
+
+        plt.plot(losses)
+        plt.savefig(PlotPaths.PLOTS / "loss.png")
+
+        return self._generate(cur_best_z).cpu().detach()
