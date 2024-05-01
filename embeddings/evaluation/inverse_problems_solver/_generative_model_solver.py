@@ -11,7 +11,7 @@ from embeddings.models.vae.vae import VariationalAutoEncoder
 from ._inverse_problem_solver import InverseProblemSolver
 
 # Empirically determined
-LEARNING_RATES = {
+_LEARNING_RATES = {
     250: 3e-3,
 }
 
@@ -41,11 +41,12 @@ class GenerativeModelSolver(InverseProblemSolver):
     def solve(self, A: Tensor, y: Tensor) -> Tensor:  # noqa: N803
         z = torch.randn(256).to(self._device)
         z.requires_grad = True
+
         a_on_device = A.to(self._device)
         y_on_device = y.to(self._device)
 
         num_measurements = len(y)
-        learning_rate = LEARNING_RATES[num_measurements]
+        learning_rate = _LEARNING_RATES[num_measurements]
 
         optimizer = torch.optim.Adam(params=[z], lr=learning_rate)
 
