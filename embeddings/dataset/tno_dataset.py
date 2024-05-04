@@ -28,6 +28,8 @@ class TnoDataset(Dataset[Tensor]):
         self._initialize_transforms()
         self._sampling_transforms: list[EmissionFieldTransform] = []
 
+        self._temporal_transforms_enabled = True
+
     @classmethod
     def from_csv(cls, path: Path) -> Self:
         logger.info(f"Loading TNO data from '{path}'")
@@ -48,6 +50,9 @@ class TnoDataset(Dataset[Tensor]):
                 bar()
         return city_emission_fields
 
+    def disable_temporal_transforms(self) -> None:
+        self._temporal_transforms_enabled = False
+
     def add_sampling_transform(self, transform: EmissionFieldTransform) -> None:
         self._sampling_transforms.append(transform)
 
@@ -65,14 +70,16 @@ class TnoDataset(Dataset[Tensor]):
         )
 
     def __len__(self) -> int:
-        return self._compute_number_of_emission_field_variations()
+        if self._temporal_transforms_enabled:
+            return self._compute_number_of_emission_field_variations()
+        return len(self.city_emission_fields)
 
     def _validate_index_is_in_range(self, index: int) -> None:
         if not 0 <= index < len(self):
             key_error = f"Index {index} out of range!"
             raise IndexError(key_error)
 
-    def _compose_transform_based_on_index(self, index: int) -> Compose:
+    def _compose_temporal_transform_based_on_index(self, index: int) -> Compose:
         hour_transform_index = index % len(self._hour_transforms)
         remaining = index // len(self._hour_transforms)
         day_transform_index = remaining % len(self._day_transforms)
@@ -86,16 +93,21 @@ class TnoDataset(Dataset[Tensor]):
             ],
         )
 
-    def _get_city_emission_field_variant(self, index: int) -> CityEmissionField:
+    def _apply_temporal_transform_based_on_index(self, field: CityEmissionField, index: int) -> CityEmissionField:
+        remaining = index // len(self.city_emission_fields)
+        transform = self._compose_temporal_transform_based_on_index(index=remaining)
+        return transform(field)
+
+    def _get_emission_field_copy_at_index(self, index: int) -> CityEmissionField:
         self._validate_index_is_in_range(index)
 
-        original_data = self.city_emission_fields[index % len(self.city_emission_fields)]
+        field = self.city_emission_fields[index % len(self.city_emission_fields)]
 
-        remaining = index // len(self.city_emission_fields)
-        transform = self._compose_transform_based_on_index(index=remaining)
+        copy = deepcopy(field)
 
-        copy = deepcopy(original_data)
-        transform(copy)
+        if self._temporal_transforms_enabled:
+            self._apply_temporal_transform_based_on_index(field=copy, index=index)
+
         return copy
 
     def _apply_sampling_transform(self, city_emission_field: CityEmissionField) -> CityEmissionField:
@@ -103,12 +115,12 @@ class TnoDataset(Dataset[Tensor]):
         return transform(city_emission_field)
 
     def get_city_emission_field(self, index: int, apply_sampling_transforms: bool = False) -> CityEmissionField:
-        emission_field = self._get_city_emission_field_variant(index)
+        emission_field = self._get_emission_field_copy_at_index(index)
         if apply_sampling_transforms:
             self._apply_sampling_transform(emission_field)
         return emission_field
 
     def __getitem__(self, index: int) -> Tensor:
-        emission_field = self._get_city_emission_field_variant(index)
+        emission_field = self._get_emission_field_copy_at_index(index)
         emission_field = self._apply_sampling_transform(emission_field)
         return emission_field.co2_ff_tensor
