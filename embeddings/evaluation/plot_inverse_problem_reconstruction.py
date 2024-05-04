@@ -13,9 +13,9 @@ if __name__ == "__main__":
     dataset = TnoDatasetCollection(deterministic=True).validation_data
     dataset.disable_temporal_transforms()
 
-    num_measurements = 100
+    num_measurements = 500
 
-    solver = GenerativeModelSolver()
+    solver = GenerativeModelSolver(plot_loss=True, log_info=True)
     experiment = CompressedSensingExperiment(num_measurements=num_measurements)
 
     x = dataset[random.randint(0, len(dataset) - 1)]

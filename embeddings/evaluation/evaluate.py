@@ -30,8 +30,6 @@ if __name__ == "__main__":
 
             reconstruction_errors.append(np.mean(np.array(mse_losses)))
 
-    print(reconstruction_errors)
-
     plt.plot(measurements, reconstruction_errors)
     plt.xscale("log")
     plt.savefig(PlotPaths.PLOTS / "measurements.png")

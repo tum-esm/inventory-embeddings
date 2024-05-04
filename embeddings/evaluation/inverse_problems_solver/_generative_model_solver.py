@@ -1,5 +1,6 @@
 from copy import copy
 
+import numpy as np
 import torch
 from matplotlib import pyplot as plt
 from torch import Tensor
@@ -12,15 +13,27 @@ from ._inverse_problem_solver import InverseProblemSolver
 
 # Empirically determined
 _LEARNING_RATES = {
-    250: 3e-3,
+    10: 1.5e-4,
+    25: 5e-4,
+    50: 1e-3,
+    100: 1.8e-3,
+    250: 2.5e-3,
+    500: 4e-3,
+    1_000: 5.5e-3,
+    2_500: 7e-3,
+    5_000: 1.5e-2,
+    10_000: 3e-2,
+    12_500: 4e-2,
 }
 
 
 class GenerativeModelSolver(InverseProblemSolver):
     MAX_STEPS = 10_000
-    STOP_AFTER = 500
+    STOP_AFTER = 100
 
-    def __init__(self) -> None:
+    def __init__(self, plot_loss: bool = False, log_info: bool = False) -> None:
+        self._plot_loss = plot_loss
+        self._log_info = log_info
         self._load_generator()
 
     def _load_generator(self) -> None:
@@ -71,22 +84,24 @@ class GenerativeModelSolver(InverseProblemSolver):
             else:
                 no_improvements += 1
 
-            losses.append(loss.item())
+            losses.append(np.log(loss.item()))
 
             if no_improvements == self.STOP_AFTER:
                 stopped_at = iteration
                 break
 
-        if stopped_at >= 0:
-            logger.info(f"Optimization stopped at iteration {stopped_at} with minimum loss {min_loss}!")
-        else:
-            logger.warning(
-                f"Optimization stopped with minimum loss {min_loss}. "
-                f"However, the loss was still decreasing. "
-                f"Consider increasing the learning rate!",
-            )
+        if self._log_info:
+            if stopped_at >= 0:
+                logger.info(f"Optimization stopped at iteration {stopped_at} with minimum loss {min_loss}!")
+            else:
+                logger.warning(
+                    f"Optimization stopped with minimum loss {min_loss}. "
+                    f"However, the loss was still decreasing. "
+                    f"Consider increasing the learning rate!",
+                )
 
-        plt.plot(losses)
-        plt.savefig(PlotPaths.PLOTS / "loss.png")
+        if self._plot_loss:
+            plt.plot(losses)
+            plt.savefig(PlotPaths.PLOTS / "loss.png")
 
         return self._generate(cur_best_z).cpu().detach()
