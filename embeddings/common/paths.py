@@ -11,7 +11,7 @@ def _archive_dir(path: Path) -> None:
         now = datetime.now(UTC)
         timestamp = now.strftime("%Y_%m_%d_%H_%M_%S")
         path.replace(target=path.parent / f"archived_{timestamp}")
-    path.mkdir(exist_ok=True)
+    path.mkdir(exist_ok=True, parents=True)
 
 
 class TnoPaths:
@@ -36,6 +36,16 @@ class OpenDataSoftPaths:
 
 class PlotPaths:
     PLOTS = _SAVES / "plots"
+
+
+class ExperimentPaths:
+    _EXPERIMENTS = _SAVES / "experiments"
+    _EVALUATION = _EXPERIMENTS / "evaluation"
+    LATEST_EVALUATION = _EVALUATION / "latest"
+
+    @classmethod
+    def archive_latest_evaluation(cls) -> None:
+        _archive_dir(cls.LATEST_EVALUATION)
 
 
 class ModelPaths:
