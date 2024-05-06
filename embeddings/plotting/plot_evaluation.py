@@ -25,5 +25,7 @@ if __name__ == "__main__":
 
     plt.errorbar(x=measurements, y=mean_mse, yerr=confidence_mse)
     plt.xscale("log")
+    plt.xticks(ticks=measurements, labels=measurements, rotation=90)
+    plt.ylim(0, 0.35)
 
     plt.savefig(PlotPaths.PLOTS / "measurements.png")
