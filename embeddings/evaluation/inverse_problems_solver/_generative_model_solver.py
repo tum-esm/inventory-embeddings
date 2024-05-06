@@ -7,6 +7,7 @@ from torch import Tensor
 
 from embeddings.common.log import logger
 from embeddings.common.paths import ModelPaths, PlotPaths
+from embeddings.evaluation.inverse_problem import InverseProblem
 from embeddings.models.vae.vae import VariationalAutoEncoder
 
 from ._inverse_problem_solver import InverseProblemSolver
@@ -51,14 +52,14 @@ class GenerativeModelSolver(InverseProblemSolver):
         regularization = torch.norm(z).pow(2)
         return loss + regularization
 
-    def solve(self, A: Tensor, y: Tensor) -> Tensor:  # noqa: N803
+    def solve(self, inverse_problem: InverseProblem) -> Tensor:
         z = torch.randn(256).to(self._device)
         z.requires_grad = True
 
-        a_on_device = A.to(self._device)
-        y_on_device = y.to(self._device)
+        a_on_device = inverse_problem.A.to(self._device)
+        y_on_device = inverse_problem.y.to(self._device)
 
-        num_measurements = len(y)
+        num_measurements = len(inverse_problem.y)
         learning_rate = _LEARNING_RATES[num_measurements]
 
         optimizer = torch.optim.Adam(params=[z], lr=learning_rate)

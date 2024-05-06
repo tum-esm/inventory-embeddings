@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 
 from embeddings.common.paths import PlotPaths
 from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
-from embeddings.evaluation.compressed_sensing_experiment import CompressedSensingExperiment
+from embeddings.evaluation.compressed_sensing_experiment import generate_random_inverse_problem, solve_inverse_problem
 from embeddings.evaluation.inverse_problems_solver import GenerativeModelSolver
 from embeddings.plotting.city_emission_field_plot import plot_emission_field_tensor
 
@@ -16,10 +16,10 @@ if __name__ == "__main__":
     num_measurements = 500
 
     solver = GenerativeModelSolver(plot_loss=True, log_info=True)
-    experiment = CompressedSensingExperiment(num_measurements=num_measurements)
 
     x = dataset[random.randint(0, len(dataset) - 1)]
-    x_rec = experiment.solve_random_inverse_problem(x=x, solver=solver)
+    inverse_problem = generate_random_inverse_problem(x=x, num_measurements=num_measurements)
+    x_rec = solve_inverse_problem(solver=solver, inverse_problem=inverse_problem)
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 10))
 
