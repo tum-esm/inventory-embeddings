@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import polars as pl
-from alive_progress import alive_bar
+from tqdm import tqdm
 
 from embeddings.common.constants import TNO_LAT_STEP, TNO_LON_STEP
 from embeddings.common.gnfr_sector import GnfrSector
@@ -32,11 +32,9 @@ class TnoPreprocessor:
 
         self._write_csv_header(out_csv=out_csv)
 
-        with alive_bar(total=len(cites)) as bar:
-            for city in cites:
-                cells = self._process_city(city, tno_data)
-                self._write_cells_to_csv(out_csv=out_csv, city=city, cells=cells)
-                bar()
+        for city in tqdm(cites, desc="Processing"):
+            cells = self._process_city(city, tno_data)
+            self._write_cells_to_csv(out_csv=out_csv, city=city, cells=cells)
 
     def _process_city(self, city: City, tno_data: pl.DataFrame) -> list[Cell]:
         city_sources_data = self._filter_city_by_latitude_and_longitude(tno_data, city)

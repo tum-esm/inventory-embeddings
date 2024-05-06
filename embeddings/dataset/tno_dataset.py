@@ -4,10 +4,10 @@ from pathlib import Path
 from typing import Self
 
 import polars as pl
-from alive_progress import alive_bar
 from torch import Tensor
 from torch.utils.data import Dataset
 from torchvision.transforms import Compose
+from tqdm import tqdm
 
 from embeddings.common.log import logger
 from embeddings.dataset.city_emission_field import CityEmissionField
@@ -42,12 +42,10 @@ class TnoDataset(Dataset[Tensor]):
     def _load_data(cls, tno_data: pl.DataFrame) -> list[CityEmissionField]:
         city_emission_fields = []
         cities = list(tno_data["City"].unique(maintain_order=True))
-        with alive_bar(len(cities)) as bar:
-            for city in cities:
-                city_data = tno_data.filter(pl.col("City") == city)
-                original = CityEmissionField(city_data=city_data)
-                city_emission_fields.append(original)
-                bar()
+        for city in tqdm(cities, desc="Loading Cities", leave=False):
+            city_data = tno_data.filter(pl.col("City") == city)
+            original = CityEmissionField(city_data=city_data)
+            city_emission_fields.append(original)
         return city_emission_fields
 
     def disable_temporal_transforms(self) -> None:
