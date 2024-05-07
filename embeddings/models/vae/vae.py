@@ -3,59 +3,24 @@ from lightning import LightningModule
 from lightning.pytorch.utilities.types import OptimizerLRScheduler
 from torch import Tensor, nn
 
-from embeddings.common.gnfr_sector import NUM_GNFR_SECTORS
-
-
-class _EncoderLayer(nn.Module):
-    def __init__(self, in_channels: int, out_channels: int) -> None:
-        super().__init__()
-        self._layers = nn.Sequential(
-            nn.Conv2d(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=2,
-                stride=2,
-                padding=0,
-            ),
-            nn.BatchNorm2d(out_channels),
-            nn.LeakyReLU(),
-        )
-
-    def forward(self, x: Tensor) -> Tensor:
-        return self._layers(x)
-
-
-class _DecoderLayer(nn.Module):
-    def __init__(self, in_channels: int, out_channels: int) -> None:
-        super().__init__()
-        self._layers = nn.Sequential(
-            nn.ConvTranspose2d(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=2,
-                stride=2,
-                padding=0,
-            ),
-            nn.BatchNorm2d(out_channels),
-            nn.LeakyReLU(),
-        )
-
-    def forward(self, x: Tensor) -> Tensor:
-        return self._layers(x)
-
 
 class Encoder(nn.Module):
     def __init__(self, latent_dim: int) -> None:
         super().__init__()
         self._layers = nn.Sequential(
-            _EncoderLayer(in_channels=NUM_GNFR_SECTORS, out_channels=64),
-            _EncoderLayer(in_channels=64, out_channels=128),
-            _EncoderLayer(in_channels=128, out_channels=256),
-            _EncoderLayer(in_channels=256, out_channels=512),
-            nn.Flatten(),
+            nn.Linear(1024, 512),
+            nn.ReLU(),
+            nn.BatchNorm1d(512),
+            nn.Dropout(0.5),
+            nn.Linear(512, 256),
+            nn.ReLU(),
+            nn.BatchNorm1d(256),
+            nn.Dropout(0.5),
+            nn.Linear(256, 128),
+            nn.ReLU(),
         )
-        self._fully_connected_mean = nn.Linear(2048, latent_dim)
-        self._fully_connected_var = nn.Linear(2048, latent_dim)
+        self._fully_connected_mean = nn.Linear(128, latent_dim)
+        self._fully_connected_var = nn.Linear(128, latent_dim)
 
     def forward(self, x: Tensor) -> tuple[Tensor, Tensor]:
         h = self._layers(x)
@@ -67,22 +32,28 @@ class Encoder(nn.Module):
 class Decoder(nn.Module):
     def __init__(self, latent_dim: int) -> None:
         super().__init__()
-        self._fully_connected_input = nn.Linear(latent_dim, 2048)
         self._layers = nn.Sequential(
-            _DecoderLayer(in_channels=512, out_channels=256),
-            _DecoderLayer(in_channels=256, out_channels=128),
-            _DecoderLayer(in_channels=128, out_channels=64),
-            _DecoderLayer(in_channels=64, out_channels=NUM_GNFR_SECTORS),
+            nn.Linear(latent_dim, 128),
+            nn.ReLU(),
+            nn.BatchNorm1d(128),
+            nn.Dropout(0.5),
+            nn.Linear(128, 256),
+            nn.ReLU(),
+            nn.BatchNorm1d(256),
+            nn.Dropout(0.5),
+            nn.Linear(256, 512),
+            nn.ReLU(),
+            nn.BatchNorm1d(512),
+            nn.Dropout(0.5),
+            nn.Linear(512, 1024),
         )
 
     def forward(self, z: Tensor) -> Tensor:
-        intermediate = self._fully_connected_input(z)
-        intermediate = intermediate.view(-1, 512, 2, 2)
-        return self._layers(intermediate)
+        return self._layers(z)
 
 
 class VariationalAutoEncoder(LightningModule):
-    LATENT_DIMENSION = 256
+    LATENT_DIMENSION = 100
 
     def __init__(self) -> None:
         super().__init__()
@@ -110,13 +81,15 @@ class VariationalAutoEncoder(LightningModule):
         return eps * std + mean
 
     def forward(self, x: Tensor) -> tuple[Tensor, Tensor, Tensor]:
-        mean, log_var = self._encoder(x)
+        x_vector = x.view(-1, 1024)
+        mean, log_var = self._encoder(x_vector)
         z = self._reparameterization(mean, log_var)
-        x_hat = self._decoder(z)
+        x_hat_vector = self._decoder(z)
+        x_hat = x_hat_vector.view(-1, 32, 32)
         return x_hat, mean, log_var
 
     def configure_optimizers(self) -> OptimizerLRScheduler:
-        learning_rate = 1e-3
+        learning_rate = 1e-5
         return torch.optim.Adam(self.parameters(recurse=True), lr=learning_rate)
 
     def training_step(self, x_batch: Tensor) -> Tensor:

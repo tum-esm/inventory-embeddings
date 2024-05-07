@@ -14,5 +14,5 @@ class RandomRotationTransform(EmissionFieldTransform):
     def __call__(self, emission_field: CityEmissionField) -> CityEmissionField:
         number = random.random()
         if number <= self._p:
-            emission_field.co2_ff_field = np.rot90(emission_field.co2_ff_field, k=1, axes=(1, 2))
+            emission_field.co2_ff_field_per_sector = np.rot90(emission_field.co2_ff_field_per_sector, k=1, axes=(1, 2))
         return emission_field

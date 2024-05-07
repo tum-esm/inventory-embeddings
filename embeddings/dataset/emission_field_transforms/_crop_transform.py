@@ -19,7 +19,7 @@ def _crop_emission_field(
         value_error = "Tried to crop beyond field border!"
         raise ValueError(value_error)
 
-    emission_field.co2_ff_field = emission_field.co2_ff_field[:, start_y:end_y, start_x:end_x]
+    emission_field.co2_ff_field_per_sector = emission_field.co2_ff_field_per_sector[:, start_y:end_y, start_x:end_x]
     emission_field.lat_lon_array = emission_field.lat_lon_array[start_x:end_x, start_y:end_y, :]
 
     assert emission_field.width == width, f"Expected width: {width}. Got: {emission_field.width}"

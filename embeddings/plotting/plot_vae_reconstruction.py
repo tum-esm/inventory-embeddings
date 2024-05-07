@@ -15,9 +15,9 @@ if __name__ == "__main__":
 
     dataset_collection = TnoDatasetCollection(deterministic=True)
 
-    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(10, 10))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 10))
 
-    data = dataset_collection.validation_data
+    data = dataset_collection.training_data
 
     emission_field = data[random.randint(0, len(data) - 1)]
 
@@ -26,12 +26,9 @@ if __name__ == "__main__":
     sector = GnfrSector.F1
 
     vmax = 1.1 * float(torch.max(emission_field))
-    vmax_sector = 1.1 * float(torch.max(emission_field[sector.to_index(), :, :]))
+    print(f"{float(torch.max(emission_field))} vs {float(torch.max(reconstructed))}")
 
     plot_emission_field_tensor(emission_field=emission_field, ax=ax1, vmax=vmax)
-    plot_emission_field_tensor(emission_field=emission_field, ax=ax2, sector=sector, vmax=vmax_sector)
-
-    plot_emission_field_tensor(emission_field=reconstructed, ax=ax3, vmax=vmax)
-    plot_emission_field_tensor(emission_field=reconstructed, ax=ax4, sector=sector, vmax=vmax_sector)
+    plot_emission_field_tensor(emission_field=reconstructed, ax=ax2, vmax=vmax)
 
     plt.savefig(PlotPaths.PLOTS / "vae_reconstructed.png")
