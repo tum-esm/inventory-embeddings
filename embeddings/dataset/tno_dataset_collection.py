@@ -15,18 +15,19 @@ class TnoDatasetCollection:
     CROPPED_WIDTH = 32
     CROPPED_HEIGHT = 32
 
-    def __init__(self, deterministic: bool = False) -> None:
+    def __init__(self) -> None:
         tno_2015 = TnoDataset.from_csv(TnoPaths.BY_CITY_2015_CSV)
 
-        _, rest = deterministic_split(tno_2015, split=[0.5, 0.5])
-
         val_split = 0.15
+        test_split = 0.15
 
-        if deterministic:
-            self._val, self._train = deterministic_split(rest, split=[val_split, 1 - val_split])
-        else:
-            self._val, self._train = random_split(rest, split=[val_split, 1 - val_split])
+        self._test, rest = deterministic_split(tno_2015, split=[test_split, 1 - test_split])
 
+        rest_val_split = val_split / (1 - test_split)
+
+        self._val, self._train = random_split(rest, split=[rest_val_split, 1 - rest_val_split])
+
+        logger.info(f"Test Set has {len(self._test.city_emission_fields)} cites!")
         logger.info(f"Validation Set has {len(self._val.city_emission_fields)} cites!")
         logger.info(f"Training Set has {len(self._train.city_emission_fields)} cites!")
 
@@ -39,6 +40,12 @@ class TnoDatasetCollection:
         self._train.add_sampling_transform(RandomRotationTransform())
 
         self._val.add_sampling_transform(CenterCropTransform(width=self.CROPPED_WIDTH, height=self.CROPPED_HEIGHT))
+
+        self._test.add_sampling_transform(CenterCropTransform(width=self.CROPPED_WIDTH, height=self.CROPPED_HEIGHT))
+
+    @property
+    def test_data(self) -> TnoDataset:
+        return self._test
 
     @property
     def validation_data(self) -> TnoDataset:

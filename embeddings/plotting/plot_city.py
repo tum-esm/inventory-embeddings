@@ -8,7 +8,7 @@ from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
 from embeddings.plotting.city_emission_field_plot import plot_emission_field
 
 if __name__ == "__main__":
-    dataset_collection = TnoDatasetCollection(deterministic=True)
+    dataset_collection = TnoDatasetCollection()
 
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(10, 10))
 

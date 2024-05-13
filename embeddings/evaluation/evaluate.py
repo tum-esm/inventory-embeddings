@@ -12,7 +12,7 @@ NUM_EXPERIMENTS = 5
 
 
 def evaluate() -> None:
-    dataset = TnoDatasetCollection(deterministic=True).validation_data
+    dataset = TnoDatasetCollection().test_data
     dataset.disable_temporal_transforms()
 
     generative_model_solver = GenerativeModelSolver()

@@ -1,8 +1,10 @@
 import random
 
+import numpy as np
 import torch
 from matplotlib import pyplot as plt
 
+from embeddings.common.log import logger
 from embeddings.common.paths import PlotPaths
 from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
 from embeddings.evaluation.compressed_sensing_experiment import generate_random_inverse_problem, solve_inverse_problem
@@ -10,7 +12,7 @@ from embeddings.evaluation.inverse_problems_solver import GenerativeModelSolver
 from embeddings.plotting.city_emission_field_plot import plot_emission_field_tensor
 
 if __name__ == "__main__":
-    dataset = TnoDatasetCollection(deterministic=True).validation_data
+    dataset = TnoDatasetCollection().test_data
     dataset.disable_temporal_transforms()
 
     num_measurements = 500
@@ -29,5 +31,7 @@ if __name__ == "__main__":
     ax1.title.set_text("Original Emission Field")
     plot_emission_field_tensor(emission_field=x_rec, ax=ax2, vmax=vmax)
     ax2.title.set_text(f"Reconstructed Emission Field\nWith {num_measurements} measurements")
+
+    logger.info(f"Reconstruction Loss: {float(np.square(np.subtract(x, x_rec)).mean())}")
 
     plt.savefig(PlotPaths.PLOTS / "inverse_problem.png")

@@ -13,11 +13,11 @@ if __name__ == "__main__":
     first_check_point = next(ModelPaths.VAE_LATEST_CHECKPOINTS.iterdir())
     vae = VariationalAutoEncoder.load_from_checkpoint(checkpoint_path=first_check_point)
 
-    dataset_collection = TnoDatasetCollection(deterministic=True)
+    dataset_collection = TnoDatasetCollection()
 
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(10, 10))
 
-    data = dataset_collection.validation_data
+    data = dataset_collection.test_data
 
     emission_field = data[random.randint(0, len(data) - 1)]
 

@@ -25,7 +25,7 @@ def train() -> None:
 
     torch.set_float32_matmul_precision("high")
 
-    tno_dataset = TnoDatasetCollection(deterministic=True)
+    tno_dataset = TnoDatasetCollection()
 
     train_data = DataLoader(
         dataset=tno_dataset.training_data,
