@@ -30,7 +30,7 @@ _LEARNING_RATES = {
 
 class GenerativeModelSolver(InverseProblemSolver):
     MAX_STEPS = 10_000
-    STOP_AFTER = 100
+    STOP_AFTER = 250
 
     def __init__(self, plot_loss: bool = False, log_info: bool = False) -> None:
         self._plot_loss = plot_loss
