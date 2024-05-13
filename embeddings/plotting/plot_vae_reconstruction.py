@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import torch
 
 from embeddings.common.gnfr_sector import GnfrSector
-from embeddings.common.paths import ModelPaths, PlotPaths
+from embeddings.common.paths import ModelPaths
 from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
 from embeddings.models.vae.vae import VariationalAutoEncoder
 from embeddings.plotting.city_emission_field_plot import plot_emission_field_tensor
@@ -34,4 +34,5 @@ if __name__ == "__main__":
     plot_emission_field_tensor(emission_field=reconstructed, ax=ax3, vmax=vmax)
     plot_emission_field_tensor(emission_field=reconstructed, ax=ax4, sector=sector, vmax=vmax_sector)
 
-    plt.savefig(PlotPaths.PLOTS / "vae_reconstructed.png")
+    ModelPaths.VAE_LATEST_PLOTS.mkdir(exist_ok=True)
+    plt.savefig(ModelPaths.VAE_LATEST_PLOTS / "reconstructed.png")

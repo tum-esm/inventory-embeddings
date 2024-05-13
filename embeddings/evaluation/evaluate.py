@@ -1,13 +1,15 @@
+import shutil
+
 import numpy as np
 from tqdm import tqdm
 
 from embeddings.common.csv_writer import CsvWriter
-from embeddings.common.paths import ExperimentPaths
+from embeddings.common.paths import ModelPaths
 from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
 from embeddings.evaluation.compressed_sensing_experiment import generate_random_inverse_problem, solve_inverse_problem
 from embeddings.evaluation.inverse_problems_solver import GenerativeModelSolver
 
-NUM_MEASUREMENTS = [10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000, 12500]
+NUM_MEASUREMENTS = [50, 100, 250, 500, 1000, 2500, 5000, 10000, 12500]
 NUM_EXPERIMENTS = 5
 
 
@@ -17,10 +19,12 @@ def evaluate() -> None:
 
     generative_model_solver = GenerativeModelSolver()
 
-    ExperimentPaths.archive_latest_evaluation()
+    if ModelPaths.VAE_LATEST_EVALUATION.exists():
+        shutil.rmtree(ModelPaths.VAE_LATEST_EVALUATION)
+    ModelPaths.VAE_LATEST_EVALUATION.mkdir()
 
     for run_index in tqdm(range(NUM_EXPERIMENTS), desc="Run"):
-        evaluation_csv = CsvWriter(path=ExperimentPaths.LATEST_EVALUATION / f"evaluation_{run_index}.csv")
+        evaluation_csv = CsvWriter(path=ModelPaths.VAE_LATEST_EVALUATION / f"evaluation_{run_index}.csv")
         evaluation_csv.write_header("Measurements", "MSE")
 
         with tqdm(total=len(NUM_MEASUREMENTS) * len(dataset), leave=False, desc="Compressed Sensing") as bar:

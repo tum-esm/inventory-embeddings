@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-from embeddings.common.paths import ModelPaths, PlotPaths
+from embeddings.common.paths import ModelPaths
 from embeddings.models.vae.vae import VariationalAutoEncoder
 from embeddings.plotting.city_emission_field_plot import plot_emission_field_tensor
 
@@ -14,4 +14,5 @@ if __name__ == "__main__":
 
     plot_emission_field_tensor(emission_field=generated, ax=ax)
 
-    plt.savefig(PlotPaths.PLOTS / "vae_generated.png")
+    ModelPaths.VAE_LATEST_PLOTS.mkdir(exist_ok=True)
+    plt.savefig(ModelPaths.VAE_LATEST_PLOTS / "generated.png")

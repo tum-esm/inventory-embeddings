@@ -38,21 +38,16 @@ class PlotPaths:
     PLOTS = _SAVES / "plots"
 
 
-class ExperimentPaths:
-    _EXPERIMENTS = _SAVES / "experiments"
-    _EVALUATION = _EXPERIMENTS / "evaluation"
-    LATEST_EVALUATION = _EVALUATION / "latest"
-
-    @classmethod
-    def archive_latest_evaluation(cls) -> None:
-        _archive_dir(cls.LATEST_EVALUATION)
-
-
 class ModelPaths:
     _MODELS = _SAVES / "models"
     _VAE_MODELS = _MODELS / "vae"
+
     VAE_LATEST = _VAE_MODELS / "latest"
+
     VAE_LATEST_CHECKPOINTS = VAE_LATEST / "checkpoints"
+    VAE_LATEST_PLOTS = VAE_LATEST / "plots"
+
+    VAE_LATEST_EVALUATION = VAE_LATEST / "evaluation"
 
     @classmethod
     def archive_latest_vae_model(cls) -> None:

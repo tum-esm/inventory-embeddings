@@ -2,10 +2,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
 
-from embeddings.common.paths import ExperimentPaths, PlotPaths
+from embeddings.common.paths import ModelPaths
 
 if __name__ == "__main__":
-    data_frames = [pl.read_csv(evaluation_csv) for evaluation_csv in ExperimentPaths.LATEST_EVALUATION.iterdir()]
+    data_frames = [pl.read_csv(evaluation_csv) for evaluation_csv in ModelPaths.VAE_LATEST_EVALUATION.iterdir()]
     evaluation = pl.concat(data_frames)
 
     mse_per_measurements = {}
@@ -26,6 +26,6 @@ if __name__ == "__main__":
     plt.errorbar(x=measurements, y=mean_mse, yerr=confidence_mse)
     plt.xscale("log")
     plt.xticks(ticks=measurements, labels=measurements, rotation=90)
-    plt.ylim(0, 0.35)
 
-    plt.savefig(PlotPaths.PLOTS / "measurements.png")
+    ModelPaths.VAE_LATEST_PLOTS.mkdir(exist_ok=True)
+    plt.savefig(ModelPaths.VAE_LATEST_PLOTS / "evaluation.png")

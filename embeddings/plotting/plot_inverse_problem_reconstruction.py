@@ -5,7 +5,7 @@ import torch
 from matplotlib import pyplot as plt
 
 from embeddings.common.log import logger
-from embeddings.common.paths import PlotPaths
+from embeddings.common.paths import ModelPaths
 from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
 from embeddings.evaluation.compressed_sensing_experiment import generate_random_inverse_problem, solve_inverse_problem
 from embeddings.evaluation.inverse_problems_solver import GenerativeModelSolver
@@ -34,4 +34,5 @@ if __name__ == "__main__":
 
     logger.info(f"Reconstruction Loss: {float(np.square(np.subtract(x, x_rec)).mean())}")
 
-    plt.savefig(PlotPaths.PLOTS / "inverse_problem.png")
+    ModelPaths.VAE_LATEST_PLOTS.mkdir(exist_ok=True)
+    plt.savefig(ModelPaths.VAE_LATEST_PLOTS / "inverse_reconstruction.png")
