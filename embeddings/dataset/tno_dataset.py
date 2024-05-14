@@ -3,6 +3,7 @@ from operator import attrgetter
 from pathlib import Path
 from typing import Self
 
+import numpy as np
 import polars as pl
 from torch import Tensor
 from torch.utils.data import Dataset
@@ -36,6 +37,7 @@ class TnoDataset(Dataset[Tensor]):
         tno_data = pl.read_csv(path, separator=";")
         city_emission_fields = cls._load_data(tno_data)
         city_emission_fields.sort(key=attrgetter("city_name"))
+        city_emission_fields = cls._filter_outliers(city_emission_fields)
         return cls(city_emission_fields)
 
     @classmethod
@@ -46,6 +48,24 @@ class TnoDataset(Dataset[Tensor]):
             city_data = tno_data.filter(pl.col("City") == city)
             original = CityEmissionField(city_data=city_data)
             city_emission_fields.append(original)
+        return city_emission_fields
+
+    @classmethod
+    def _filter_outliers(cls, city_emission_fields: list[CityEmissionField]) -> list[CityEmissionField]:
+        lower_bound = 0.001
+        upper_bound = 0.025
+
+        original_cities = {city.city_name for city in city_emission_fields}
+        city_emission_fields = [c for c in city_emission_fields if np.percentile(c.co2_ff_field, 75) < upper_bound]
+        cities_after_upper_bound_removed = {city.city_name for city in city_emission_fields}
+        difference = original_cities - cities_after_upper_bound_removed
+        logger.warning(f"Removed {difference} due to exceeding the upper bound (in total: {len(difference)})!")
+
+        city_emission_fields = [c for c in city_emission_fields if np.percentile(c.co2_ff_field, 75) > lower_bound]
+        cities_after_lower_bound_removed = {city.city_name for city in city_emission_fields}
+        difference = cities_after_upper_bound_removed - cities_after_lower_bound_removed
+        logger.warning(f"Removed {difference} due to exceeding the lower bound (in total: {len(difference)})!")
+
         return city_emission_fields
 
     def disable_temporal_transforms(self) -> None:
