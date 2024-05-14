@@ -11,6 +11,8 @@ from embeddings.common.paths import ModelPaths
 from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
 from embeddings.models.vae.vae import VariationalAutoEncoder
 
+WANDB_PROJECT_NAME = "inventory-embeddings-vae-ablations"
+
 
 def train() -> None:
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -46,7 +48,7 @@ def train() -> None:
     csv_logger = CSVLogger(save_dir=ModelPaths.VAE_LATEST, name="logs", version="csv")
     loggers = [tensorboard_logger, csv_logger]
     if args.wandb:
-        wandb_logger = WandbLogger(project="inventory-embeddings-vae", save_dir=ModelPaths.VAE_LATEST / "logs")
+        wandb_logger = WandbLogger(project=WANDB_PROJECT_NAME, save_dir=ModelPaths.VAE_LATEST / "logs")
         loggers.append(wandb_logger)
 
     checkpoint_callback = ModelCheckpoint(
