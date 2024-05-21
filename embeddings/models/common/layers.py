@@ -10,6 +10,7 @@ class ConvLayer(nn.Module):
         stride: int = 1,
         padding: int = 0,
         activation: bool = True,
+        bias: bool = True,
     ) -> None:
         super().__init__()
         self._layers = nn.Sequential(
@@ -19,6 +20,7 @@ class ConvLayer(nn.Module):
                 kernel_size=kernel,
                 stride=stride,
                 padding=padding,
+                bias=bias,
             ),
             nn.BatchNorm2d(out_channels),
         )
