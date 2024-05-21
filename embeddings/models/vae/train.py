@@ -58,7 +58,7 @@ def train() -> None:
         filename="{epoch}-{val_loss:.2f}",
     )
 
-    trainer = Trainer(devices=[0], max_epochs=20, callbacks=[checkpoint_callback], logger=loggers)
+    trainer = Trainer(devices=[0], max_epochs=500, callbacks=[checkpoint_callback], logger=loggers)
     trainer.fit(model=vae, train_dataloaders=train_data, val_dataloaders=val_data)
 
     logger.info("Training done!")
