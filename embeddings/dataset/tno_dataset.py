@@ -37,7 +37,6 @@ class TnoDataset(Dataset[Tensor]):
         tno_data = pl.read_csv(path, separator=";")
         city_emission_fields = cls._load_data(tno_data)
         city_emission_fields.sort(key=attrgetter("city_name"))
-        city_emission_fields = cls._filter_outliers(city_emission_fields)
         return cls(city_emission_fields)
 
     @classmethod
