@@ -3,8 +3,9 @@ from lightning import LightningModule
 from lightning.pytorch.utilities.types import OptimizerLRScheduler
 from torch import Tensor, nn
 
-from embeddings.common.gnfr_sector import NUM_GNFR_SECTORS
+from embeddings.common.gnfr_sector import NUM_GNFR_SECTORS, GnfrSector
 from embeddings.models.common.layers import ConvLayer, ConvTransposeLayer, ResidualConvLayer
+from embeddings.models.common.metrics import mse, ssim
 
 
 class Encoder(nn.Module):
@@ -14,6 +15,7 @@ class Encoder(nn.Module):
             ResidualConvLayer(NUM_GNFR_SECTORS),  # 15x32x32
             ResidualConvLayer(NUM_GNFR_SECTORS),
             ConvLayer(NUM_GNFR_SECTORS, 30, kernel=2, stride=2),  # 30x16x16
+            ResidualConvLayer(30),
             ResidualConvLayer(30),
             ResidualConvLayer(30),
             ConvLayer(30, 60, kernel=2, stride=2),  # 60x8x8
@@ -39,6 +41,7 @@ class Decoder(nn.Module):
             ResidualConvLayer(60),  # 60x8x8
             ResidualConvLayer(60),
             ConvTransposeLayer(60, 30, kernel=2, stride=2),  # 30x16x16
+            ResidualConvLayer(30),
             ResidualConvLayer(30),
             ResidualConvLayer(30),
             ConvTransposeLayer(30, NUM_GNFR_SECTORS, kernel=2, stride=2),  # 15x32x32
@@ -99,10 +102,18 @@ class VariationalAutoEncoder(LightningModule):
             mean=mean_batch,
             log_var=log_var_batch,
         )
+        train_ssim = ssim(x=x_batch, x_hat=x_hat_batch)
+        train_mse = mse(x=x_batch, x_hat=x_hat_batch)
 
         batch_size = x_batch.size(0)
 
         self.log("train_loss", train_loss / batch_size, on_step=False, on_epoch=True, prog_bar=True)
+        self.log("train_ssim", train_ssim, on_step=False, on_epoch=True)
+        self.log("train_mse", train_mse / batch_size, on_step=False, on_epoch=True)
+
+        for sector in GnfrSector:
+            sector_mse = mse(x=x_batch, x_hat=x_hat_batch, channel=sector.to_index())
+            self.log(f"train_mse_{sector}", sector_mse / batch_size, on_step=False, on_epoch=True)
 
         return train_loss
 
@@ -115,10 +126,18 @@ class VariationalAutoEncoder(LightningModule):
             mean=mean_batch,
             log_var=log_var_batch,
         )
+        val_ssim = ssim(x=x_val_batch, x_hat=x_val_hat_batch)
+        val_mse = mse(x=x_val_batch, x_hat=x_val_hat_batch)
 
         batch_size = x_val_batch.size(0)
 
-        self.log("validation_loss", val_loss / batch_size)
+        self.log("val_loss", val_loss / batch_size)
+        self.log("val_ssim", val_ssim)
+        self.log("val_mse", val_mse / batch_size)
+
+        for sector in GnfrSector:
+            sector_mse = mse(x=x_val_batch, x_hat=x_val_hat_batch, channel=sector.to_index())
+            self.log(f"val_mse_{sector}", sector_mse / batch_size, on_step=False, on_epoch=True)
 
         return val_loss
 
