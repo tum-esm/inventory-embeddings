@@ -45,7 +45,7 @@ class Decoder(nn.Module):
             ResidualConvLayer(30, dropout=0.05),
             ResidualConvLayer(30, dropout=0.05),
             ConvTransposeLayer(30, NUM_GNFR_SECTORS, kernel=2, stride=2),  # 15x32x32
-            ResidualConvLayer(NUM_GNFR_SECTORS, dropout=0.05),
+            ResidualConvLayer(NUM_GNFR_SECTORS),
             ResidualConvLayer(NUM_GNFR_SECTORS),
         )
 

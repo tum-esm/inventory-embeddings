@@ -11,7 +11,7 @@ from embeddings.common.paths import ModelPaths
 from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
 from embeddings.models.vae.vae import VariationalAutoEncoder
 
-WANDB_PROJECT_NAME = "inventory-embeddings-vae-ablations"
+WANDB_PROJECT_NAME = "inventory-embeddings-vae-ablations-more-data"
 
 
 def train() -> None:
@@ -20,13 +20,13 @@ def train() -> None:
     epochs_help = "Number of epochs to train."
     val_split_help = "Validation Split."
     test_split_help = "Test Split. The split must be kept consistent for all experiments."
-    split_help = "Makes training and validation split reproducible by splitting alphabetically."
+    split_help = "Makes training and validation split random instead of splitting alphabetically."
     wandb_help = "Toggles weights and biases as logger!"
 
     parser.add_argument("-e", "--epochs", metavar="N", default=200, type=int, help=epochs_help)
     parser.add_argument("-v", "--val-split", metavar="p", default=0.15, type=float, help=val_split_help)
     parser.add_argument("-t", "--test-split", metavar="p", default=0.15, type=float, help=test_split_help)
-    parser.add_argument("-deterministic-split", default=False, action="store_true", help=split_help)
+    parser.add_argument("-random-split", default=False, action="store_true", help=split_help)
     parser.add_argument("-wandb", default=False, action="store_true", help=wandb_help)
 
     args = parser.parse_args()
@@ -38,7 +38,7 @@ def train() -> None:
     tno_dataset = TnoDatasetCollection(
         test_split=args.test_split,
         val_split=args.val_split,
-        deterministic=args.deterministic_split,
+        random=args.random_split,
     )
 
     train_data = DataLoader(
@@ -64,10 +64,10 @@ def train() -> None:
         loggers.append(wandb_logger)
 
     checkpoint_callback = ModelCheckpoint(
-        monitor="val_loss",
-        mode="min",  # model with the smallest validation loss is saved
+        monitor="val_ssim",
+        mode="max",  # model with the smallest validation loss is saved
         dirpath=ModelPaths.VAE_LATEST_CHECKPOINTS,
-        filename="{epoch}-{val_loss:.2f}",
+        filename="{epoch}-{val_loss:.2f}-{val_ssim:.2f}",
     )
 
     trainer = Trainer(devices=[0], max_epochs=args.epochs, callbacks=[checkpoint_callback], logger=loggers)
