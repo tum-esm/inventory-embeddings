@@ -57,7 +57,7 @@ class ConvTransposeLayer(nn.Module):
 
 
 class ResidualConvLayer(nn.Module):
-    def __init__(self, channels: int) -> None:
+    def __init__(self, channels: int, dropout: float = 0.0) -> None:
         super().__init__()
         self._conv_layers = nn.Sequential(
             nn.BatchNorm2d(channels),
@@ -70,7 +70,10 @@ class ResidualConvLayer(nn.Module):
             ),
             nn.BatchNorm2d(channels),
             nn.ReLU(),
-            nn.Dropout2d(0.1),
+        )
+        if dropout:
+            self._conv_layers.append(nn.Dropout2d(dropout))
+        self._conv_layers.append(
             nn.Conv2d(
                 in_channels=channels,
                 out_channels=channels,
