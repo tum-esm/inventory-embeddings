@@ -15,17 +15,17 @@ class TnoDatasetCollection:
     CROPPED_WIDTH = 32
     CROPPED_HEIGHT = 32
 
-    def __init__(self) -> None:
+    def __init__(self, test_split: float = 0.15, val_split: float = 0.15, deterministic: bool = False) -> None:
         tno_2015 = TnoDataset.from_csv(TnoPaths.BY_CITY_2015_CSV)
-
-        val_split = 0.15
-        test_split = 0.15
 
         self._test, rest = deterministic_split(tno_2015, split=[test_split, 1 - test_split])
 
         rest_val_split = val_split / (1 - test_split)
 
-        self._val, self._train = random_split(rest, split=[rest_val_split, 1 - rest_val_split])
+        if deterministic:
+            self._val, self._train = deterministic_split(rest, split=[rest_val_split, 1 - rest_val_split])
+        else:
+            self._val, self._train = random_split(rest, split=[rest_val_split, 1 - rest_val_split])
 
         logger.info(f"Test Set has {len(self._test.city_emission_fields)} cites!")
         logger.info(f"Validation Set has {len(self._val.city_emission_fields)} cites!")

@@ -17,8 +17,16 @@ WANDB_PROJECT_NAME = "inventory-embeddings-vae-ablations"
 def train() -> None:
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    wandb_help = "Argument to toggle weights and biases as logger!"
+    epochs_help = "Number of epochs to train."
+    val_split_help = "Validation Split."
+    test_split_help = "Test Split. The split must be kept consistent for all experiments."
+    split_help = "Makes training and validation split reproducible by splitting alphabetically."
+    wandb_help = "Toggles weights and biases as logger!"
 
+    parser.add_argument("-e", "--epochs", metavar="N", default=200, type=int, help=epochs_help)
+    parser.add_argument("-v", "--val-split", metavar="p", default=0.15, type=float, help=val_split_help)
+    parser.add_argument("-t", "--test-split", metavar="p", default=0.15, type=float, help=test_split_help)
+    parser.add_argument("-deterministic-split", default=False, action="store_true", help=split_help)
     parser.add_argument("-wandb", default=False, action="store_true", help=wandb_help)
 
     args = parser.parse_args()
@@ -27,7 +35,11 @@ def train() -> None:
 
     torch.set_float32_matmul_precision("high")
 
-    tno_dataset = TnoDatasetCollection()
+    tno_dataset = TnoDatasetCollection(
+        test_split=args.test_split,
+        val_split=args.val_split,
+        deterministic=args.deterministic_split,
+    )
 
     train_data = DataLoader(
         dataset=tno_dataset.training_data,
@@ -58,7 +70,7 @@ def train() -> None:
         filename="{epoch}-{val_loss:.2f}",
     )
 
-    trainer = Trainer(devices=[0], max_epochs=500, callbacks=[checkpoint_callback], logger=loggers)
+    trainer = Trainer(devices=[0], max_epochs=args.epochs, callbacks=[checkpoint_callback], logger=loggers)
     trainer.fit(model=vae, train_dataloaders=train_data, val_dataloaders=val_data)
 
     logger.info("Training done!")
