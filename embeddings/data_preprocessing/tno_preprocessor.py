@@ -27,7 +27,7 @@ class TnoPreprocessor:
         self._options = options
 
     def preprocess(self, tno_csv: Path, out_csv: Path) -> None:
-        tno_data = pl.read_csv(tno_csv, separator=";")
+        tno_data = pl.read_csv(tno_csv, separator=";", ignore_errors=True, truncate_ragged_lines=True)
         cites = self._filter_cities(tno_data=tno_data)
 
         self._write_csv_header(out_csv=out_csv)

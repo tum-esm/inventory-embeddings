@@ -20,8 +20,12 @@ class TnoPaths:
     _HIGH_RES_2015 = _HIGH_RES / "TNO_highres_2015"
     HIGH_RES_2015_CSV = _HIGH_RES_2015 / "TNO_GHGco_2015_highres_v1_1.csv"
 
-    _BY_CITY = _HIGH_RES / "TNO_by_city"
-    BY_CITY_2015_CSV = _BY_CITY / "TNO_GHGco_2015_highres_v1_1_by_city.csv"
+    _HIGH_RES_2018 = _HIGH_RES / "TNO_highres_2018"
+    HIGH_RES_2018_CSV = _HIGH_RES_2018 / "TNO_GHGco_v4_0_highres_year2018.csv"
+
+    BY_CITY = _HIGH_RES / "TNO_by_city"
+    BY_CITY_2015_CSV = BY_CITY / "TNO_GHGco_2015_highres_by_city.csv"
+    BY_CITY_2018_CSV = BY_CITY / "TNO_GHGco_2018_highres_by_city.csv"
 
     _TIME_PROFILES = _HIGH_RES / "TNO_timeprofiles"
     HOUR_TIME_PROFILE = _TIME_PROFILES / "timeprofiles-hour-in-day_GNFR.csv"

@@ -67,6 +67,11 @@ class TnoDataset(Dataset[Tensor]):
 
         return city_emission_fields
 
+    @property
+    def num_unique_cities(self) -> int:
+        city_names = {city.city_name for city in self.city_emission_fields}
+        return len(city_names)
+
     def disable_temporal_transforms(self) -> None:
         self._temporal_transforms_enabled = False
 
