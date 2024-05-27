@@ -23,16 +23,15 @@ if __name__ == "__main__":
 
     reconstructed = vae.reconstruct(emission_field)
 
-    sector = GnfrSector.F1
+    sector = GnfrSector.F2
 
     vmax = 1.1 * float(torch.max(emission_field))
-    vmax_sector = 1.1 * float(torch.max(emission_field[sector.to_index(), :, :]))
 
     plot_emission_field_tensor(emission_field=emission_field, ax=ax1, vmax=vmax)
-    plot_emission_field_tensor(emission_field=emission_field, ax=ax2, sector=sector, vmax=vmax_sector)
+    plot_emission_field_tensor(emission_field=emission_field, ax=ax2, sector=sector, vmax=vmax)
 
     plot_emission_field_tensor(emission_field=reconstructed, ax=ax3, vmax=vmax)
-    plot_emission_field_tensor(emission_field=reconstructed, ax=ax4, sector=sector, vmax=vmax_sector)
+    plot_emission_field_tensor(emission_field=reconstructed, ax=ax4, sector=sector, vmax=vmax)
 
     ModelPaths.VAE_LATEST_PLOTS.mkdir(exist_ok=True)
     plt.savefig(ModelPaths.VAE_LATEST_PLOTS / "reconstructed.png")
