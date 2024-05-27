@@ -50,6 +50,7 @@ class ConvTransposeLayer(nn.Module):
                 padding=padding,
             ),
             nn.BatchNorm2d(out_channels),
+            nn.LeakyReLU(),
         )
 
     def forward(self, x: Tensor) -> Tensor:
