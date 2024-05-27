@@ -12,15 +12,15 @@ class Encoder(nn.Module):
     def __init__(self, latent_dim: int) -> None:
         super().__init__()
         self._layers = nn.Sequential(
-            ResidualConvLayer(NUM_GNFR_SECTORS, dropout=0.05),  # 15x32x32
-            ResidualConvLayer(NUM_GNFR_SECTORS, dropout=0.05),
+            ResidualConvLayer(NUM_GNFR_SECTORS),  # 15x32x32
+            ResidualConvLayer(NUM_GNFR_SECTORS),
             ConvLayer(NUM_GNFR_SECTORS, 30, kernel=2, stride=2),  # 30x16x16
-            ResidualConvLayer(30, dropout=0.05),
-            ResidualConvLayer(30, dropout=0.05),
-            ResidualConvLayer(30, dropout=0.05),
+            ResidualConvLayer(30),
+            ResidualConvLayer(30),
+            ResidualConvLayer(30),
             ConvLayer(30, 60, kernel=2, stride=2),  # 60x8x8
-            ResidualConvLayer(60, dropout=0.05),
-            ResidualConvLayer(60, dropout=0.05),
+            ResidualConvLayer(60),
+            ResidualConvLayer(60),
         )
         self._fully_connected_mean = nn.Linear(60 * 8 * 8, latent_dim)
         self._fully_connected_var = nn.Linear(60 * 8 * 8, latent_dim)
@@ -38,12 +38,12 @@ class Decoder(nn.Module):
         super().__init__()
         self._fully_connected_input = nn.Linear(latent_dim, 60 * 8 * 8)
         self._layers = nn.Sequential(
-            ResidualConvLayer(60, dropout=0.05),  # 60x8x8
-            ResidualConvLayer(60, dropout=0.05),
+            ResidualConvLayer(60),  # 60x8x8
+            ResidualConvLayer(60),
             ConvTransposeLayer(60, 30, kernel=2, stride=2),  # 30x16x16
-            ResidualConvLayer(30, dropout=0.05),
-            ResidualConvLayer(30, dropout=0.05),
-            ResidualConvLayer(30, dropout=0.05),
+            ResidualConvLayer(30),
+            ResidualConvLayer(30),
+            ResidualConvLayer(30),
             ConvTransposeLayer(30, NUM_GNFR_SECTORS, kernel=2, stride=2),  # 15x32x32
             ResidualConvLayer(NUM_GNFR_SECTORS),
             ResidualConvLayer(NUM_GNFR_SECTORS),
