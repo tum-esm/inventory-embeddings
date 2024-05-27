@@ -11,7 +11,7 @@ from embeddings.common.paths import ModelPaths
 from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
 from embeddings.models.vae.vae import VariationalAutoEncoder
 
-WANDB_PROJECT_NAME = "inventory-embeddings-vae-ablations-more-data"
+WANDB_PROJECT_NAME = "inventory-embeddings-vae"
 
 
 def train() -> None:

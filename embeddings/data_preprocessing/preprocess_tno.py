@@ -14,7 +14,7 @@ def preprocess() -> None:
 
     parser.add_argument("-gw", "--width", metavar="W", default=51, type=int, help=grid_width_help)
     parser.add_argument("-gh", "--height", metavar="H", default=51, type=int, help=grid_height_help)
-    parser.add_argument("-p", "--population", metavar="N", default=200_000, type=int, help=population_help)
+    parser.add_argument("-p", "--population", metavar="N", default=100_000, type=int, help=population_help)
     parser.add_argument("-v", "--verbose", action="store_true")
 
     args = parser.parse_args()

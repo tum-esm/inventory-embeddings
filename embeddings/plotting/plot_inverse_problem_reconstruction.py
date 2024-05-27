@@ -1,6 +1,5 @@
 import random
 
-import numpy as np
 import torch
 from matplotlib import pyplot as plt
 
@@ -9,6 +8,7 @@ from embeddings.common.paths import ModelPaths
 from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
 from embeddings.evaluation.compressed_sensing_experiment import generate_random_inverse_problem, solve_inverse_problem
 from embeddings.evaluation.inverse_problems_solver import GenerativeModelSolver
+from embeddings.models.common.metrics import mse, ssim
 from embeddings.plotting.city_emission_field_plot import plot_emission_field_tensor
 
 if __name__ == "__main__":
@@ -32,7 +32,8 @@ if __name__ == "__main__":
     plot_emission_field_tensor(emission_field=x_rec, ax=ax2, vmax=vmax)
     ax2.title.set_text(f"Reconstructed Emission Field\nWith {num_measurements} measurements")
 
-    logger.info(f"Reconstruction Loss: {float(np.square(np.subtract(x, x_rec)).mean())}")
+    logger.info(f"MSE: {mse(x=x, x_hat=x_rec)}")
+    logger.info(f"SSIM: {ssim(x=x, x_hat=x_rec)}")
 
     ModelPaths.VAE_LATEST_PLOTS.mkdir(exist_ok=True)
     plt.savefig(ModelPaths.VAE_LATEST_PLOTS / "inverse_reconstruction.png")

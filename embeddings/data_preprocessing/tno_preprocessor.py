@@ -91,9 +91,9 @@ class TnoPreprocessor:
         return [
             GhgSource(
                 sector=GnfrSector.from_str(source["GNFR_Sector"]),
-                co2_ff=source["CO2_ff"],
-                co2_bf=source["CO2_bf"],
-                ch4=source["CH4"],
+                co2_ff=source["CO2_ff"] if source["CO2_ff"] else 0.0,
+                co2_bf=source["CO2_bf"] if source["CO2_bf"] else 0.0,
+                ch4=source["CH4"] if source["CH4"] else 0.0,
             )
             for source in sources_data.iter_rows(named=True)
         ]
