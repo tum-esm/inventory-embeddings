@@ -1,5 +1,7 @@
 import polars as pl
 
+from embeddings.common.constants import TNO_LAT_STEP, TNO_LON_STEP
+from embeddings.common.log import logger
 from embeddings.common.paths import OpenDataSoftPaths
 from embeddings.data_preprocessing.data_classes.city import City
 
@@ -18,10 +20,22 @@ def _are_coordinates_within_range(
     return lat_range[0] <= lat <= lat_range[1] and lon_range[0] <= lon <= lon_range[1]
 
 
+def _are_coordinates_too_close(city_1: City, city_2: City) -> bool:
+    threshold = 40  # ~km
+
+    return all(
+        [
+            city_1.lat - threshold * TNO_LAT_STEP <= city_2.lat <= city_1.lat + threshold * TNO_LAT_STEP,
+            city_1.lon - threshold * TNO_LON_STEP <= city_2.lon <= city_1.lon + threshold * TNO_LON_STEP,
+        ],
+    )
+
+
 def filter_cities_from_open_data_soft_data(
     min_population_size: int,
     lat_range: tuple[float, float],
     lon_range: tuple[float, float],
+    show_warnings: bool = False,
 ) -> list[City]:
     res = pl.read_csv(OpenDataSoftPaths.GEONAMES_CSV, separator=";", infer_schema_length=10000)
 
@@ -35,10 +49,26 @@ def filter_cities_from_open_data_soft_data(
         ),
     )
 
-    cities = []
+    cities: list[City] = []
 
-    for city in filtered_cities.iter_rows(named=True):
-        lat, lon = _coordinates_to_float(city["Coordinates"])
-        cities.append(City(name=city["Name"], lat=lat, lon=lon))
+    for city_data in filtered_cities.iter_rows(named=True):
+        lat, lon = _coordinates_to_float(city_data["Coordinates"])
+        population = city_data["Population"]
+        city = City(name=city_data["Name"], lat=lat, lon=lon, population=population)
+
+        close_cities = [i for i in range(len(cities)) if _are_coordinates_too_close(city_1=cities[i], city_2=city)]
+
+        if close_cities:
+            city_names = ", ".join(cities[i].name for i in close_cities)
+            if all(city.population >= cities[i].population for i in close_cities):
+                if show_warnings:
+                    logger.warning(f"Removing {city_names} in favor of {city.name}")
+                for j, i in enumerate(close_cities):
+                    cities.pop(i - j)
+            else:
+                if show_warnings:
+                    logger.warning(f"Skipping {city.name} as it is too close to {city_names}")
+                continue
+        cities.append(city)
 
     return cities

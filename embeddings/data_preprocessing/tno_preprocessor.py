@@ -28,11 +28,11 @@ class TnoPreprocessor:
 
     def preprocess(self, tno_csv: Path, out_csv: Path) -> None:
         tno_data = pl.read_csv(tno_csv, separator=";", ignore_errors=True, truncate_ragged_lines=True)
-        cites = self._filter_cities(tno_data=tno_data)
+        cities = self._filter_cities(tno_data=tno_data)
 
         self._write_csv_header(out_csv=out_csv)
 
-        for city in tqdm(cites, desc="Processing"):
+        for city in tqdm(cities, desc="Processing"):
             cells = self._process_city(city, tno_data)
             self._write_cells_to_csv(out_csv=out_csv, city=city, cells=cells)
 
@@ -57,6 +57,7 @@ class TnoPreprocessor:
             min_population_size=self._options.min_population_size,
             lat_range=self._get_min_max(tno_data, column="Lat", margin=TNO_LAT_STEP * self._options.grid_height),
             lon_range=self._get_min_max(tno_data, column="Lon", margin=TNO_LON_STEP * self._options.grid_width),
+            show_warnings=self._options.show_warnings,
         )
 
     def _write_csv_header(self, out_csv: Path) -> None:
