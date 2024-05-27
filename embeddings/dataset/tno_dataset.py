@@ -3,7 +3,6 @@ from operator import attrgetter
 from pathlib import Path
 from typing import Self
 
-import numpy as np
 import polars as pl
 from torch import Tensor
 from torch.utils.data import Dataset
@@ -49,28 +48,12 @@ class TnoDataset(Dataset[Tensor]):
             city_emission_fields.append(original)
         return city_emission_fields
 
-    @classmethod
-    def _filter_outliers(cls, city_emission_fields: list[CityEmissionField]) -> list[CityEmissionField]:
-        lower_bound = 0.001
-        upper_bound = 0.025
-
-        original_cities = {city.city_name for city in city_emission_fields}
-        city_emission_fields = [c for c in city_emission_fields if np.percentile(c.co2_ff_field, 75) < upper_bound]
-        cities_after_upper_bound_removed = {city.city_name for city in city_emission_fields}
-        difference = original_cities - cities_after_upper_bound_removed
-        logger.warning(f"Removed {difference} due to exceeding the upper bound (in total: {len(difference)})!")
-
-        city_emission_fields = [c for c in city_emission_fields if np.percentile(c.co2_ff_field, 75) > lower_bound]
-        cities_after_lower_bound_removed = {city.city_name for city in city_emission_fields}
-        difference = cities_after_upper_bound_removed - cities_after_lower_bound_removed
-        logger.warning(f"Removed {difference} due to exceeding the lower bound (in total: {len(difference)})!")
-
-        return city_emission_fields
+    def _get_unique_city_names(self) -> set[str]:
+        return {city.city_name for city in self.city_emission_fields}
 
     @property
     def num_unique_cities(self) -> int:
-        city_names = {city.city_name for city in self.city_emission_fields}
-        return len(city_names)
+        return len(self._get_unique_city_names())
 
     def disable_temporal_transforms(self) -> None:
         self._temporal_transforms_enabled = False
@@ -146,3 +129,6 @@ class TnoDataset(Dataset[Tensor]):
         emission_field = self._get_emission_field_copy_at_index(index)
         emission_field = self._apply_sampling_transform(emission_field)
         return emission_field.co2_ff_tensor
+
+    def __str__(self) -> str:
+        return ", ".join(self._get_unique_city_names())

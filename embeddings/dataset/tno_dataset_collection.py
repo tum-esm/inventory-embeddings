@@ -30,9 +30,9 @@ class TnoDatasetCollection:
         else:
             self._val, self._train = deterministic_split(rest, split=[rest_val_split, 1 - rest_val_split])
 
-        logger.info(f"Test Set has {self._test.num_unique_cities} unique cites!")
-        logger.info(f"Validation Set has {self._val.num_unique_cities} unique cites!")
-        logger.info(f"Training Set has {self._train.num_unique_cities} unique cites!")
+        logger.info(f"Test Set has {self._test.num_unique_cities} unique cites!\n\t{self._test!s}")
+        logger.info(f"Validation Set has {self._val.num_unique_cities} unique cites!\n\t{self._val!s}")
+        logger.info(f"Training Set has {self._train.num_unique_cities} unique cites!\n\t{self._train!s}")
 
         self._add_sampling_transforms()
 
