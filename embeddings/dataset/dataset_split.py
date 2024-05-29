@@ -5,7 +5,7 @@ from embeddings.dataset.tno_dataset import TnoDataset
 
 def _get_all_unique_cities(dataset: TnoDataset) -> list[str]:
     cities = [field.city_name for field in dataset.city_emission_fields]
-    return list(dict.fromkeys(cities))
+    return sorted(dict.fromkeys(cities))
 
 
 def _split(list_: list, split: list[float]) -> list[list]:
