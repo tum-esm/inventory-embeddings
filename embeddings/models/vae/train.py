@@ -18,12 +18,14 @@ def train() -> None:
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     epochs_help = "Number of epochs to train."
+    latent_dim_help = "Latent Dimension."
     val_split_help = "Validation Split."
     test_split_help = "Test Split. The split must be kept consistent for all experiments."
     split_help = "Makes training and validation split random instead of splitting alphabetically."
     wandb_help = "Toggles weights and biases as logger!"
 
     parser.add_argument("-e", "--epochs", metavar="N", default=200, type=int, help=epochs_help)
+    parser.add_argument("-d", "--latent-dim", metavar="N", default=256, type=int, help=latent_dim_help)
     parser.add_argument("-v", "--val-split", metavar="p", default=0.15, type=float, help=val_split_help)
     parser.add_argument("-t", "--test-split", metavar="p", default=0.15, type=float, help=test_split_help)
     parser.add_argument("-random-split", default=False, action="store_true", help=split_help)
@@ -54,7 +56,7 @@ def train() -> None:
         num_workers=16,
     )
 
-    vae = VariationalAutoEncoder()
+    vae = VariationalAutoEncoder(latent_dimension=args.latent_dim)
 
     tensorboard_logger = TensorBoardLogger(save_dir=ModelPaths.VAE_LATEST, name="logs", version="tensorboard")
     csv_logger = CSVLogger(save_dir=ModelPaths.VAE_LATEST, name="logs", version="csv")

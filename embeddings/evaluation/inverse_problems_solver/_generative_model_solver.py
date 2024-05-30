@@ -42,6 +42,7 @@ class GenerativeModelSolver(InverseProblemSolver):
         vae = VariationalAutoEncoder.load_from_checkpoint(checkpoint_path=first_check_point)
         self._device = vae.device
         self._generator = vae.decoder
+        self._latent_dimension = vae.latent_dimension
 
     def _generate(self, z: Tensor) -> Tensor:
         x_rec = self._generator(z)
@@ -53,7 +54,7 @@ class GenerativeModelSolver(InverseProblemSolver):
         return loss + regularization
 
     def solve(self, inverse_problem: InverseProblem) -> Tensor:
-        z = torch.randn(256).to(self._device)
+        z = torch.randn(self._latent_dimension).to(self._device)
         z.requires_grad = True
 
         a_on_device = inverse_problem.A.to(self._device)

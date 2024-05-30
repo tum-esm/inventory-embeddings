@@ -60,12 +60,12 @@ class Decoder(nn.Module):
 
 
 class VariationalAutoEncoder(LightningModule):
-    LATENT_DIMENSION = 256
-
-    def __init__(self) -> None:
+    def __init__(self, latent_dimension: int) -> None:
         super().__init__()
-        self._encoder = Encoder(latent_dim=self.LATENT_DIMENSION)
-        self._decoder = Decoder(latent_dim=self.LATENT_DIMENSION)
+        self._latent_dimension = latent_dimension
+        self.save_hyperparameters()
+        self._encoder = Encoder(latent_dim=self._latent_dimension)
+        self._decoder = Decoder(latent_dim=self._latent_dimension)
 
     @staticmethod
     def loss(x: Tensor, x_hat: Tensor, mean: Tensor, log_var: Tensor) -> Tensor:
@@ -81,6 +81,10 @@ class VariationalAutoEncoder(LightningModule):
     @property
     def decoder(self) -> Decoder:
         return self._decoder
+
+    @property
+    def latent_dimension(self) -> int:
+        return self._latent_dimension
 
     def _reparameterization(self, mean: Tensor, log_var: Tensor) -> Tensor:
         std = torch.exp(0.5 * log_var)
@@ -154,6 +158,6 @@ class VariationalAutoEncoder(LightningModule):
     def generate(self) -> Tensor:
         self.eval()
         with torch.no_grad():
-            noise = torch.randn(1, self.LATENT_DIMENSION).to(self.device)
+            noise = torch.randn(1, self._latent_dimension).to(self.device)
             generated = self.decoder(noise)
         return generated.squeeze(0).cpu()
