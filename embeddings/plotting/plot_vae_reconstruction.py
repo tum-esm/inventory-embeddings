@@ -4,8 +4,10 @@ import matplotlib.pyplot as plt
 import torch
 
 from embeddings.common.gnfr_sector import GnfrSector
+from embeddings.common.log import logger
 from embeddings.common.paths import ModelPaths
 from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
+from embeddings.models.common.metrics import mse, ssim
 from embeddings.models.vae.vae import VariationalAutoEncoder
 from embeddings.plotting.city_emission_field_plot import plot_emission_field_tensor
 
@@ -35,3 +37,6 @@ if __name__ == "__main__":
 
     ModelPaths.VAE_LATEST_PLOTS.mkdir(exist_ok=True)
     plt.savefig(ModelPaths.VAE_LATEST_PLOTS / "reconstructed.png")
+
+    logger.info(f"MSE: {mse(x=emission_field, x_hat=reconstructed)}")
+    logger.info(f"SSIM: {ssim(x=emission_field, x_hat=reconstructed)}")
