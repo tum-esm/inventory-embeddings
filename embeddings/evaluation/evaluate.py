@@ -11,7 +11,7 @@ from embeddings.evaluation.inverse_problems_solver import GenerativeModelSolver
 from embeddings.models.common.metrics import ssim
 
 NUM_MEASUREMENTS = [50, 100, 250, 500, 1000, 2500, 5000, 10000, 12500]
-NUM_EXPERIMENTS = 5
+NUM_EXPERIMENTS = 3
 
 
 def evaluate() -> None:
