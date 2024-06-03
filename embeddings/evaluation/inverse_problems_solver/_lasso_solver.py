@@ -3,7 +3,7 @@ from torch import Tensor
 
 from embeddings.evaluation.inverse_problem import InverseProblem
 
-from . import InverseProblemSolver
+from ._inverse_problem_solver import InverseProblemSolver
 
 
 class LassoSolver(InverseProblemSolver):
