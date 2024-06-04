@@ -19,10 +19,9 @@ class DwtLassoSolver(InverseProblemSolver):
         A = inverse_problem.A.numpy()  # noqa: N806
         y = inverse_problem.y.numpy()
 
-        lasso = Lasso()
+        lasso = Lasso(alpha=0.1, max_iter=10_000)
 
         A_DWT, coefficient_slices = self._wavelet_transform_sensing_matrix(sensing_matrix=A)  # noqa: N806
-        print(type(coefficient_slices[0]))
         lasso.fit(A_DWT, y)
         c = lasso.coef_
         x = self._reverse_wavelet_transform_emission_field(c, coefficient_slices)
