@@ -33,7 +33,8 @@ def train() -> None:
 
     args = parser.parse_args()
 
-    ModelPaths.archive_latest_vae_model()
+    latest_vae_paths = ModelPaths.get_latest_vae_model()
+    latest_vae_paths.archive()
 
     torch.set_float32_matmul_precision("high")
 
@@ -58,17 +59,17 @@ def train() -> None:
 
     vae = VariationalAutoEncoder(latent_dimension=args.latent_dim)
 
-    tensorboard_logger = TensorBoardLogger(save_dir=ModelPaths.VAE_LATEST, name="logs", version="tensorboard")
-    csv_logger = CSVLogger(save_dir=ModelPaths.VAE_LATEST, name="logs", version="csv")
+    tensorboard_logger = TensorBoardLogger(save_dir=latest_vae_paths.base_path, name="logs", version="tensorboard")
+    csv_logger = CSVLogger(save_dir=latest_vae_paths.base_path, name="logs", version="csv")
     loggers = [tensorboard_logger, csv_logger]
     if args.wandb:
-        wandb_logger = WandbLogger(project=WANDB_PROJECT_NAME, save_dir=ModelPaths.VAE_LATEST / "logs")
+        wandb_logger = WandbLogger(project=WANDB_PROJECT_NAME, save_dir=latest_vae_paths.logs)
         loggers.append(wandb_logger)
 
     checkpoint_callback = ModelCheckpoint(
         monitor="val_ssim",
         mode="max",  # model with the smallest validation loss is saved
-        dirpath=ModelPaths.VAE_LATEST_CHECKPOINTS,
+        dirpath=latest_vae_paths.checkpoints,
         filename="{epoch}-{val_loss:.2f}-{val_ssim:.2f}",
     )
 

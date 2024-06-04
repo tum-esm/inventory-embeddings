@@ -42,18 +42,45 @@ class PlotPaths:
     PLOTS = _SAVES / "plots"
 
 
+class VaeModelPaths:
+    def __init__(self, base_path: Path) -> None:
+        self._base_path = base_path
+
+    @property
+    def base_path(self) -> Path:
+        return self._base_path
+
+    @property
+    def checkpoints(self) -> Path:
+        return self._base_path / "checkpoints"
+
+    @property
+    def checkpoint(self) -> Path:
+        return next(self.checkpoints.iterdir())
+
+    @property
+    def logs(self) -> Path:
+        return self._base_path / "logs"
+
+    @property
+    def plots(self) -> Path:
+        return self._base_path / "plots"
+
+    def archive(self) -> None:
+        _archive_dir(self._base_path)
+
+
 class ModelPaths:
     _MODELS = _SAVES / "models"
     _VAE_MODELS = _MODELS / "vae"
 
-    VAE_LATEST = _VAE_MODELS / "latest"
-
-    VAE_LATEST_CHECKPOINTS = VAE_LATEST / "checkpoints"
-    VAE_LATEST_PLOTS = VAE_LATEST / "plots"
+    @classmethod
+    def get_vae_model(cls, model: str) -> VaeModelPaths:
+        return VaeModelPaths(base_path=cls._VAE_MODELS / model)
 
     @classmethod
-    def archive_latest_vae_model(cls) -> None:
-        _archive_dir(cls.VAE_LATEST)
+    def get_latest_vae_model(cls) -> VaeModelPaths:
+        return VaeModelPaths(base_path=cls._VAE_MODELS / "latest")
 
 
 class ExperimentPaths:

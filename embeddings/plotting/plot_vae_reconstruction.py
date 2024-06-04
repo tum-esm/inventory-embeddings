@@ -12,8 +12,8 @@ from embeddings.models.vae.vae import VariationalAutoEncoder
 from embeddings.plotting.city_emission_field_plot import plot_emission_field_tensor
 
 if __name__ == "__main__":
-    first_check_point = next(ModelPaths.VAE_LATEST_CHECKPOINTS.iterdir())
-    vae = VariationalAutoEncoder.load_from_checkpoint(checkpoint_path=first_check_point)
+    latest_vae = ModelPaths.get_latest_vae_model()
+    vae = VariationalAutoEncoder.load_from_checkpoint(checkpoint_path=latest_vae.checkpoint)
 
     dataset_collection = TnoDatasetCollection()
 
@@ -35,8 +35,8 @@ if __name__ == "__main__":
     plot_emission_field_tensor(emission_field=reconstructed, ax=ax3, vmax=vmax)
     plot_emission_field_tensor(emission_field=reconstructed, ax=ax4, sector=sector, vmax=vmax)
 
-    ModelPaths.VAE_LATEST_PLOTS.mkdir(exist_ok=True)
-    plt.savefig(ModelPaths.VAE_LATEST_PLOTS / "reconstructed.png")
+    latest_vae.plots.mkdir(exist_ok=True)
+    plt.savefig(latest_vae.plots / "reconstructed.png")
 
     logger.info(f"MSE: {mse(x=emission_field, x_hat=reconstructed)}")
     logger.info(f"SSIM: {ssim(x=emission_field, x_hat=reconstructed)}")

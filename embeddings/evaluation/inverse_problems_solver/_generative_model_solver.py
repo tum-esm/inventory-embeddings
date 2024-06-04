@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 from torch import Tensor
 
 from embeddings.common.log import logger
-from embeddings.common.paths import ModelPaths, PlotPaths
+from embeddings.common.paths import ModelPaths, PlotPaths, VaeModelPaths
 from embeddings.evaluation.inverse_problem import InverseProblem
 from embeddings.models.vae.vae import VariationalAutoEncoder
 
@@ -32,14 +32,19 @@ class GenerativeModelSolver(InverseProblemSolver):
     MAX_STEPS = 10_000
     STOP_AFTER = 250
 
-    def __init__(self, plot_loss: bool = False, log_info: bool = False) -> None:
+    def __init__(
+        self,
+        plot_loss: bool = False,
+        log_info: bool = False,
+        path_to_model: VaeModelPaths | None = None,
+    ) -> None:
         self._plot_loss = plot_loss
         self._log_info = log_info
-        self._load_generator()
+        self._load_generator(path=path_to_model)
 
-    def _load_generator(self) -> None:
-        first_check_point = next(ModelPaths.VAE_LATEST_CHECKPOINTS.iterdir())
-        vae = VariationalAutoEncoder.load_from_checkpoint(checkpoint_path=first_check_point)
+    def _load_generator(self, path: VaeModelPaths | None) -> None:
+        model_path = path if path else ModelPaths.get_latest_vae_model()
+        vae = VariationalAutoEncoder.load_from_checkpoint(checkpoint_path=model_path.checkpoint)
         self._device = vae.device
         self._generator = vae.decoder
         self._latent_dimension = vae.latent_dimension
