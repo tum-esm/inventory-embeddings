@@ -95,7 +95,7 @@ class DwtLassoSolver(InverseProblemSolver):
                             temp_basis = pywt.waverec2(coefficients, wavelet)
                             basis.append(temp_basis)
                             coefficients[i][j][m][n] = 0
-        return np.array(basis).reshape((_WIDTH * _HEIGHT, _WIDTH * _HEIGHT))
+        return np.array(basis).reshape((_WIDTH * _HEIGHT, _WIDTH * _HEIGHT)).T
 
     def _generate_wavelet_basis(self) -> np.array:
         sector_size = _WIDTH * _HEIGHT
@@ -103,6 +103,6 @@ class DwtLassoSolver(InverseProblemSolver):
         wavelet_basis = np.zeros((_DEPTH * sector_size, _DEPTH * sector_size))
         for i in range(_DEPTH):
             wavelet_basis[i * sector_size : (i + 1) * sector_size, i * sector_size : (i + 1) * sector_size] = (
-                sector_basis.T
+                sector_basis
             )
         return wavelet_basis
