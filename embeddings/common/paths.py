@@ -51,8 +51,17 @@ class ModelPaths:
     VAE_LATEST_CHECKPOINTS = VAE_LATEST / "checkpoints"
     VAE_LATEST_PLOTS = VAE_LATEST / "plots"
 
-    VAE_LATEST_EVALUATION = VAE_LATEST / "evaluation"
-
     @classmethod
     def archive_latest_vae_model(cls) -> None:
         _archive_dir(cls.VAE_LATEST)
+
+
+class ExperimentPaths:
+    _EXPERIMENTS = _SAVES / "experiments"
+    _EVALUATIONS = _EXPERIMENTS / "evaluations"
+
+    EVALUATION_LATEST = _EVALUATIONS / "latest"
+
+    @classmethod
+    def archive_latest_evaluation(cls) -> None:
+        _archive_dir(cls.EVALUATION_LATEST)
