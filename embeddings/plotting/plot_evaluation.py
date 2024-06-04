@@ -23,6 +23,8 @@ if __name__ == "__main__":
     data_frames = [pl.read_csv(evaluation_csv) for evaluation_csv in ExperimentPaths.EVALUATION_LATEST.glob("*.csv")]
     evaluation = pl.concat(data_frames)
 
+    measurements: list[float] = []
+
     for solver, group in evaluation.group_by("Solver"):
         mse_values = _get_mean_and_confidence_tuples(pl_values=group, metric="MSE")
         ssim_values = _get_mean_and_confidence_tuples(pl_values=group, metric="SSIM")
