@@ -2,14 +2,19 @@ import numpy as np
 from tqdm import tqdm
 
 from embeddings.common.csv_writer import CsvWriter
-from embeddings.common.paths import ExperimentPaths
+from embeddings.common.paths import ExperimentPaths, ModelPaths
 from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
 from embeddings.evaluation.compressed_sensing_experiment import generate_random_inverse_problem, solve_inverse_problem
-from embeddings.evaluation.inverse_problems_solver import DwtLassoSolver, GenerativeModelSolver, LassoSolver
+from embeddings.evaluation.inverse_problems_solver import (
+    DctLassoSolver,
+    DwtLassoSolver,
+    GenerativeModelSolver,
+    LassoSolver,
+)
 from embeddings.models.common.metrics import ssim
 
 NUM_MEASUREMENTS = [50, 100, 250, 500, 1000, 2500, 5000, 10000, 12500]
-NUM_EXPERIMENTS = 3
+NUM_RUNS = 3
 
 
 def evaluate() -> None:
@@ -17,14 +22,16 @@ def evaluate() -> None:
     dataset.disable_temporal_transforms()
 
     solvers = {
-        "Generative": GenerativeModelSolver(),
+        "VAE 128": GenerativeModelSolver(path_to_model=ModelPaths.get_vae_model(model="128")),
+        "VAE 256": GenerativeModelSolver(path_to_model=ModelPaths.get_vae_model(model="256")),
         "Lasso": LassoSolver(),
-        "Lasso_DWT": DwtLassoSolver(),
+        "Lasso (DWT)": DwtLassoSolver(),
+        "Lasso (DCT)": DctLassoSolver(),
     }
 
     ExperimentPaths.archive_latest_evaluation()
 
-    for run_index in tqdm(range(NUM_EXPERIMENTS), desc="Run"):
+    for run_index in tqdm(range(NUM_RUNS), desc="Run"):
         evaluation_csv = CsvWriter(path=ExperimentPaths.EVALUATION_LATEST / f"evaluation_{run_index}.csv")
         evaluation_csv.write_header("Measurements", "Solver", "MSE", "SSIM")
 
