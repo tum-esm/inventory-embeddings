@@ -9,8 +9,9 @@ class ConvLayer(nn.Module):
         kernel: int,
         stride: int = 1,
         padding: int = 0,
-        activation: bool = True,
         bias: bool = True,
+        activation: bool = True,
+        batch_norm: bool = True,
     ) -> None:
         super().__init__()
         self._layers = nn.Sequential(
@@ -22,8 +23,9 @@ class ConvLayer(nn.Module):
                 padding=padding,
                 bias=bias,
             ),
-            nn.BatchNorm2d(out_channels),
         )
+        if batch_norm:
+            self._layers.append(nn.BatchNorm2d(out_channels))
         if activation:
             self._layers.append(nn.LeakyReLU())
 
@@ -39,6 +41,8 @@ class ConvTransposeLayer(nn.Module):
         kernel: int,
         stride: int = 1,
         padding: int = 0,
+        activation: bool = True,
+        batch_norm: bool = True,
     ) -> None:
         super().__init__()
         self._layers = nn.Sequential(
@@ -49,9 +53,11 @@ class ConvTransposeLayer(nn.Module):
                 stride=stride,
                 padding=padding,
             ),
-            nn.BatchNorm2d(out_channels),
-            nn.LeakyReLU(),
         )
+        if batch_norm:
+            self._layers.append(nn.BatchNorm2d(out_channels))
+        if activation:
+            self._layers.append(nn.LeakyReLU())
 
     def forward(self, x: Tensor) -> Tensor:
         return self._layers(x)
