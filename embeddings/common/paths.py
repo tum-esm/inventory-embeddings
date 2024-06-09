@@ -42,7 +42,7 @@ class PlotPaths:
     PLOTS = _SAVES / "plots"
 
 
-class VaeModelPaths:
+class ModelPaths:
     def __init__(self, base_path: Path) -> None:
         self._base_path = base_path
 
@@ -70,17 +70,17 @@ class VaeModelPaths:
         _archive_dir(self._base_path)
 
 
-class ModelPaths:
+class ModelPathsCreator:
     _MODELS = _SAVES / "models"
     _VAE_MODELS = _MODELS / "vae"
 
     @classmethod
-    def get_vae_model(cls, model: str) -> VaeModelPaths:
-        return VaeModelPaths(base_path=cls._VAE_MODELS / model)
+    def get_vae_model(cls, model: str) -> ModelPaths:
+        return ModelPaths(base_path=cls._VAE_MODELS / model)
 
     @classmethod
-    def get_latest_vae_model(cls) -> VaeModelPaths:
-        return VaeModelPaths(base_path=cls._VAE_MODELS / "latest")
+    def get_latest_vae_model(cls) -> ModelPaths:
+        return ModelPaths(base_path=cls._VAE_MODELS / "latest")
 
 
 class ExperimentPaths:

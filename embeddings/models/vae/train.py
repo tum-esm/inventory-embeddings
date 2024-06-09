@@ -7,7 +7,7 @@ from lightning.pytorch.loggers import CSVLogger, TensorBoardLogger, WandbLogger
 from torch.utils.data import DataLoader
 
 from embeddings.common.log import logger
-from embeddings.common.paths import ModelPaths
+from embeddings.common.paths import ModelPathsCreator
 from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
 from embeddings.models.vae.vae import VariationalAutoEncoder
 
@@ -33,7 +33,7 @@ def train() -> None:
 
     args = parser.parse_args()
 
-    latest_vae_paths = ModelPaths.get_latest_vae_model()
+    latest_vae_paths = ModelPathsCreator.get_latest_vae_model()
     latest_vae_paths.archive()
 
     torch.set_float32_matmul_precision("high")

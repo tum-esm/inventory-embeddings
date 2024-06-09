@@ -2,7 +2,7 @@ import numpy as np
 from tqdm import tqdm
 
 from embeddings.common.csv_writer import CsvWriter
-from embeddings.common.paths import ExperimentPaths, ModelPaths
+from embeddings.common.paths import ExperimentPaths, ModelPathsCreator
 from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
 from embeddings.evaluation.compressed_sensing_experiment import generate_random_inverse_problem, solve_inverse_problem
 from embeddings.evaluation.inverse_problems_solver import (
@@ -22,8 +22,8 @@ def evaluate() -> None:
     dataset.disable_temporal_transforms()
 
     solvers = {
-        "VAE 128": GenerativeModelSolver(path_to_model=ModelPaths.get_vae_model(model="128")),
-        "VAE 256": GenerativeModelSolver(path_to_model=ModelPaths.get_vae_model(model="256")),
+        "VAE 128": GenerativeModelSolver(path_to_model=ModelPathsCreator.get_vae_model(model="128")),
+        "VAE 256": GenerativeModelSolver(path_to_model=ModelPathsCreator.get_vae_model(model="256")),
         "Lasso": LassoSolver(),
         "Lasso (DWT)": DwtLassoSolver(),
         "Lasso (DCT)": DctLassoSolver(),

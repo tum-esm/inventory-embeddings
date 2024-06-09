@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
 
-from embeddings.common.paths import ModelPaths
+from embeddings.common.paths import ModelPathsCreator
 from embeddings.models.vae.vae import VariationalAutoEncoder
 from embeddings.plotting.city_emission_field_plot import plot_emission_field_tensor
 
 if __name__ == "__main__":
-    latest_vae = ModelPaths.get_latest_vae_model()
+    latest_vae = ModelPathsCreator.get_latest_vae_model()
     vae = VariationalAutoEncoder.load_from_checkpoint(checkpoint_path=latest_vae.checkpoint)
 
     fig, ax = plt.subplots(figsize=(5, 5))
