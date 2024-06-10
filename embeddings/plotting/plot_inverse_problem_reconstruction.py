@@ -40,11 +40,7 @@ if __name__ == "__main__":
     num_measurements = 500
 
     solvers = {
-        "VAE 128": GenerativeModelSolver(
-            plot_loss=True,
-            log_info=True,
-            path_to_model=ModelPathsCreator.get_vae_model("128"),
-        ),
+        "VAE 128": GenerativeModelSolver(path_to_model=ModelPathsCreator.get_vae_model("128")),
         "VAE 256": GenerativeModelSolver(path_to_model=ModelPathsCreator.get_vae_model("256")),
         "Lasso": LassoSolver(),
         "Lasso (DWT)": DwtLassoSolver(),
