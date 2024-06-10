@@ -4,6 +4,8 @@ import polars as pl
 
 from embeddings.common.paths import ExperimentPaths
 
+PLOT_CONFIDENCE = False
+
 
 def _get_mean_and_confidence_tuples(pl_values: pl.DataFrame, metric: str) -> dict[int, tuple[float, float]]:
     values_dict = {}
@@ -37,8 +39,12 @@ if __name__ == "__main__":
         mean_ssim = [value[0] for value in ssim_values.values()]
         confidence_ssim = [value[1] / 2 for value in ssim_values.values()]
 
-        ax1.errorbar(x=measurements, y=mean_mse, yerr=confidence_mse, label=solver)
-        ax2.errorbar(x=measurements, y=mean_ssim, yerr=confidence_ssim, label=solver)
+        if PLOT_CONFIDENCE:
+            ax1.errorbar(x=measurements, y=mean_mse, yerr=confidence_mse, label=solver)
+            ax2.errorbar(x=measurements, y=mean_ssim, yerr=confidence_ssim, label=solver)
+        else:
+            ax1.plot(measurements, mean_mse, "o-", label=solver)
+            ax2.plot(measurements, mean_ssim, "o-", label=solver)
 
     ax1.set_xscale("log")
     ax1.set_xticks(ticks=measurements, labels=[str(m) for m in measurements], rotation=90)
