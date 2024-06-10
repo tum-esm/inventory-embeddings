@@ -20,6 +20,7 @@ class TnoDatasetCollection:
         tno_2015 = TnoDataset.from_csv(TnoPaths.BY_CITY_2015_CSV)
         tno_2018 = TnoDataset.from_csv(TnoPaths.BY_CITY_2018_CSV)
         tno = merge(tno_2015, tno_2018)
+        tno.remove_city_with_name(name="Bratislava")
 
         self._test, rest = deterministic_split(tno, split=[test_split, 1 - test_split])
 
