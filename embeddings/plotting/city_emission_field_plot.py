@@ -10,6 +10,7 @@ from embeddings.dataset.city_emission_field import CityEmissionField
 def plot_emission_field(
     emission_field: CityEmissionField,
     ax: Axes,
+    vmax: float | None = None,
     sector: GnfrSector | None = None,
 ) -> None:
     field = emission_field.co2_ff_field
@@ -23,6 +24,8 @@ def plot_emission_field(
         cmap=colormaps["viridis"],
         extent=(float(bl_corner[1]), float(tr_corner[1]), float(bl_corner[0]), float(tr_corner[0])),
         aspect=LON_LAT_ASPECT_RATIO,
+        vmin=None if vmax is None else 0,
+        vmax=vmax,
     )
 
     city_name = emission_field.city_name

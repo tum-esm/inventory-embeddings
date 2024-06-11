@@ -51,8 +51,13 @@ class TnoDataset(Dataset[Tensor]):
     def _get_unique_city_names(self) -> set[str]:
         return {city.city_name for city in self.city_emission_fields}
 
-    def remove_city_with_name(self, name: str) -> None:
+    def remove_city_with_name(self, name: str) -> list[CityEmissionField]:
+        city_fields = [c for c in self.city_emission_fields if c.city_name == name]
+        if len(city_fields) == 0:
+            key_error = f"City with name '{name}' not found in dataset!"
+            raise KeyError(key_error)
         self.city_emission_fields = [c for c in self.city_emission_fields if c.city_name != name]
+        return city_fields
 
     @property
     def num_unique_cities(self) -> int:

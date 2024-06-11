@@ -1,3 +1,4 @@
+import shutil
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -40,11 +41,17 @@ class OpenDataSoftPaths:
 
 class PlotPaths:
     PLOTS = _SAVES / "plots"
+    CASE_STUDY_PLOT = PLOTS / "case_studies"
 
 
 class ModelPaths:
     def __init__(self, base_path: Path) -> None:
         self._base_path = base_path
+
+    def remove_old_and_create_new(self) -> None:
+        if self._base_path.exists():
+            shutil.rmtree(self._base_path)
+        self._base_path.mkdir(parents=True)
 
     @property
     def base_path(self) -> Path:
