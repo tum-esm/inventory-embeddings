@@ -70,7 +70,7 @@ def train() -> None:
 
     checkpoint_callback = ModelCheckpoint(
         monitor="val_ssim",
-        mode="max",  # model with the smallest validation loss is saved
+        mode="max",  # model with biggest ssim is stored
         dirpath=latest_vae_paths.checkpoints,
         filename="{epoch}-{val_loss:.2f}-{val_ssim:.2f}",
     )

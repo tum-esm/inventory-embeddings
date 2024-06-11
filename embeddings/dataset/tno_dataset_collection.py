@@ -34,13 +34,16 @@ class TnoDatasetCollection:
     CROPPED_WIDTH = 32
     CROPPED_HEIGHT = 32
 
-    def __init__(self, settings: TnoDatasetCollectionSettings) -> None:
+    def __init__(self, settings: TnoDatasetCollectionSettings | None = None) -> None:
         tno_2015 = TnoDataset.from_csv(TnoPaths.BY_CITY_2015_CSV)
         tno_2018 = TnoDataset.from_csv(TnoPaths.BY_CITY_2018_CSV)
         self._complete_tno = merge(tno_2015, tno_2018)
 
         self._remove_excluded_cities()
         self._build_case_study_datasets()
+
+        if not settings:
+            settings = TnoDatasetCollectionSettings()
 
         self._test, rest = deterministic_split(self._complete_tno, split=[settings.test_split, 1 - settings.test_split])
 
