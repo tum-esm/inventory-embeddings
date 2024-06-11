@@ -23,14 +23,12 @@ def train() -> None:
     latent_dim_help = "Latent Dimension."
     v_split_help = "Validation Split."
     t_split_help = "Test Split. The split must be kept consistent for all experiments."
-    split_help = "Makes training and validation split random instead of splitting alphabetically."
     wandb_help = "Toggles weights and biases as logger!"
 
     parser.add_argument("-e", "--epochs", metavar="N", default=100, type=int, help=epochs_help)
     parser.add_argument("-d", "--latent-dim", metavar="N", default=256, type=int, help=latent_dim_help)
     parser.add_argument("-v", "--val-split", metavar="p", default=settings.val_split, type=float, help=v_split_help)
     parser.add_argument("-t", "--test-split", metavar="p", default=settings.test_split, type=float, help=t_split_help)
-    parser.add_argument("-random-split", default=settings.random, action="store_true", help=split_help)
     parser.add_argument("-wandb", default=False, action="store_true", help=wandb_help)
 
     args = parser.parse_args()
@@ -42,7 +40,6 @@ def train() -> None:
 
     settings.test_split = args.test_split
     settings.val_split = args.val_split
-    settings.random = args.random_split
 
     tno_dataset = TnoDatasetCollection(settings)
 

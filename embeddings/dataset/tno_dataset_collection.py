@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from embeddings.common.log import logger
 from embeddings.common.paths import TnoPaths
-from embeddings.dataset.dataset_operations import deterministic_split, merge, random_split
+from embeddings.dataset.dataset_operations import deterministic_split, merge
 from embeddings.dataset.emission_field_transforms import (
     CenterCropTransform,
     RandomCropTransform,
@@ -11,10 +11,6 @@ from embeddings.dataset.emission_field_transforms import (
     RandomVerticalFlipTransform,
 )
 from embeddings.dataset.tno_dataset import TnoDataset
-
-CITIES_TO_REMOVE = [
-    "Bratislava",
-]
 
 CITIES_FOR_CASE_STUDY = [
     "Munich",
@@ -25,9 +21,8 @@ CITIES_FOR_CASE_STUDY = [
 
 @dataclass
 class TnoDatasetCollectionSettings:
-    test_split: float = 0.15
+    test_split: float = 0.13
     val_split: float = 0.15
-    random: float = False
 
 
 class TnoDatasetCollection:
@@ -39,7 +34,6 @@ class TnoDatasetCollection:
         tno_2018 = TnoDataset.from_csv(TnoPaths.BY_CITY_2018_CSV)
         self._complete_tno = merge(tno_2015, tno_2018)
 
-        self._remove_excluded_cities()
         self._build_case_study_datasets()
 
         if not settings:
@@ -49,20 +43,13 @@ class TnoDatasetCollection:
 
         rest_val_split = settings.val_split / (1 - settings.test_split)
 
-        if settings.random:
-            self._val, self._train = random_split(rest, split=[rest_val_split, 1 - rest_val_split])
-        else:
-            self._val, self._train = deterministic_split(rest, split=[rest_val_split, 1 - rest_val_split])
+        self._val, self._train = deterministic_split(rest, split=[rest_val_split, 1 - rest_val_split])
 
         logger.info(f"Test Set has {self._test.num_unique_cities} unique cites!\n\t{self._test!s}")
         logger.info(f"Validation Set has {self._val.num_unique_cities} unique cites!\n\t{self._val!s}")
         logger.info(f"Training Set has {self._train.num_unique_cities} unique cites!\n\t{self._train!s}")
 
         self._add_sampling_transforms()
-
-    def _remove_excluded_cities(self) -> None:
-        for city in CITIES_TO_REMOVE:
-            self._complete_tno.remove_city_with_name(name=city)
 
     def _build_case_study_datasets(self) -> None:
         self._case_study_datasets = {}
