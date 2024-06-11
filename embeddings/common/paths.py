@@ -1,4 +1,3 @@
-import shutil
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -9,9 +8,10 @@ _SAVES = _REPOSITORY_ROOT / "saves"
 
 def _archive_dir(path: Path) -> None:
     if path.exists():
+        base_name = path.name
         now = datetime.now(UTC)
         timestamp = now.strftime("%Y_%m_%d_%H_%M_%S")
-        path.replace(target=path.parent / f"archived_{timestamp}")
+        path.replace(target=path.parent / f"{base_name}_archived_{timestamp}")
     path.mkdir(exist_ok=True, parents=True)
 
 
@@ -47,11 +47,6 @@ class PlotPaths:
 class ModelPaths:
     def __init__(self, base_path: Path) -> None:
         self._base_path = base_path
-
-    def remove_old_and_create_new(self) -> None:
-        if self._base_path.exists():
-            shutil.rmtree(self._base_path)
-        self._base_path.mkdir(parents=True)
 
     @property
     def base_path(self) -> Path:
