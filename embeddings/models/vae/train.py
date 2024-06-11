@@ -24,7 +24,7 @@ def train() -> None:
     split_help = "Makes training and validation split random instead of splitting alphabetically."
     wandb_help = "Toggles weights and biases as logger!"
 
-    parser.add_argument("-e", "--epochs", metavar="N", default=200, type=int, help=epochs_help)
+    parser.add_argument("-e", "--epochs", metavar="N", default=100, type=int, help=epochs_help)
     parser.add_argument("-d", "--latent-dim", metavar="N", default=256, type=int, help=latent_dim_help)
     parser.add_argument("-v", "--val-split", metavar="p", default=0.15, type=float, help=val_split_help)
     parser.add_argument("-t", "--test-split", metavar="p", default=0.15, type=float, help=test_split_help)

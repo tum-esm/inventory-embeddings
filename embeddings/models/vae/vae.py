@@ -63,6 +63,7 @@ class VariationalAutoEncoder(LightningModule):
     def __init__(self, latent_dimension: int) -> None:
         super().__init__()
         self._latent_dimension = latent_dimension
+        self.learning_rate = 1e-3
         self.save_hyperparameters()
         self._encoder = Encoder(latent_dim=self._latent_dimension)
         self._decoder = Decoder(latent_dim=self._latent_dimension)
@@ -98,8 +99,7 @@ class VariationalAutoEncoder(LightningModule):
         return x_hat, mean, log_var
 
     def configure_optimizers(self) -> OptimizerLRScheduler:
-        learning_rate = 1e-3
-        return torch.optim.Adam(self.parameters(), lr=learning_rate, amsgrad=True)
+        return torch.optim.Adam(self.parameters(), lr=self.learning_rate, amsgrad=True)
 
     def _log_mse_per_sector(self, log_prefix: str, x_batch: Tensor, x_hat_batch: Tensor) -> None:
         for sector in GnfrSector:
