@@ -31,6 +31,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
 preprocess-tno = "embeddings.data_preprocessing.preprocess_tno:preprocess"
 train-vae = "embeddings.models.vae.train:train"
+finetune-vae = "embeddings.models.vae.finetune:finetune"
 evaluate = "embeddings.evaluation.evaluate:evaluate"
 
 [tool.ruff]
