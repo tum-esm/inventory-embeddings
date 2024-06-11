@@ -8,27 +8,29 @@ from torch.utils.data import DataLoader
 
 from embeddings.common.log import logger
 from embeddings.common.paths import ModelPathsCreator
-from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
+from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection, TnoDatasetCollectionSettings
 from embeddings.models.vae.vae import VariationalAutoEncoder
 
 WANDB_PROJECT_NAME = "inventory-embeddings-vae"
 
 
 def train() -> None:
+    settings = TnoDatasetCollectionSettings()
+
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     epochs_help = "Number of epochs to train."
     latent_dim_help = "Latent Dimension."
-    val_split_help = "Validation Split."
-    test_split_help = "Test Split. The split must be kept consistent for all experiments."
+    v_split_help = "Validation Split."
+    t_split_help = "Test Split. The split must be kept consistent for all experiments."
     split_help = "Makes training and validation split random instead of splitting alphabetically."
     wandb_help = "Toggles weights and biases as logger!"
 
     parser.add_argument("-e", "--epochs", metavar="N", default=100, type=int, help=epochs_help)
     parser.add_argument("-d", "--latent-dim", metavar="N", default=256, type=int, help=latent_dim_help)
-    parser.add_argument("-v", "--val-split", metavar="p", default=0.15, type=float, help=val_split_help)
-    parser.add_argument("-t", "--test-split", metavar="p", default=0.15, type=float, help=test_split_help)
-    parser.add_argument("-random-split", default=False, action="store_true", help=split_help)
+    parser.add_argument("-v", "--val-split", metavar="p", default=settings.val_split, type=float, help=v_split_help)
+    parser.add_argument("-t", "--test-split", metavar="p", default=settings.test_split, type=float, help=t_split_help)
+    parser.add_argument("-random-split", default=settings.random, action="store_true", help=split_help)
     parser.add_argument("-wandb", default=False, action="store_true", help=wandb_help)
 
     args = parser.parse_args()
@@ -38,11 +40,11 @@ def train() -> None:
 
     torch.set_float32_matmul_precision("high")
 
-    tno_dataset = TnoDatasetCollection(
-        test_split=args.test_split,
-        val_split=args.val_split,
-        random=args.random_split,
-    )
+    settings.test_split = args.test_split
+    settings.val_split = args.val_split
+    settings.random = args.random_split
+
+    tno_dataset = TnoDatasetCollection(settings)
 
     train_data = DataLoader(
         dataset=tno_dataset.training_data,

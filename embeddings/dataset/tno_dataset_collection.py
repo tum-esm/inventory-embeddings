@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from embeddings.common.log import logger
 from embeddings.common.paths import TnoPaths
 from embeddings.dataset.dataset_operations import deterministic_split, merge, random_split
@@ -21,11 +23,18 @@ CITIES_FOR_CASE_STUDY = [
 ]
 
 
+@dataclass
+class TnoDatasetCollectionSettings:
+    test_split: float = 0.15
+    val_split: float = 0.15
+    random: float = False
+
+
 class TnoDatasetCollection:
     CROPPED_WIDTH = 32
     CROPPED_HEIGHT = 32
 
-    def __init__(self, test_split: float = 0.15, val_split: float = 0.15, random: bool = False) -> None:
+    def __init__(self, settings: TnoDatasetCollectionSettings) -> None:
         tno_2015 = TnoDataset.from_csv(TnoPaths.BY_CITY_2015_CSV)
         tno_2018 = TnoDataset.from_csv(TnoPaths.BY_CITY_2018_CSV)
         self._complete_tno = merge(tno_2015, tno_2018)
@@ -33,11 +42,11 @@ class TnoDatasetCollection:
         self._remove_excluded_cities()
         self._build_case_study_datasets()
 
-        self._test, rest = deterministic_split(self._complete_tno, split=[test_split, 1 - test_split])
+        self._test, rest = deterministic_split(self._complete_tno, split=[settings.test_split, 1 - settings.test_split])
 
-        rest_val_split = val_split / (1 - test_split)
+        rest_val_split = settings.val_split / (1 - settings.test_split)
 
-        if random:
+        if settings.random:
             self._val, self._train = random_split(rest, split=[rest_val_split, 1 - rest_val_split])
         else:
             self._val, self._train = deterministic_split(rest, split=[rest_val_split, 1 - rest_val_split])
