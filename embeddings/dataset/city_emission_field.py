@@ -9,7 +9,7 @@ from embeddings.common.gnfr_sector import NUM_GNFR_SECTORS
 class CityEmissionField:
     ROBUST_SCALING_FACTOR = 1 / 2_500_000  # determined using average of 95th percentile per city in training data
 
-    def __init__(self, city_data: pl.DataFrame) -> None:
+    def __init__(self, city_data: pl.DataFrame, year: int) -> None:
         """
         An emission field have dimension SxHxW (typical representations of images in numpy and torch).
 
@@ -19,6 +19,7 @@ class CityEmissionField:
 
         The corresponding latitude and longitude array has dimensions WxH.
         """
+        self.year = year
 
         self._name = city_data["City"][0]
         width: int = city_data["x"].max() + 1  # type: ignore[operator, assignment]

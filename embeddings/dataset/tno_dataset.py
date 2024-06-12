@@ -31,22 +31,28 @@ class TnoDataset(Dataset[Tensor]):
         self._temporal_transforms_enabled = True
 
     @classmethod
-    def from_csv(cls, path: Path) -> Self:
+    def from_csv(cls, path: Path, year: int) -> Self:
         logger.info(f"Loading TNO data from '{path}'")
         tno_data = pl.read_csv(path, separator=";")
-        city_emission_fields = cls._load_data(tno_data)
+        city_emission_fields = cls._load_data(tno_data, year)
         city_emission_fields.sort(key=attrgetter("city_name"))
         return cls(city_emission_fields)
 
     @classmethod
-    def _load_data(cls, tno_data: pl.DataFrame) -> list[CityEmissionField]:
+    def _load_data(cls, tno_data: pl.DataFrame, year: int) -> list[CityEmissionField]:
         city_emission_fields = []
         cities = list(tno_data["City"].unique(maintain_order=True))
         for city in tqdm(cities, desc="Loading Cities", leave=False):
             city_data = tno_data.filter(pl.col("City") == city)
-            original = CityEmissionField(city_data=city_data)
+            original = CityEmissionField(city_data=city_data, year=year)
             city_emission_fields.append(original)
         return city_emission_fields
+
+    def get_sub_dataset_of_year(self, year: int) -> Self:
+        dataset = TnoDataset(city_emission_fields=[c for c in self.city_emission_fields if c.year == year])
+        for transform in self._sampling_transforms:
+            dataset.add_sampling_transform(transform=transform)
+        return dataset
 
     def _get_unique_city_names(self) -> set[str]:
         return {city.city_name for city in self.city_emission_fields}

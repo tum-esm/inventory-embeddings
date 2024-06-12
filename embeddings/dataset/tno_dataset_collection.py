@@ -34,8 +34,8 @@ class TnoDatasetCollection:
     CROPPED_HEIGHT = 32
 
     def __init__(self, settings: TnoDatasetCollectionSettings | None = None) -> None:
-        tno_2015 = TnoDataset.from_csv(TnoPaths.BY_CITY_2015_CSV)
-        tno_2018 = TnoDataset.from_csv(TnoPaths.BY_CITY_2018_CSV)
+        tno_2015 = TnoDataset.from_csv(TnoPaths.BY_CITY_2015_CSV, year=2015)
+        tno_2018 = TnoDataset.from_csv(TnoPaths.BY_CITY_2018_CSV, year=2018)
         self._complete_tno = merge(tno_2015, tno_2018)
 
         self._remove_excluded_cities()
@@ -94,5 +94,5 @@ class TnoDatasetCollection:
     def complete_data(self) -> TnoDataset:
         return self._complete_tno
 
-    def get_case_study_data(self, city: str) -> TnoDataset:
-        return self._case_study_datasets[city]
+    def get_case_study_data(self, city: str, year: int) -> TnoDataset:
+        return self._case_study_datasets[city].get_sub_dataset_of_year(year)

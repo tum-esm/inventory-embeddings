@@ -20,7 +20,7 @@ def ssim(x: Tensor, x_hat: Tensor, channel: int | None = None) -> Tensor:
 
 
 def mse(x: Tensor, x_hat: Tensor, channel: int | None = None) -> Tensor:
-    metric = torch.nn.MSELoss(reduction="sum")
+    metric = torch.nn.MSELoss(reduction="mean")
     if channel is not None:
         return metric(x[:, channel : channel + 1, :, :], x_hat[:, channel : channel + 1, :, :])
     return metric(x, x_hat)

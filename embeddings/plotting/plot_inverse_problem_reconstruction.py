@@ -37,7 +37,7 @@ if __name__ == "__main__":
     SNR = 100
 
     city = "Munich"
-    dataset = TnoDatasetCollection().get_case_study_data(city=city)
+    dataset = TnoDatasetCollection().get_case_study_data(city=city, year=2018)
 
     num_measurements = 5000
 
@@ -106,6 +106,6 @@ if __name__ == "__main__":
     path = PlotPaths.CASE_STUDY_PLOT / city.lower()
     path.mkdir(exist_ok=True)
     plt.figure(1)
-    plt.savefig(path / f"cs_reconstruction_{num_measurements!s}_snr_{SNR}.png")
+    plt.savefig(path / f"cs_reconstruction_snr_{SNR}_{num_measurements!s}.png")
     plt.figure(2)
-    plt.savefig(path / f"cs_reconstruction_diff_{num_measurements!s}_snr_{SNR}_diff.png")
+    plt.savefig(path / f"cs_reconstruction_snr_{SNR}_{num_measurements!s}_diff.png")

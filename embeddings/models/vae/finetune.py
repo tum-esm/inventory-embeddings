@@ -22,11 +22,11 @@ def finetune() -> None:
 
     base_model = VariationalAutoEncoder.load_from_checkpoint(base_model_path.checkpoint)
 
-    dataset_with_city = TnoDatasetCollection().get_case_study_data(city)
+    dataset_with_city = TnoDatasetCollection().get_case_study_data(city, year=2015)
 
     train_data = DataLoader(
         dataset=dataset_with_city,
-        batch_size=8,
+        batch_size=4,
         shuffle=True,
         num_workers=16,
     )
