@@ -16,7 +16,7 @@ _EMISSION_FIELD_SIZE = _EMISSION_FIELD_WIDTH * _EMISSION_FIELD_HEIGHT * _EMISSIO
 def generate_random_inverse_problem(
     x: Tensor,
     num_measurements: int,
-    signal_to_noise_ratio: float = 0.0,
+    signal_to_noise_ratio: int = 0,
 ) -> InverseProblem:
     sensing_matrix = torch.randn((num_measurements, _EMISSION_FIELD_SIZE))
     x_vectorized = _vectorize(x=x)

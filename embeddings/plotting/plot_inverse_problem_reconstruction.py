@@ -22,7 +22,7 @@ from embeddings.plotting.city_emission_field_plot import plot_emission_field_ten
 SECTORS_TO_PLOT = [GnfrSector.B, GnfrSector.C, GnfrSector.F2]
 
 
-def plot_reconstruction(axes_: tuple[tuple[Axis]], field: Tensor, vmax_: float, title: str, index_: int) -> None:
+def plot_field(axes_: tuple[tuple[Axis]], field: Tensor, vmax_: float, title: str, index_: int) -> None:
     ax = axes_[0][index_]
     plot_emission_field_tensor(emission_field=field, ax=ax, vmax=vmax_)
     ax.title.set_text(title)
@@ -34,30 +34,42 @@ def plot_reconstruction(axes_: tuple[tuple[Axis]], field: Tensor, vmax_: float, 
 
 
 if __name__ == "__main__":
-    dataset = TnoDatasetCollection().test_data
-    dataset.disable_temporal_transforms()
+    SNR = 100
 
-    num_measurements = 500
+    city = "Munich"
+    dataset = TnoDatasetCollection().get_case_study_data(city=city)
+
+    num_measurements = 5000
+
+    fine_tuned = "256_fine_tuned_on"
 
     solvers = {
-        "VAE 128": GenerativeModelSolver(path_to_model=ModelPathsCreator.get_vae_model("128")),
-        "VAE 256": GenerativeModelSolver(path_to_model=ModelPathsCreator.get_vae_model("256")),
+        "VAE 256 Base": GenerativeModelSolver(path_to_model=ModelPathsCreator.get_vae_model("256")),
+        "VAE 256 Munich": GenerativeModelSolver(path_to_model=ModelPathsCreator.get_vae_model(f"{fine_tuned}_munich")),
+        "VAE 256 Zürich": GenerativeModelSolver(path_to_model=ModelPathsCreator.get_vae_model(f"{fine_tuned}_zürich")),
+        "VAE 256 Paris": GenerativeModelSolver(path_to_model=ModelPathsCreator.get_vae_model(f"{fine_tuned}_paris")),
         "Lasso": LassoSolver(),
         "Lasso (DWT)": DwtLassoSolver(),
         "Lasso (DCT)": DctLassoSolver(),
     }
 
     x = dataset[random.randint(0, len(dataset) - 1)]
-    inverse_problem = generate_random_inverse_problem(x=x, num_measurements=num_measurements)
+    inverse_problem = generate_random_inverse_problem(x=x, num_measurements=num_measurements, signal_to_noise_ratio=SNR)
 
-    fig, axes = plt.subplots(
+    fig_1, axes = plt.subplots(
         len(SECTORS_TO_PLOT) + 1,
         len(solvers) + 1,
         figsize=(5 + 5 * len(solvers), 5 + 5 * len(SECTORS_TO_PLOT)),
     )
     vmax = 1.1 * float(torch.max(x))
 
-    plot_reconstruction(
+    fig_2, axes_difference = plt.subplots(
+        len(SECTORS_TO_PLOT) + 1,
+        len(solvers),
+        figsize=(5 * len(solvers), 5 + 5 * len(SECTORS_TO_PLOT)),
+    )
+
+    plot_field(
         axes_=axes,
         field=x,
         index_=0,
@@ -68,7 +80,9 @@ if __name__ == "__main__":
     for index, (solver_name, solver) in enumerate(solvers.items()):
         x_rec = solve_inverse_problem(solver=solver, inverse_problem=inverse_problem)
 
-        plot_reconstruction(
+        plt.figure(1)
+
+        plot_field(
             axes_=axes,
             field=x_rec,
             index_=index + 1,
@@ -76,7 +90,22 @@ if __name__ == "__main__":
             title=f"Reconstructed Emission Field\nWith {num_measurements} measurements\n{solver_name}",
         )
 
+        plt.figure(2)
+
+        plot_field(
+            axes_=axes_difference,
+            field=x_rec - x,
+            index_=index,
+            vmax_=vmax,
+            title=f"Difference Map \n{solver_name}",
+        )
+
         logger.info(f"MSE {solver_name}: {mse(x=x, x_hat=x_rec)}")
         logger.info(f"SSIM {solver_name}: {ssim(x=x, x_hat=x_rec)}")
 
-    plt.savefig(PlotPaths.PLOTS / "inverse_reconstruction.png")
+    path = PlotPaths.CASE_STUDY_PLOT / city.lower()
+    path.mkdir(exist_ok=True)
+    plt.figure(1)
+    plt.savefig(path / f"cs_reconstruction_{num_measurements!s}_snr_{SNR}.png")
+    plt.figure(2)
+    plt.savefig(path / f"cs_reconstruction_diff_{num_measurements!s}_snr_{SNR}_diff.png")

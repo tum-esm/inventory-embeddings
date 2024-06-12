@@ -141,7 +141,7 @@ class VariationalAutoEncoder(LightningModule):
 
         batch_size = x_val_batch.size(0)
 
-        self.log("val_loss", val_loss / batch_size)
+        self.log("val_loss", val_loss / batch_size, prog_bar=True)
         self.log("val_ssim", val_ssim)
         self.log("val_mse", val_mse / batch_size)
         self._log_mse_per_sector(log_prefix="val", x_batch=x_val_batch, x_hat_batch=x_val_hat_batch)

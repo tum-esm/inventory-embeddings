@@ -21,9 +21,13 @@ def evaluate() -> None:
     dataset = TnoDatasetCollection().test_data
     dataset.disable_temporal_transforms()
 
+    fine_tuned = "256_fine_tuned_on"
+
     solvers = {
-        "VAE 128": GenerativeModelSolver(path_to_model=ModelPathsCreator.get_vae_model(model="128")),
-        "VAE 256": GenerativeModelSolver(path_to_model=ModelPathsCreator.get_vae_model(model="256")),
+        "VAE 256 Base": GenerativeModelSolver(path_to_model=ModelPathsCreator.get_vae_model("256")),
+        "VAE 256 Munich": GenerativeModelSolver(path_to_model=ModelPathsCreator.get_vae_model(f"{fine_tuned}_munich")),
+        "VAE 256 Zürich": GenerativeModelSolver(path_to_model=ModelPathsCreator.get_vae_model(f"{fine_tuned}_zürich")),
+        "VAE 256 Paris": GenerativeModelSolver(path_to_model=ModelPathsCreator.get_vae_model(f"{fine_tuned}_paris")),
         "Lasso": LassoSolver(),
         "Lasso (DWT)": DwtLassoSolver(),
         "Lasso (DCT)": DctLassoSolver(),
