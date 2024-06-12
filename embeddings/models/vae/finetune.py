@@ -26,7 +26,7 @@ def finetune() -> None:
 
     train_data = DataLoader(
         dataset=dataset_with_city,
-        batch_size=1,
+        batch_size=8,
         shuffle=True,
         num_workers=16,
     )
@@ -45,8 +45,8 @@ def finetune() -> None:
     base_model.learning_rate = 1e-5
 
     trainer = Trainer(
-        devices=[1],
-        max_epochs=20,
+        devices=[0],
+        max_epochs=30,
         callbacks=[checkpoint_callback],
         logger=loggers,
         gradient_clip_val=0.5,
