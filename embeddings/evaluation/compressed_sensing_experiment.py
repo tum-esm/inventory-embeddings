@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 from torch import Tensor
 
@@ -12,11 +13,24 @@ _EMISSION_FIELD_DEPTH = NUM_GNFR_SECTORS
 _EMISSION_FIELD_SIZE = _EMISSION_FIELD_WIDTH * _EMISSION_FIELD_HEIGHT * _EMISSION_FIELD_DEPTH
 
 
-def generate_random_inverse_problem(x: Tensor, num_measurements: int) -> InverseProblem:
+def generate_random_inverse_problem(
+    x: Tensor,
+    num_measurements: int,
+    signal_to_noise_ratio: float = 0.0,
+) -> InverseProblem:
     sensing_matrix = torch.randn((num_measurements, _EMISSION_FIELD_SIZE))
     x_vectorized = _vectorize(x=x)
-    # TODO(must1d): add noise for measurements  # noqa: FIX002, TD003
+
     measurements = sensing_matrix @ x_vectorized
+
+    if signal_to_noise_ratio:
+        measurements_np = np.array(measurements)
+        signal_power = np.mean(measurements_np**2)
+        noise_power = signal_power / signal_to_noise_ratio
+        noise_std_dev = np.sqrt(noise_power)
+        noise = np.random.default_rng().normal(0, noise_std_dev, num_measurements)
+        measurements = Tensor(measurements_np + noise)
+
     return InverseProblem(A=sensing_matrix, y=measurements)
 
 
