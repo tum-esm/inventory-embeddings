@@ -1,4 +1,5 @@
 from copy import copy
+from typing import Self
 
 import numpy as np
 import torch
@@ -41,6 +42,10 @@ class GenerativeModelSolver(InverseProblemSolver):
         self._plot_loss = plot_loss
         self._log_info = log_info
         self._load_generator(path=path_to_model)
+
+    @classmethod
+    def from_vae_model_name(cls, name: str) -> Self:
+        return cls(path_to_model=ModelPathsCreator.get_vae_model(name))
 
     def _load_generator(self, path: ModelPaths | None) -> None:
         model_path = path if path else ModelPathsCreator.get_latest_vae_model()
