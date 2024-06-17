@@ -122,7 +122,7 @@ class VariationalAutoEncoder(LightningModule):
 
         self.log("train_loss", train_loss / batch_size, on_step=False, on_epoch=True, prog_bar=True)
         self.log("train_ssim", train_ssim, on_step=False, on_epoch=True)
-        self.log("train_mse", train_mse / batch_size, on_step=False, on_epoch=True)
+        self.log("train_mse", train_mse, on_step=False, on_epoch=True)
         self._log_mse_per_sector(log_prefix="train", x_batch=x_batch, x_hat_batch=x_hat_batch)
 
         return train_loss
@@ -143,7 +143,7 @@ class VariationalAutoEncoder(LightningModule):
 
         self.log("val_loss", val_loss / batch_size, prog_bar=True)
         self.log("val_ssim", val_ssim)
-        self.log("val_mse", val_mse / batch_size)
+        self.log("val_mse", val_mse)
         self._log_mse_per_sector(log_prefix="val", x_batch=x_val_batch, x_hat_batch=x_val_hat_batch)
 
         return val_loss
