@@ -12,6 +12,10 @@ from embeddings.dataset.emission_field_transforms import (
 )
 from embeddings.dataset.tno_dataset import TnoDataset
 
+CITIES_TO_REMOVE = [
+    "Bratislava",
+]
+
 CITIES_FOR_CASE_STUDY = [
     "Munich",
     "Zürich",
@@ -34,6 +38,7 @@ class TnoDatasetCollection:
         tno_2018 = TnoDataset.from_csv(TnoPaths.BY_CITY_2018_CSV, year=2018)
         self._complete_tno = merge(tno_2015, tno_2018)
 
+        self._remove_excluded_cities()
         self._build_case_study_datasets()
 
         if not settings:
@@ -50,6 +55,10 @@ class TnoDatasetCollection:
         logger.info(f"Training Set has {self._train.num_unique_cities} unique cites!\n\t{self._train!s}")
 
         self._add_sampling_transforms()
+
+    def _remove_excluded_cities(self) -> None:
+        for city in CITIES_TO_REMOVE:
+            self._complete_tno.remove_city_with_name(name=city)
 
     def _build_case_study_datasets(self) -> None:
         self._case_study_datasets = {}
