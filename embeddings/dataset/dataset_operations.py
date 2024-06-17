@@ -32,9 +32,9 @@ def _split(list_: list, split: list[float]) -> list[list]:
     resulting_split = []
     num_elements = len(list_)
     for percentage in split[:-1]:
-        num_items_in_split = int(percentage * num_elements) - 1
-        step_size = int(num_elements / num_items_in_split)
-        start_index = int(step_size / 2) - 1
+        num_items_in_split = round(percentage * num_elements)
+        step_size = round(num_elements / num_items_in_split)
+        start_index = round(step_size / 2)
         current_split = list_[start_index::step_size]
         resulting_split.append(current_split)
         list_ = [item for item in list_ if item not in current_split]
