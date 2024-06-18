@@ -35,10 +35,12 @@ class GenerativeModelSolver(InverseProblemSolver):
 
     def __init__(
         self,
+        regularization_factor: float = 0.0,
         plot_loss: bool = False,
         log_info: bool = False,
         path_to_model: ModelPaths | None = None,
     ) -> None:
+        self._regularization_factor = regularization_factor
         self._plot_loss = plot_loss
         self._log_info = log_info
         self._load_generator(path=path_to_model)
@@ -61,7 +63,7 @@ class GenerativeModelSolver(InverseProblemSolver):
     def _target(self, A: Tensor, y: Tensor, z: Tensor) -> Tensor:  # noqa: N803
         loss = torch.norm(y - A @ self._generate(z)).pow(2)
         regularization = torch.norm(z).pow(2)
-        return loss + regularization
+        return loss + self._regularization_factor * regularization
 
     def solve(self, inverse_problem: InverseProblem) -> Tensor:
         z = torch.randn(self._latent_dimension).to(self._device)
