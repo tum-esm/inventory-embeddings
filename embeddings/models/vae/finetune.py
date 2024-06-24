@@ -1,3 +1,5 @@
+import argparse
+
 import torch
 from lightning import Trainer
 from lightning.pytorch.callbacks import ModelCheckpoint
@@ -11,18 +13,29 @@ from embeddings.models.vae.vae import VariationalAutoEncoder
 
 
 def finetune() -> None:
-    base_model_name = "256"
-    city = "Munich"
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    base_model_path = ModelPathsCreator.get_vae_model(base_model_name)
-    target_model_path = ModelPathsCreator.get_vae_model(f"{base_model_name}_fine_tuned_on_{city.lower()}")
-    target_model_path.archive()
+    epochs_help = "Number of epochs to train."
+    city_help = "Name of the city the model is fine-tuned on."
+    base_model_help = "Name of the base model that is fine-tuned, e.g. '1024'."
+
+    parser.add_argument("-e", "--epochs", metavar="N", default=20, type=int, help=epochs_help)
+    parser.add_argument("-c", "--city", metavar="C", type=str, help=city_help, required=True)
+    parser.add_argument("-b", "--base-model", metavar="M", type=str, help=base_model_help, required=True)
+
+    args = parser.parse_args()
+    base_model_name = args.base_model
+    city = args.city
 
     torch.set_float32_matmul_precision("high")
 
+    base_model_path = ModelPathsCreator.get_vae_model(base_model_name)
     base_model = VariationalAutoEncoder.load_from_checkpoint(base_model_path.checkpoint)
 
     dataset_with_city = TnoDatasetCollection().get_case_study_data(city, year=2015)
+
+    target_model_path = ModelPathsCreator.get_vae_model(f"{base_model_name}_fine_tuned_on_{city.lower()}")
+    target_model_path.archive()
 
     train_data = DataLoader(
         dataset=dataset_with_city,
@@ -46,7 +59,7 @@ def finetune() -> None:
 
     trainer = Trainer(
         devices=[0],
-        max_epochs=30,
+        max_epochs=args.epochs,
         callbacks=[checkpoint_callback],
         logger=loggers,
         gradient_clip_val=0.5,
