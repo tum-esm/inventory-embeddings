@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 
 from embeddings.common.gnfr_sector import GnfrSector
 from embeddings.common.paths import PlotPaths
+from embeddings.dataset.emission_field_transforms import RandomSparseEmittersTransform
 from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
 from embeddings.plotting.city_emission_field_plot import plot_emission_field
 
@@ -10,9 +11,10 @@ if __name__ == "__main__":
 
     fig, ((ax1, ax2, ax3, ax4), (ax5, ax6, ax7, ax8)) = plt.subplots(2, 4, figsize=(20, 12))
 
-    city = "Zürich"
-    data = dataset_collection.get_case_study_data(city)
+    city = "Munich"
+    data = dataset_collection.get_case_study_data(city, year=2015)
     data.disable_temporal_transforms()
+    data.add_sampling_transform(RandomSparseEmittersTransform(lam=100))
 
     emission_field = data.get_city_emission_field(0, apply_sampling_transforms=False)
     vmax = 1.1 * emission_field.co2_ff_field.max()

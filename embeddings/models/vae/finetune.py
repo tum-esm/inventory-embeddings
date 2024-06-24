@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader
 
 from embeddings.common.log import logger
 from embeddings.common.paths import ModelPathsCreator
+from embeddings.dataset.emission_field_transforms import RandomSparseEmittersTransform
 from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
 from embeddings.models.vae.vae import VariationalAutoEncoder
 
@@ -33,8 +34,9 @@ def finetune() -> None:
     base_model = VariationalAutoEncoder.load_from_checkpoint(base_model_path.checkpoint)
 
     dataset_with_city = TnoDatasetCollection().get_case_study_data(city, year=2015)
+    dataset_with_city.add_sampling_transform(RandomSparseEmittersTransform(lam=100))
 
-    target_model_path = ModelPathsCreator.get_vae_model(f"{base_model_name}_fine_tuned_on_{city.lower()}")
+    target_model_path = ModelPathsCreator.get_vae_model(f"{base_model_name}_{city.lower()}")
     target_model_path.archive()
 
     train_data = DataLoader(

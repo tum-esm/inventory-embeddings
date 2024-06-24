@@ -11,7 +11,6 @@ from embeddings.common.paths import PlotPaths
 from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
 from embeddings.evaluation.compressed_sensing_experiment import generate_random_inverse_problem, solve_inverse_problem
 from embeddings.evaluation.inverse_problems_solver import (
-    DctLassoSolver,
     DwtLassoSolver,
     GenerativeModelSolver,
     LassoSolver,
@@ -34,26 +33,24 @@ def plot_field(axes_: tuple[tuple[Axis]], field: Tensor, vmax_: float, title: st
 
 
 if __name__ == "__main__":
-    SNR = 100
+    SNR = 10
 
     city = "Munich"
     dataset = TnoDatasetCollection().get_case_study_data(city=city, year=2018)
     dataset.disable_temporal_transforms()
 
-    num_measurements = 1000
+    num_measurements = 5000
 
     solvers = {
-        "VAE 256": GenerativeModelSolver.from_vae_model_name("256"),
-        "VAE 512": GenerativeModelSolver.from_vae_model_name("512"),
-        "VAE 1024": GenerativeModelSolver.from_vae_model_name("1024"),
         "VAE 2048": GenerativeModelSolver.from_vae_model_name("2048"),
-        "VAE 2048 Munich": GenerativeModelSolver.from_vae_model_name("2048_fine_tuned_on_munich"),
+        "VAE 2048 Munich": GenerativeModelSolver.from_vae_model_name("2048_munich"),
+        "VAE 2048 Munich (no noise)": GenerativeModelSolver.from_vae_model_name("2048_munich_no_noise"),
         "Lasso": LassoSolver(),
         "Lasso (DWT)": DwtLassoSolver(),
-        "Lasso (DCT)": DctLassoSolver(),
     }
 
     x = dataset[random.randint(0, len(dataset) - 1)]
+    x[GnfrSector.C.to_index(), 30, 3] = x[GnfrSector.C.to_index(), :, :].max() * 0.9
     inverse_problem = generate_random_inverse_problem(x=x, num_measurements=num_measurements, signal_to_noise_ratio=SNR)
 
     fig_1, axes = plt.subplots(
