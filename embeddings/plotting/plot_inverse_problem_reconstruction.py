@@ -7,7 +7,7 @@ from torch import Tensor
 
 from embeddings.common.gnfr_sector import GnfrSector
 from embeddings.common.log import logger
-from embeddings.common.paths import ModelPathsCreator, PlotPaths
+from embeddings.common.paths import PlotPaths
 from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
 from embeddings.evaluation.compressed_sensing_experiment import generate_random_inverse_problem, solve_inverse_problem
 from embeddings.evaluation.inverse_problems_solver import (
@@ -38,16 +38,16 @@ if __name__ == "__main__":
 
     city = "Munich"
     dataset = TnoDatasetCollection().get_case_study_data(city=city, year=2018)
+    dataset.disable_temporal_transforms()
 
-    num_measurements = 5000
-
-    fine_tuned = "256_fine_tuned_on"
+    num_measurements = 1000
 
     solvers = {
-        "VAE 256 Base": GenerativeModelSolver(path_to_model=ModelPathsCreator.get_vae_model("256")),
-        "VAE 256 Munich": GenerativeModelSolver(path_to_model=ModelPathsCreator.get_vae_model(f"{fine_tuned}_munich")),
-        "VAE 256 Zürich": GenerativeModelSolver(path_to_model=ModelPathsCreator.get_vae_model(f"{fine_tuned}_zürich")),
-        "VAE 256 Paris": GenerativeModelSolver(path_to_model=ModelPathsCreator.get_vae_model(f"{fine_tuned}_paris")),
+        "VAE 256": GenerativeModelSolver.from_vae_model_name("256"),
+        "VAE 512": GenerativeModelSolver.from_vae_model_name("512"),
+        "VAE 1024": GenerativeModelSolver.from_vae_model_name("1024"),
+        "VAE 2048": GenerativeModelSolver.from_vae_model_name("2048"),
+        "VAE 2048 Munich": GenerativeModelSolver.from_vae_model_name("2048_fine_tuned_on_munich"),
         "Lasso": LassoSolver(),
         "Lasso (DWT)": DwtLassoSolver(),
         "Lasso (DCT)": DctLassoSolver(),
