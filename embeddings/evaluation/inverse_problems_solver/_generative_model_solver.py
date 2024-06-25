@@ -52,6 +52,7 @@ class GenerativeModelSolver(InverseProblemSolver):
     def _load_generator(self, path: ModelPaths | None) -> None:
         model_path = path if path else ModelPathsCreator.get_latest_vae_model()
         vae = VariationalAutoEncoder.load_from_checkpoint(checkpoint_path=model_path.checkpoint)
+        vae.deactivate_dropout()
         self._device = vae.device
         self._generator = vae.decoder
         self._latent_dimension = vae.latent_dimension
