@@ -15,7 +15,7 @@ from embeddings.evaluation.inverse_problems_solver import (
     GenerativeModelSolver,
     LassoSolver,
 )
-from embeddings.models.common.metrics import mse, ssim
+from embeddings.models.common.metrics import mse, relative_error, ssim
 from embeddings.plotting.city_emission_field_plot import plot_emission_field_tensor
 
 SECTORS_TO_PLOT = [GnfrSector.B, GnfrSector.C, GnfrSector.F2]
@@ -44,27 +44,19 @@ if __name__ == "__main__":
     solvers = {
         "VAE 2048": GenerativeModelSolver.from_vae_model_name("2048"),
         "VAE 2048 Munich": GenerativeModelSolver.from_vae_model_name("2048_munich"),
-        "VAE 2048 Munich (no noise)": GenerativeModelSolver.from_vae_model_name("2048_munich_no_noise"),
         "Lasso": LassoSolver(),
         "Lasso (DWT)": DwtLassoSolver(),
     }
 
     x = dataset[random.randint(0, len(dataset) - 1)]
-    x[GnfrSector.C.to_index(), 30, 3] = x[GnfrSector.C.to_index(), :, :].max() * 0.9
     inverse_problem = generate_random_inverse_problem(x=x, num_measurements=num_measurements, signal_to_noise_ratio=SNR)
 
-    fig_1, axes = plt.subplots(
+    fig, axes = plt.subplots(
         len(SECTORS_TO_PLOT) + 1,
         len(solvers) + 1,
         figsize=(5 + 5 * len(solvers), 5 + 5 * len(SECTORS_TO_PLOT)),
     )
     vmax = 1.1 * float(torch.max(x))
-
-    fig_2, axes_difference = plt.subplots(
-        len(SECTORS_TO_PLOT) + 1,
-        len(solvers),
-        figsize=(5 * len(solvers), 5 + 5 * len(SECTORS_TO_PLOT)),
-    )
 
     plot_field(
         axes_=axes,
@@ -77,8 +69,6 @@ if __name__ == "__main__":
     for index, (solver_name, solver) in enumerate(solvers.items()):
         x_rec = solve_inverse_problem(solver=solver, inverse_problem=inverse_problem)
 
-        plt.figure(1)
-
         plot_field(
             axes_=axes,
             field=x_rec,
@@ -87,22 +77,12 @@ if __name__ == "__main__":
             title=f"Reconstructed Emission Field\nWith {num_measurements} measurements\n{solver_name}",
         )
 
-        plt.figure(2)
-
-        plot_field(
-            axes_=axes_difference,
-            field=x_rec - x,
-            index_=index,
-            vmax_=vmax,
-            title=f"Difference Map \n{solver_name}",
-        )
-
-        logger.info(f"MSE {solver_name}: {mse(x=x, x_hat=x_rec)}")
-        logger.info(f"SSIM {solver_name}: {ssim(x=x, x_hat=x_rec)}")
+        result_string = f"Results for solver {solver_name}"
+        result_string += f"\n\t\t\tMSE {solver_name}: {mse(x=x, x_hat=x_rec)}"
+        result_string += f"\n\t\t\tSSIM {solver_name}: {ssim(x=x, x_hat=x_rec)}"
+        result_string += f"\n\t\t\tRelative Error {solver_name}: {100 * relative_error(x=x, x_hat=x_rec):.2f}%"
+        logger.info(result_string)
 
     path = PlotPaths.CASE_STUDY_PLOT / city.lower()
-    path.mkdir(exist_ok=True)
-    plt.figure(1)
+    path.mkdir(exist_ok=True, parents=True)
     plt.savefig(path / f"cs_reconstruction_snr_{SNR}_{num_measurements!s}.png")
-    plt.figure(2)
-    plt.savefig(path / f"cs_reconstruction_snr_{SNR}_{num_measurements!s}_diff.png")

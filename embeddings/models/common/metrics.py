@@ -26,7 +26,7 @@ def mse(x: Tensor, x_hat: Tensor, channel: int | None = None) -> Tensor:
         return metric(x[:, channel : channel + 1, :, :], x_hat[:, channel : channel + 1, :, :])
     return metric(x, x_hat)
 
-def relative_error(x: Tensor, x_hat: Tensor, p: int, channel: int | None = None) -> Tensor:
+def relative_error(x: Tensor, x_hat: Tensor, channel: int | None = None) -> Tensor:
     three_dimensions = 3
 
     if x.dim() != three_dimensions:
@@ -40,6 +40,8 @@ def relative_error(x: Tensor, x_hat: Tensor, p: int, channel: int | None = None)
     if channel is not None:
         x_np = x_np[:, channel : channel + 1, :, :]
         x_hat_np = x_hat_np[:, channel : channel + 1, :, :]
+
+    p = None
 
     error_norm = np.linalg.norm(x_np - x_hat_np, ord=p)
 
