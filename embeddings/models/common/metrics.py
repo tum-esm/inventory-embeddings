@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 from torch import Tensor
 from torchmetrics.image import StructuralSimilarityIndexMeasure
@@ -24,3 +25,26 @@ def mse(x: Tensor, x_hat: Tensor, channel: int | None = None) -> Tensor:
     if channel is not None:
         return metric(x[:, channel : channel + 1, :, :], x_hat[:, channel : channel + 1, :, :])
     return metric(x, x_hat)
+
+def relative_error(x: Tensor, x_hat: Tensor, p: int, channel: int | None = None) -> Tensor:
+    three_dimensions = 3
+
+    if x.dim() != three_dimensions:
+        x = x.squeeze(0)
+    if x_hat.dim() != three_dimensions:
+        x_hat = x_hat.squeeze(0)
+
+    x_np = np.array(x)
+    x_hat_np = np.array(x_hat)
+
+    if channel is not None:
+        x_np = x_np[:, channel : channel + 1, :, :]
+        x_hat_np = x_hat_np[:, channel : channel + 1, :, :]
+
+    error_norm = np.linalg.norm(x_np - x_hat_np, ord=p)
+
+    x_norm = np.linalg.norm(x_np, ord=p)
+
+    relative_error = error_norm / x_norm
+
+    return torch.tensor(relative_error)
