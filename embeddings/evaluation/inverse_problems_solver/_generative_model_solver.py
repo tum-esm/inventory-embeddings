@@ -32,10 +32,11 @@ _LEARNING_RATES = {
 class GenerativeModelSolver(InverseProblemSolver):
     MAX_STEPS = 10_000
     STOP_AFTER = 250
+    IMPROVEMENT_TOLERANCE = 1e-5
 
     def __init__(
         self,
-        regularization_factor: float = 0.0,
+        regularization_factor: float = 0.1,
         plot_loss: bool = False,
         log_info: bool = False,
         path_to_model: ModelPaths | None = None,
@@ -46,13 +47,13 @@ class GenerativeModelSolver(InverseProblemSolver):
         self._load_generator(path=path_to_model)
 
     @classmethod
-    def from_vae_model_name(cls, name: str) -> Self:
-        return cls(path_to_model=ModelPathsCreator.get_vae_model(name))
+    def from_vae_model_name(cls, name: str, *, plot_loss: bool = False) -> Self:
+        return cls(path_to_model=ModelPathsCreator.get_vae_model(name), plot_loss=plot_loss)
 
     def _load_generator(self, path: ModelPaths | None) -> None:
         model_path = path if path else ModelPathsCreator.get_latest_vae_model()
         vae = VariationalAutoEncoder.load_from_checkpoint(checkpoint_path=model_path.checkpoint)
-        vae.deactivate_dropout()
+        vae.eval()
         self._device = vae.device
         self._generator = vae.decoder
         self._latent_dimension = vae.latent_dimension
@@ -62,7 +63,7 @@ class GenerativeModelSolver(InverseProblemSolver):
         return x_rec.view(15 * 32 * 32)
 
     def _target(self, A: Tensor, y: Tensor, z: Tensor) -> Tensor:  # noqa: N803
-        loss = torch.norm(y - A @ self._generate(z)).pow(2)
+        loss = torch.norm(y - A @ self._generate(z), p=2).pow(2)
         regularization = torch.norm(z).pow(2)
         return loss + self._regularization_factor * regularization
 
@@ -90,14 +91,20 @@ class GenerativeModelSolver(InverseProblemSolver):
         for iteration in range(self.MAX_STEPS):
             loss = self._target(A=a_on_device, y=y_on_device, z=z)
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(z, max_norm=0.1)
             optimizer.step()
 
-            if loss.item() < min_loss:
+            percentage_improvement = (min_loss - loss.item()) / min_loss
+
+            if percentage_improvement < self.IMPROVEMENT_TOLERANCE:
+                no_improvements += 1
+            else:
                 no_improvements = 0
+
+            if loss.item() < min_loss:
                 cur_best_z = copy(z)
                 min_loss = loss.item()
-            else:
-                no_improvements += 1
+
 
             losses.append(np.log(loss.item()))
 

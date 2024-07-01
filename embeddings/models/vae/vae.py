@@ -1,10 +1,7 @@
-from itertools import chain
-
 import torch
 from lightning import LightningModule
 from lightning.pytorch.utilities.types import OptimizerLRScheduler
 from torch import Tensor, nn
-from torch.nn import Dropout2d
 
 from embeddings.common.gnfr_sector import NUM_GNFR_SECTORS, GnfrSector
 from embeddings.models.common.layers import ConvLayer, ConvTransposeLayer, ResidualConvLayer
@@ -150,11 +147,6 @@ class VariationalAutoEncoder(LightningModule):
         self._log_mse_per_sector(log_prefix="val", x_batch=x_val_batch, x_hat_batch=x_val_hat_batch)
 
         return val_loss
-
-    def deactivate_dropout(self) -> None:
-        for module in chain(self._encoder.modules(), self._decoder.modules()):
-            if isinstance(module, Dropout2d):
-                module.eval()
 
     def reconstruct(self, x: Tensor) -> Tensor:
         self.eval()
