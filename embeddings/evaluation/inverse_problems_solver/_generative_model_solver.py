@@ -64,7 +64,7 @@ class GenerativeModelSolver(InverseProblemSolver):
 
     def _target(self, A: Tensor, y: Tensor, z: Tensor) -> Tensor:  # noqa: N803
         loss = torch.norm(y - A @ self._generate(z), p=2).pow(2)
-        regularization = torch.norm(z).pow(2)
+        regularization = torch.norm(z, p=2).pow(2)
         return loss + self._regularization_factor * regularization
 
     def solve(self, inverse_problem: InverseProblem) -> Tensor:
@@ -91,7 +91,7 @@ class GenerativeModelSolver(InverseProblemSolver):
         for iteration in range(self.MAX_STEPS):
             loss = self._target(A=a_on_device, y=y_on_device, z=z)
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(z, max_norm=0.1)
+            torch.nn.utils.clip_grad_norm_(z, max_norm=0.5)
             optimizer.step()
 
             percentage_improvement = (min_loss - loss.item()) / min_loss
