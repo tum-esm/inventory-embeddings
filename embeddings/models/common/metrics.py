@@ -41,11 +41,11 @@ def relative_error(x: Tensor, x_hat: Tensor, channel: int | None = None) -> Tens
         x_np = x_np[:, channel : channel + 1, :, :]
         x_hat_np = x_hat_np[:, channel : channel + 1, :, :]
 
-    p = None
+    p = 2
 
-    error_norm = np.linalg.norm(x_np - x_hat_np, ord=p)
+    error_norm = np.linalg.norm((x_np - x_hat_np).flatten(), ord=p)
 
-    x_norm = np.linalg.norm(x_np, ord=p)
+    x_norm = np.linalg.norm(x_np.flatten(), ord=p)
 
     relative_error = error_norm / x_norm
 
