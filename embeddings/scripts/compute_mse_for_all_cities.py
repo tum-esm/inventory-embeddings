@@ -33,7 +33,7 @@ def _compute_mse_per_city(tno_dataset: TnoDataset) -> dict[str, list[float]]:
 
 
 if __name__ == "__main__":
-    latest_vae = ModelPathsCreator.get_latest_vae_model()
+    latest_vae = ModelPathsCreator.get_vae_model("2048")
     vae = VariationalAutoEncoder.load_from_checkpoint(checkpoint_path=latest_vae.checkpoint)
     vae.eval()
     crop_transform = CenterCropTransform(TnoDatasetCollection.CROPPED_WIDTH, TnoDatasetCollection.CROPPED_HEIGHT)
@@ -50,7 +50,7 @@ if __name__ == "__main__":
         logger.info(f"-------- {name} -------")
         result = _compute_mse_per_city(data)
         for city, mse_values in result.items():
-            logger.info(f"\t{city}: {", ".join([str(v) for v in mse_values])}")
+            logger.info(f"\t{city}: {', '.join([str(v) for v in mse_values])}")
         means = []
         for value in result.values():
             means += value
