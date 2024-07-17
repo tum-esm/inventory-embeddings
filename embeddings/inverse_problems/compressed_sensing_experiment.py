@@ -4,8 +4,8 @@ from torch import Tensor
 
 from embeddings.common.gnfr_sector import NUM_GNFR_SECTORS
 from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
-from embeddings.evaluation.inverse_problem import InverseProblem
-from embeddings.evaluation.inverse_problems_solver import InverseProblemSolver
+from embeddings.inverse_problems.inverse_problem import InverseProblem
+from embeddings.inverse_problems.inverse_problems_solver import InverseProblemSolver
 
 _EMISSION_FIELD_WIDTH = TnoDatasetCollection.CROPPED_WIDTH
 _EMISSION_FIELD_HEIGHT = TnoDatasetCollection.CROPPED_HEIGHT

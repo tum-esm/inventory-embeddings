@@ -5,7 +5,7 @@ from torch import Tensor
 
 from embeddings.common.gnfr_sector import NUM_GNFR_SECTORS
 from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
-from embeddings.evaluation.inverse_problem import InverseProblem
+from embeddings.inverse_problems.inverse_problem import InverseProblem
 
 from ._inverse_problem_solver import InverseProblemSolver
 

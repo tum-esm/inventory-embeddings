@@ -8,7 +8,7 @@ from torch import Tensor
 
 from embeddings.common.log import logger
 from embeddings.common.paths import ModelPaths, ModelPathsCreator, PlotPaths
-from embeddings.evaluation.inverse_problem import InverseProblem
+from embeddings.inverse_problems.inverse_problem import InverseProblem
 from embeddings.models.vae.vae import VariationalAutoEncoder
 
 from ._inverse_problem_solver import InverseProblemSolver

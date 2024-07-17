@@ -9,8 +9,11 @@ from embeddings.common.gnfr_sector import GnfrSector
 from embeddings.common.log import logger
 from embeddings.common.paths import PlotPaths
 from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
-from embeddings.evaluation.compressed_sensing_experiment import generate_random_inverse_problem, solve_inverse_problem
-from embeddings.evaluation.inverse_problems_solver import (
+from embeddings.inverse_problems.compressed_sensing_experiment import (
+    generate_random_inverse_problem,
+    solve_inverse_problem,
+)
+from embeddings.inverse_problems.inverse_problems_solver import (
     DwtLassoSolver,
     GenerativeModelSolver,
     LassoSolver,

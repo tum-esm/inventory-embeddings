@@ -1,7 +1,7 @@
 from sklearn.linear_model import Lasso
 from torch import Tensor
 
-from embeddings.evaluation.inverse_problem import InverseProblem
+from embeddings.inverse_problems.inverse_problem import InverseProblem
 
 from ._inverse_problem_solver import InverseProblemSolver
 
