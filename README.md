@@ -6,7 +6,7 @@ poetry install
 ```
 
 ### Alternative Cuda Version / CPU Only
-T.b.d.
+T.b.d. (at the moment no solution?)
 
 # Usage
 ### Preprocessing of TNO Data
