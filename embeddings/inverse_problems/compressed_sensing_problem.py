@@ -15,6 +15,7 @@ _EMISSION_FIELD_WIDTH = TnoDatasetCollection.CROPPED_WIDTH
 _EMISSION_FIELD_HEIGHT = TnoDatasetCollection.CROPPED_HEIGHT
 _EMISSION_FIELD_DEPTH = NUM_GNFR_SECTORS
 
+
 class CompressedSensingProblem:
     def __init__(self, inverse_problem: InverseProblem) -> None:
         self._inverse_problem = inverse_problem
@@ -54,6 +55,7 @@ class SectorWiseCompressedSensingProblem(CompressedSensingProblem):
     Compressed sensing experiments for reconstruction of emission fields per sector.
     Emission fields have dimension: number of sectors x emission field height x emission field width
     """
+
     _EMISSION_FIELD_SIZE = _EMISSION_FIELD_DEPTH * _EMISSION_FIELD_HEIGHT * _EMISSION_FIELD_WIDTH
 
     @classmethod
@@ -75,7 +77,6 @@ class SectorWiseCompressedSensingProblem(CompressedSensingProblem):
 
         measurements = cls._compute_measurement(x=x, sensing_matrix=sensing_matrix, snr=snr)
         return cls(inverse_problem=InverseProblem(A=sensing_matrix, y=measurements))
-
 
     @classmethod
     def generate_random_total_emission_measurements(
@@ -130,6 +131,7 @@ class TotalEmissionsCompressedSensingExperiment(CompressedSensingProblem):
     Compressed sensing experiment for reconstruction of total emissions independent of sector.
     Emission fields have dimension: emission field height x emission field width
     """
+
     _EMISSION_FIELD_SIZE = _EMISSION_FIELD_HEIGHT * _EMISSION_FIELD_WIDTH
 
     @classmethod
