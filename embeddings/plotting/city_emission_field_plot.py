@@ -6,6 +6,8 @@ from embeddings.common.constants import LON_LAT_ASPECT_RATIO
 from embeddings.common.gnfr_sector import GnfrSector
 from embeddings.dataset.city_emission_field import CityEmissionField
 
+_TOTAL_EMISSIONS_ERROR = "Cannot provide a sector when plotting total emissions."
+_TWO = 2
 
 def plot_emission_field(
     emission_field: CityEmissionField,
@@ -39,7 +41,12 @@ def plot_emission_field_tensor(
     vmax: float | None = None,
     sector: GnfrSector | None = None,
 ) -> None:
-    to_plot = emission_field[sector.to_index(), :, :] if sector else emission_field.sum(0)
+    if emission_field.ndimension() == _TWO:
+        if sector is not None:
+            raise AssertionError(_TOTAL_EMISSIONS_ERROR)
+        to_plot = emission_field
+    else:
+        to_plot = emission_field[sector.to_index(), :, :] if sector else emission_field.sum(0)
 
     ax.imshow(
         to_plot,
