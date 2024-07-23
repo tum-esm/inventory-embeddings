@@ -9,10 +9,11 @@ from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
 from embeddings.inverse_problems.inverse_problem import InverseProblem
 from embeddings.inverse_problems.inverse_problems_solver import InverseProblemSolver
 
+_DIMENSION_MISMATCH_ERROR = "Dimensions are emission field are not as expected!"
+
 _EMISSION_FIELD_WIDTH = TnoDatasetCollection.CROPPED_WIDTH
 _EMISSION_FIELD_HEIGHT = TnoDatasetCollection.CROPPED_HEIGHT
 _EMISSION_FIELD_DEPTH = NUM_GNFR_SECTORS
-
 
 class CompressedSensingProblem:
     def __init__(self, inverse_problem: InverseProblem) -> None:
@@ -27,6 +28,15 @@ class CompressedSensingProblem:
 
     @classmethod
     def _un_vectorize(cls, x: Tensor) -> Tensor: ...
+
+    @classmethod
+    def _compute_measurement(cls, x: Tensor, sensing_matrix: Tensor, snr: int | None) -> Tensor:
+        measurements = sensing_matrix @ cls._vectorize(x=x)
+
+        if snr:
+            measurements = cls._add_noise(snr=snr, measurements=measurements)
+
+        return measurements
 
     @classmethod
     def _add_noise(cls, snr: int, measurements: Tensor) -> Tensor:
@@ -44,7 +54,7 @@ class SectorWiseCompressedSensingProblem(CompressedSensingProblem):
     Compressed sensing experiments for reconstruction of emission fields per sector.
     Emission fields have dimension: number of sectors x emission field height x emission field width
     """
-    _EMISSION_FIELD_SIZE = _EMISSION_FIELD_WIDTH * _EMISSION_FIELD_WIDTH * _EMISSION_FIELD_HEIGHT
+    _EMISSION_FIELD_SIZE = _EMISSION_FIELD_DEPTH * _EMISSION_FIELD_HEIGHT * _EMISSION_FIELD_WIDTH
 
     @classmethod
     def generate_random_sector_wise_measurements(
@@ -60,15 +70,12 @@ class SectorWiseCompressedSensingProblem(CompressedSensingProblem):
         this type of problem allows evaluating the capabilities of different solvers.
         """
         cls._verify_dimensions_of_emission_field(x)
+
         sensing_matrix = torch.randn((num_measurements, cls._EMISSION_FIELD_SIZE))
-        x_vectorized = cls._vectorize(x=x)
 
-        measurements = sensing_matrix @ x_vectorized
-
-        if snr:
-            measurements = cls._add_noise(snr=snr, measurements=measurements)
-
+        measurements = cls._compute_measurement(x=x, sensing_matrix=sensing_matrix, snr=snr)
         return cls(inverse_problem=InverseProblem(A=sensing_matrix, y=measurements))
+
 
     @classmethod
     def generate_random_total_emission_measurements(
@@ -83,15 +90,11 @@ class SectorWiseCompressedSensingProblem(CompressedSensingProblem):
         Sectors are not individually sensed, but instead the total emissions are sensed.
         """
         cls._verify_dimensions_of_emission_field(x)
+
         spatial_sensing_matrix = torch.randn((num_measurements, _EMISSION_FIELD_WIDTH * _EMISSION_FIELD_HEIGHT))
         sensing_matrix = torch.concatenate(tuple(spatial_sensing_matrix for _ in range(_EMISSION_FIELD_DEPTH)), 1)
-        x_vectorized = cls._vectorize(x=x)
 
-        measurements = sensing_matrix @ x_vectorized
-
-        if snr:
-            measurements = cls._add_noise(snr=snr, measurements=measurements)
-
+        measurements = cls._compute_measurement(x=x, sensing_matrix=sensing_matrix, snr=snr)
         return cls(inverse_problem=InverseProblem(A=sensing_matrix, y=measurements))
 
     @classmethod
@@ -110,11 +113,12 @@ class SectorWiseCompressedSensingProblem(CompressedSensingProblem):
 
     @classmethod
     def _verify_dimensions_of_emission_field(cls, x: Tensor) -> None:
-        raise NotImplementedError
+        if x.shape != (_EMISSION_FIELD_DEPTH, _EMISSION_FIELD_HEIGHT, _EMISSION_FIELD_WIDTH):
+            raise ValueError(_DIMENSION_MISMATCH_ERROR)
 
     @classmethod
     def _vectorize(cls, x: Tensor) -> Tensor:
-        return x.view(_EMISSION_FIELD_DEPTH * _EMISSION_FIELD_HEIGHT * _EMISSION_FIELD_WIDTH)
+        return x.view(cls._EMISSION_FIELD_SIZE)
 
     @classmethod
     def _un_vectorize(cls, x: Tensor) -> Tensor:
@@ -126,7 +130,7 @@ class TotalEmissionsCompressedSensingExperiment(CompressedSensingProblem):
     Compressed sensing experiment for reconstruction of total emissions independent of sector.
     Emission fields have dimension: emission field height x emission field width
     """
-    _EMISSION_FIELD_SIZE = _EMISSION_FIELD_WIDTH * _EMISSION_FIELD_HEIGHT
+    _EMISSION_FIELD_SIZE = _EMISSION_FIELD_HEIGHT * _EMISSION_FIELD_WIDTH
 
     @classmethod
     def generate_random_measurements(
@@ -140,14 +144,10 @@ class TotalEmissionsCompressedSensingExperiment(CompressedSensingProblem):
             num_measurements x (emission field height * emission field width).
         """
         cls._verify_dimensions_of_emission_field(x)
+
         sensing_matrix = torch.randn((num_measurements, cls._EMISSION_FIELD_SIZE))
-        x_vectorized = cls._vectorize(x=x)
 
-        measurements = sensing_matrix @ x_vectorized
-
-        if snr:
-            measurements = cls._add_noise(snr=snr, measurements=measurements)
-
+        measurements = cls._compute_measurement(x=x, sensing_matrix=sensing_matrix, snr=snr)
         return cls(inverse_problem=InverseProblem(A=sensing_matrix, y=measurements))
 
     @classmethod
@@ -161,11 +161,12 @@ class TotalEmissionsCompressedSensingExperiment(CompressedSensingProblem):
 
     @classmethod
     def _verify_dimensions_of_emission_field(cls, x: Tensor) -> None:
-        raise NotImplementedError
+        if x.shape != (_EMISSION_FIELD_HEIGHT, _EMISSION_FIELD_WIDTH):
+            raise ValueError(_DIMENSION_MISMATCH_ERROR)
 
     @classmethod
     def _vectorize(cls, x: Tensor) -> Tensor:
-        return x.view(_EMISSION_FIELD_HEIGHT * _EMISSION_FIELD_WIDTH)
+        return x.view(cls._EMISSION_FIELD_SIZE)
 
     @classmethod
     def _un_vectorize(cls, x: Tensor) -> Tensor:
