@@ -100,7 +100,6 @@ class TnoPreprocessor:
         ]
 
     def _extract_cells_from_city_data(self, city_data: pl.DataFrame) -> list[Cell]:
-        # TODO: must also check for point sources  # noqa: FIX002, TD002, TD003
         city_area_sources_data = city_data.filter(pl.col("SourceType") == "A")
 
         min_lon = city_area_sources_data["Lon"].min()

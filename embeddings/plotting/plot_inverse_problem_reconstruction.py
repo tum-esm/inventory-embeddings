@@ -9,11 +9,9 @@ from embeddings.common.gnfr_sector import GnfrSector
 from embeddings.common.log import logger
 from embeddings.common.paths import PlotPaths
 from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
-from embeddings.inverse_problems.compressed_sensing_experiment import (
-    generate_random_inverse_problem,
-    solve_inverse_problem,
-)
+from embeddings.inverse_problems.compressed_sensing_problem import SectorWiseCompressedSensingProblem
 from embeddings.inverse_problems.inverse_problems_solver import (
+    DctLassoSolver,
     DwtLassoSolver,
     GenerativeModelSolver,
     LassoSolver,
@@ -36,7 +34,7 @@ def plot_field(axes_: tuple[tuple[Axis]], field: Tensor, vmax_: float, title: st
 
 
 if __name__ == "__main__":
-    SNR = 10
+    SNR = 0
 
     city = "Munich"
     dataset = TnoDatasetCollection().get_case_study_data(city=city, year=2018)
@@ -48,11 +46,16 @@ if __name__ == "__main__":
         "VAE 2048": GenerativeModelSolver.from_vae_model_name("2048"),
         "VAE 2048 Munich": GenerativeModelSolver.from_vae_model_name("2048_munich"),
         "Lasso": LassoSolver(),
+        "Lasso (DCT)": DctLassoSolver(),
         "Lasso (DWT)": DwtLassoSolver(),
     }
 
     x = dataset[random.randint(0, len(dataset) - 1)]
-    inverse_problem = generate_random_inverse_problem(x=x, num_measurements=num_measurements, signal_to_noise_ratio=SNR)
+    compressed_sensing_problem = SectorWiseCompressedSensingProblem.generate_random_sector_wise_measurements(
+        x=x,
+        num_measurements=num_measurements,
+        snr=SNR,
+    )
 
     fig, axes = plt.subplots(
         len(SECTORS_TO_PLOT) + 1,
@@ -70,7 +73,7 @@ if __name__ == "__main__":
     )
 
     for index, (solver_name, solver) in enumerate(solvers.items()):
-        x_rec = solve_inverse_problem(solver=solver, inverse_problem=inverse_problem)
+        x_rec = compressed_sensing_problem.solve(solver)
 
         plot_field(
             axes_=axes,
