@@ -89,8 +89,11 @@ class ExperimentPaths:
     _EXPERIMENTS = _SAVES / "experiments"
     _EVALUATIONS = _EXPERIMENTS / "evaluations"
 
-    EVALUATION_LATEST = _EVALUATIONS / "latest"
+    LATENT_DIMENSION = _EVALUATIONS / "latent_dimension"
 
     @classmethod
-    def archive_latest_evaluation(cls) -> None:
-        _archive_dir(cls.EVALUATION_LATEST)
+    def get_next_evaluation_csv(cls, path: Path) -> Path:
+        i = 0
+        while (path / f"evaluation_{i}.csv").exists():
+            i += 1
+        return path / f"evaluation_{i}.csv"
