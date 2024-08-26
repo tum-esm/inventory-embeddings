@@ -84,7 +84,7 @@ class GaussianPlumeModel:
     SIMULATION_WIDTH = UP_SAMPLING_FACTOR * WIDTH
     SIMULATION_HEIGHT = UP_SAMPLING_FACTOR * HEIGHT
 
-    STATIC_TIME = 10
+    STATIC_TIME = 5
 
     TIME_PER_MEASUREMENT = 0.5
 
@@ -145,7 +145,10 @@ class GaussianPlumeModel:
 if __name__ == "__main__":
     model = GaussianPlumeModel()
 
-    solutions = model.get_sensitivities_for_sensor(sensor_x=25, sensor_y=25, num_measurements=20)
+    sensor_x = 25
+    sensor_y = 25
+
+    solutions = model.get_sensitivities_for_sensor(sensor_x=sensor_x, sensor_y=sensor_y, num_measurements=20)
 
     vmax = max([s.max() for s in solutions])
 
