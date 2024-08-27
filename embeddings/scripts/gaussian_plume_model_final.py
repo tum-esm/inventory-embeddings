@@ -8,7 +8,7 @@ class WindField:
     def __init__(
         self,
         speed: float = 0.3,
-        omega: float = 0.02,
+        omega: float = 0.1,
         static_time: float = 10.0,
     ) -> None:
         self._speed = speed
@@ -16,10 +16,10 @@ class WindField:
         self._static_time = static_time
 
     def __call__(self, x: np.ndarray, y: np.ndarray, t: float) -> tuple[np.ndarray, np.ndarray]:
-        omega = 0.02 if t > self._static_time else 0
+        omega = self._omega if t > self._static_time else 0
 
         u = 2 * self._speed * np.sin(0.1 * np.pi * x - omega * t)
-        v = self._speed * np.cos(0.1 * np.pi * y)
+        v = self._speed * np.cos(0.1 * np.pi * y + +omega * t)
         return u, v
 
 
@@ -86,9 +86,9 @@ class GaussianPlumeModel:
 
     STATIC_TIME = 5
 
-    TIME_PER_MEASUREMENT = 0.5
+    TIME_PER_MEASUREMENT = 0.4
 
-    dt = 0.25
+    dt = 0.05
 
     def get_sensitivities_for_sensor(self, sensor_x: int, sensor_y: int, num_measurements: int) -> list[np.ndarray]:
         u_0_flat = np.zeros((self.SIMULATION_HEIGHT, self.SIMULATION_WIDTH)).flatten()
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     sensor_x = 25
     sensor_y = 25
 
-    solutions = model.get_sensitivities_for_sensor(sensor_x=sensor_x, sensor_y=sensor_y, num_measurements=20)
+    solutions = model.get_sensitivities_for_sensor(sensor_x=sensor_x, sensor_y=sensor_y, num_measurements=100)
 
     vmax = max([s.max() for s in solutions])
 
