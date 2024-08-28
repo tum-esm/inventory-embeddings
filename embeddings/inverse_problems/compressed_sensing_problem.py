@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from typing import Self
 
 import numpy as np
@@ -16,7 +17,7 @@ _EMISSION_FIELD_HEIGHT = TnoDatasetCollection.CROPPED_HEIGHT
 _EMISSION_FIELD_DEPTH = NUM_GNFR_SECTORS
 
 
-class CompressedSensingProblem:
+class CompressedSensingProblem(ABC):
     def __init__(self, inverse_problem: InverseProblem) -> None:
         self._inverse_problem = inverse_problem
 
@@ -25,9 +26,11 @@ class CompressedSensingProblem:
         return self._un_vectorize(x_rec_vectorized)
 
     @classmethod
+    @abstractmethod
     def _vectorize(cls, x: Tensor) -> Tensor: ...
 
     @classmethod
+    @abstractmethod
     def _un_vectorize(cls, x: Tensor) -> Tensor: ...
 
     @classmethod
@@ -48,6 +51,16 @@ class CompressedSensingProblem:
         noise_std_dev = np.sqrt(noise_power)
         noise = np.random.default_rng().normal(0, noise_std_dev, num_measurements)
         return Tensor(measurements_np + noise)
+
+    @classmethod
+    def generate_from_sensing_matrix(
+        cls,
+        x: Tensor,
+        sensing_matrix: Tensor,
+        snr: int | None = None,
+    ) -> Self:
+        measurements = cls._compute_measurement(x, sensing_matrix, snr)
+        return cls(inverse_problem=InverseProblem(A=sensing_matrix, y=measurements))
 
 
 class SectorWiseCompressedSensingProblem(CompressedSensingProblem):
