@@ -34,23 +34,23 @@ class CompressedSensingProblem(ABC):
     def _un_vectorize(cls, x: Tensor) -> Tensor: ...
 
     @classmethod
-    def _compute_measurement(cls, x: Tensor, sensing_matrix: Tensor, snr: int | None) -> Tensor:
+    def _compute_measurement(cls, x: Tensor, sensing_matrix: Tensor, snr: int | None) -> tuple[Tensor, Tensor | None]:
         measurements = sensing_matrix @ cls._vectorize(x=x)
 
         if snr:
-            measurements = cls._add_noise(snr=snr, measurements=measurements)
-
-        return measurements
+            noise = cls._compute_noise(snr=snr, measurements=measurements)
+            return measurements + noise, noise
+        return measurements, None
 
     @classmethod
-    def _add_noise(cls, snr: int, measurements: Tensor) -> Tensor:
+    def _compute_noise(cls, snr: int, measurements: Tensor) -> Tensor:
         num_measurements = len(measurements)
         measurements_np = np.array(measurements)
         signal_power = np.mean(measurements_np**2)
         noise_power = signal_power / snr
         noise_std_dev = np.sqrt(noise_power)
         noise = np.random.default_rng().normal(0, noise_std_dev, num_measurements)
-        return Tensor(measurements_np + noise)
+        return Tensor(noise)
 
     @classmethod
     def generate_from_sensing_matrix(
@@ -59,8 +59,8 @@ class CompressedSensingProblem(ABC):
         sensing_matrix: Tensor,
         snr: int | None = None,
     ) -> Self:
-        measurements = cls._compute_measurement(x, sensing_matrix, snr)
-        return cls(inverse_problem=InverseProblem(A=sensing_matrix, y=measurements))
+        measurements, noise = cls._compute_measurement(x, sensing_matrix, snr)
+        return cls(inverse_problem=InverseProblem(A=sensing_matrix, y=measurements, noise=noise))
 
 
 class SectorWiseCompressedSensingProblem(CompressedSensingProblem):
@@ -88,8 +88,8 @@ class SectorWiseCompressedSensingProblem(CompressedSensingProblem):
 
         sensing_matrix = torch.randn((num_measurements, cls._EMISSION_FIELD_SIZE))
 
-        measurements = cls._compute_measurement(x=x, sensing_matrix=sensing_matrix, snr=snr)
-        return cls(inverse_problem=InverseProblem(A=sensing_matrix, y=measurements))
+        measurements, noise = cls._compute_measurement(x=x, sensing_matrix=sensing_matrix, snr=snr)
+        return cls(inverse_problem=InverseProblem(A=sensing_matrix, y=measurements, noise=noise))
 
     @classmethod
     def generate_random_total_emission_measurements(
@@ -108,8 +108,8 @@ class SectorWiseCompressedSensingProblem(CompressedSensingProblem):
         spatial_sensing_matrix = torch.randn((num_measurements, _EMISSION_FIELD_WIDTH * _EMISSION_FIELD_HEIGHT))
         sensing_matrix = torch.concatenate(tuple(spatial_sensing_matrix for _ in range(_EMISSION_FIELD_DEPTH)), 1)
 
-        measurements = cls._compute_measurement(x=x, sensing_matrix=sensing_matrix, snr=snr)
-        return cls(inverse_problem=InverseProblem(A=sensing_matrix, y=measurements))
+        measurements, noise = cls._compute_measurement(x=x, sensing_matrix=sensing_matrix, snr=snr)
+        return cls(inverse_problem=InverseProblem(A=sensing_matrix, y=measurements, noise=noise))
 
     @classmethod
     def generate_gaussian_plume_total_emission_measurements(
@@ -162,8 +162,8 @@ class TotalEmissionsCompressedSensingExperiment(CompressedSensingProblem):
 
         sensing_matrix = torch.randn((num_measurements, cls._EMISSION_FIELD_SIZE))
 
-        measurements = cls._compute_measurement(x=x, sensing_matrix=sensing_matrix, snr=snr)
-        return cls(inverse_problem=InverseProblem(A=sensing_matrix, y=measurements))
+        measurements, noise = cls._compute_measurement(x=x, sensing_matrix=sensing_matrix, snr=snr)
+        return cls(inverse_problem=InverseProblem(A=sensing_matrix, y=measurements, noise=noise))
 
     @classmethod
     def generate_gaussian_plume_measurements(

@@ -18,6 +18,8 @@ tensorboard = "^2.16.2"
 wandb = "^0.16.6"
 scikit-learn = "^1.5.0"
 pywavelets = "^1.6.0"
+cvxpy = "^1.5.3"
+gurobipy = "^11.0.3"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.3.7"

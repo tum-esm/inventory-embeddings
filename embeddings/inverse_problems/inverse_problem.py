@@ -7,3 +7,4 @@ from torch import Tensor
 class InverseProblem:
     A: Tensor
     y: Tensor
+    noise: Tensor | None
