@@ -1,13 +1,8 @@
 import numpy as np
 from scipy import fftpack
-from sklearn.linear_model import Lasso
-from torch import Tensor
 
 from embeddings.common.gnfr_sector import NUM_GNFR_SECTORS
 from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
-from embeddings.inverse_problems.inverse_problem import InverseProblem
-
-from ._inverse_problem_solver import InverseProblemSolver
 
 _WIDTH = TnoDatasetCollection.CROPPED_WIDTH
 _HEIGHT = TnoDatasetCollection.CROPPED_HEIGHT
@@ -24,38 +19,33 @@ def inverse_dct2(array: np.array) -> np.array:
     return fftpack.idct(fftpack.idct(array.T, norm="ortho").T, norm="ortho")
 
 
-class DctLassoSolver(InverseProblemSolver):
-    def solve(self, inverse_problem: InverseProblem) -> Tensor:
-        lasso = Lasso(alpha=0.1, max_iter=10_000)
-
-        A = inverse_problem.A.numpy()  # noqa: N806
-        y = inverse_problem.y.numpy()
-
-        A_cosine_basis = self._transform_sensing_matrix(sensing_matrix=A)  # noqa: N806
-
-        lasso.fit(A_cosine_basis, y)
-
-        c = lasso.coef_
-
-        x = self._inverse_transform_emission_field(transformed_field_as_vec=c)
-
-        return Tensor(x)
-
-    def _transform_sensing_matrix(self, sensing_matrix: np.array) -> np.array:
+class DctTransform:
+    @staticmethod
+    def transform_sensing_matrix(sensing_matrix: np.array) -> np.array:
         transformed_sensing_matrix = np.zeros(sensing_matrix.shape)
         for row in range(sensing_matrix.shape[0]):
-            transformed_row = self._transform_emission_field(sensing_matrix[row, :])
+            transformed_row = DctTransform._transform_emission_field(sensing_matrix[row, :])
             transformed_sensing_matrix[row, :] = transformed_row
         return transformed_sensing_matrix
 
-    def _transform_emission_field(self, field_as_vec: np.array) -> np.array:
-        if len(field_as_vec) == _DEPTH * _HEIGHT * _WIDTH:
-            return self._transform_emission_field_sector_wise(field_as_vec)
-        if len(field_as_vec) == _WIDTH * _HEIGHT:
-            return self._transform_emission_field_total(field_as_vec)
+    @staticmethod
+    def inverse_transform_field(transformed_field_as_vec: np.array) -> np.array:
+        if len(transformed_field_as_vec) == _DEPTH * _HEIGHT * _WIDTH:
+            return DctTransform._inverse_transform_emission_field_sector_wise(transformed_field_as_vec)
+        if len(transformed_field_as_vec) == _WIDTH * _HEIGHT:
+            return DctTransform._inverse_transform_emission_field_total(transformed_field_as_vec)
         raise AttributeError(_UNSUPPORTED_DIMENSIONS_ERROR)
 
-    def _transform_emission_field_sector_wise(self, field_as_vec: np.array) -> np.array:
+    @staticmethod
+    def _transform_emission_field(field_as_vec: np.array) -> np.array:
+        if len(field_as_vec) == _DEPTH * _HEIGHT * _WIDTH:
+            return DctTransform._transform_emission_field_sector_wise(field_as_vec)
+        if len(field_as_vec) == _WIDTH * _HEIGHT:
+            return DctTransform._transform_emission_field_total(field_as_vec)
+        raise AttributeError(_UNSUPPORTED_DIMENSIONS_ERROR)
+
+    @staticmethod
+    def _transform_emission_field_sector_wise(field_as_vec: np.array) -> np.array:
         field = field_as_vec.reshape((_DEPTH, _HEIGHT, _WIDTH))
         transformed_field = np.zeros(field.shape)
         for sector in range(_DEPTH):
@@ -63,19 +53,14 @@ class DctLassoSolver(InverseProblemSolver):
             transformed_field[sector, :, :] = dct2(sector_field)
         return transformed_field.reshape(_DEPTH * _HEIGHT * _WIDTH)
 
-    def _transform_emission_field_total(self, field_as_vec: np.array) -> np.array:
+    @staticmethod
+    def _transform_emission_field_total(field_as_vec: np.array) -> np.array:
         field = field_as_vec.reshape((_HEIGHT, _WIDTH))
         transformed_field = dct2(field)
         return transformed_field.reshape(_HEIGHT * _WIDTH)
 
-    def _inverse_transform_emission_field(self, transformed_field_as_vec: np.array) -> np.array:
-        if len(transformed_field_as_vec) == _DEPTH * _HEIGHT * _WIDTH:
-            return self._inverse_transform_emission_field_sector_wise(transformed_field_as_vec)
-        if len(transformed_field_as_vec) == _WIDTH * _HEIGHT:
-            return self._inverse_transform_emission_field_total(transformed_field_as_vec)
-        raise AttributeError(_UNSUPPORTED_DIMENSIONS_ERROR)
-
-    def _inverse_transform_emission_field_sector_wise(self, transformed_field_as_vec: np.array) -> np.array:
+    @staticmethod
+    def _inverse_transform_emission_field_sector_wise(transformed_field_as_vec: np.array) -> np.array:
         transformed_field = transformed_field_as_vec.reshape((_DEPTH, _HEIGHT, _WIDTH))
         field = np.zeros(transformed_field.shape)
         for sector in range(_DEPTH):
@@ -83,7 +68,8 @@ class DctLassoSolver(InverseProblemSolver):
             field[sector, :, :] = inverse_dct2(transformed_sector_field)
         return field.reshape(_DEPTH * _HEIGHT * _WIDTH)
 
-    def _inverse_transform_emission_field_total(self, transformed_field_as_vec: np.array) -> np.array:
+    @staticmethod
+    def _inverse_transform_emission_field_total(transformed_field_as_vec: np.array) -> np.array:
         transformed_field = transformed_field_as_vec.reshape((_HEIGHT, _WIDTH))
         field = inverse_dct2(transformed_field)
         return field.reshape(_HEIGHT * _WIDTH)
