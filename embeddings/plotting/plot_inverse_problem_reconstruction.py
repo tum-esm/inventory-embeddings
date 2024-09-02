@@ -11,10 +11,9 @@ from embeddings.common.paths import PlotPaths
 from embeddings.dataset.tno_dataset_collection import TnoDatasetCollection
 from embeddings.inverse_problems.compressed_sensing_problem import SectorWiseCompressedSensingProblem
 from embeddings.inverse_problems.inverse_problems_solver import (
-    DctLassoSolver,
-    DwtLassoSolver,
     GenerativeModelSolver,
     LassoSolver,
+    SparsityTransform,
 )
 from embeddings.models.common.metrics import mse, relative_error, ssim
 from embeddings.plotting.city_emission_field_plot import plot_emission_field_tensor
@@ -46,8 +45,8 @@ if __name__ == "__main__":
         "VAE 2048": GenerativeModelSolver.from_vae_model_name("2048"),
         "VAE 2048 Munich": GenerativeModelSolver.from_vae_model_name("2048_munich"),
         "Lasso": LassoSolver(),
-        "Lasso (DCT)": DctLassoSolver(),
-        "Lasso (DWT)": DwtLassoSolver(),
+        "Lasso (DCT)": LassoSolver(transform=SparsityTransform.DCT),
+        "Lasso (DWT)": LassoSolver(transform=SparsityTransform.DWT),
     }
 
     x = dataset[random.randint(0, len(dataset) - 1)]
