@@ -1,9 +1,12 @@
+from typing import Self
+
 import torch
 from lightning import LightningModule
 from lightning.pytorch.utilities.types import OptimizerLRScheduler
 from torch import Tensor, nn
 
 from embeddings.common.gnfr_sector import NUM_GNFR_SECTORS, GnfrSector
+from embeddings.common.paths import ModelPathsCreator
 from embeddings.models.common.layers import ConvLayer, ConvTransposeLayer, ResidualConvLayer
 from embeddings.models.common.metrics import mse, ssim
 
@@ -67,6 +70,14 @@ class VariationalAutoEncoder(LightningModule):
         self.save_hyperparameters()
         self._encoder = Encoder(latent_dim=self._latent_dimension)
         self._decoder = Decoder(latent_dim=self._latent_dimension)
+
+    @staticmethod
+    def load(model_name: str | None = None) -> Self:
+        if model_name is not None:
+            path = ModelPathsCreator.get_vae_model(model_name)
+        else:
+            path = ModelPathsCreator.get_latest_vae_model()
+        return VariationalAutoEncoder.load_from_checkpoint(checkpoint_path=path.checkpoint)
 
     @staticmethod
     def loss(x: Tensor, x_hat: Tensor, mean: Tensor, log_var: Tensor) -> Tensor:

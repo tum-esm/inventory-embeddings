@@ -30,8 +30,7 @@ def finetune() -> None:
 
     torch.set_float32_matmul_precision("high")
 
-    base_model_path = ModelPathsCreator.get_vae_model(base_model_name)
-    base_model = VariationalAutoEncoder.load_from_checkpoint(base_model_path.checkpoint)
+    base_model = VariationalAutoEncoder.load(model_name=base_model_name)
 
     dataset_with_city = TnoDatasetCollection().get_case_study_data(city, year=2015)
     dataset_with_city.add_sampling_transform(RandomSparseEmittersTransform(lam=100))

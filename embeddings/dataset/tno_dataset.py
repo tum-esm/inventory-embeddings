@@ -1,3 +1,4 @@
+import sys
 from copy import deepcopy
 from operator import attrgetter
 from pathlib import Path
@@ -42,7 +43,7 @@ class TnoDataset(Dataset[Tensor]):
     def _load_data(cls, tno_data: pl.DataFrame, year: int) -> list[CityEmissionField]:
         city_emission_fields = []
         cities = list(tno_data["City"].unique(maintain_order=True))
-        for city in tqdm(cities, desc="Loading Cities", leave=False):
+        for city in tqdm(cities, desc="Loading Cities", leave=False, file=sys.stdout):
             city_data = tno_data.filter(pl.col("City") == city)
             original = CityEmissionField(city_data=city_data, year=year)
             city_emission_fields.append(original)
