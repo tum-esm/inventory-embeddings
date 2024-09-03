@@ -12,7 +12,7 @@ _UNKNOWN_TRANSFORM_ERROR = "Set transform is not implemented!"
 
 
 def _optimize(
-    A: np.ndarray, # noqa: N803
+    A: np.ndarray,  # noqa: N803
     b: np.ndarray,
     error: np.ndarray | None,
     p: int = 1,
@@ -53,8 +53,9 @@ class BasisPursuitSolver(InverseProblemSolver):
     In case of noisy measurements, basis pursuit denoising is used!
     """
 
-    def __init__(self, transform: SparsityTransform | None = None) -> None:
+    def __init__(self, transform: SparsityTransform | None = None, verbose: bool = False) -> None:
         self._transform = transform
+        self._verbose = verbose
 
     def solve(self, inverse_problem: InverseProblem) -> Tensor:
         A = inverse_problem.A.numpy()  # noqa: N806
@@ -62,14 +63,14 @@ class BasisPursuitSolver(InverseProblemSolver):
         noise = inverse_problem.noise.numpy() if inverse_problem.noise is not None else None
 
         if self._transform is None:
-            x = _optimize(A, y, noise, p=1)
+            x = _optimize(A, y, noise, p=1, verbose=self._verbose)
         elif self._transform is SparsityTransform.DWT:
             A_DWT, coefficient_slices = DwtTransform.transform_sensing_matrix(sensing_matrix=A)  # noqa: N806
-            res = _optimize(A_DWT, y, noise, p=1)
+            res = _optimize(A_DWT, y, noise, p=1, verbose=self._verbose)
             x = DwtTransform.inverse_transform_field(coefficients=res, coefficient_slices=coefficient_slices)
         elif self._transform is SparsityTransform.DCT:
             A_cosine_basis = DctTransform.transform_sensing_matrix(sensing_matrix=A)  # noqa: N806
-            res = _optimize(A_cosine_basis, y, noise, p=1)
+            res = _optimize(A_cosine_basis, y, noise, p=1, verbose=self._verbose)
             x = DctTransform.inverse_transform_field(transformed_field_as_vec=res)
         else:
             raise NotImplementedError(_UNKNOWN_TRANSFORM_ERROR)
