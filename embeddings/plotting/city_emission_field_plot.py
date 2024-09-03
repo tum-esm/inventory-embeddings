@@ -9,6 +9,7 @@ from embeddings.dataset.city_emission_field import CityEmissionField
 _TOTAL_EMISSIONS_ERROR = "Cannot provide a sector when plotting total emissions."
 _TWO = 2
 
+
 def plot_emission_field(
     emission_field: CityEmissionField,
     ax: Axes,

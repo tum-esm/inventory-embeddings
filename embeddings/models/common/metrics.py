@@ -10,6 +10,7 @@ _CHANNEL_ERROR_MESSAGE = "Cannot provide channel if number of dimensions is only
 
 _SSIM = StructuralSimilarityIndexMeasure()
 
+
 def ssim(x: Tensor, x_hat: Tensor, channel: int | None = None) -> Tensor:
     if x.ndimension() == _TWO:
         if channel is not None:
@@ -45,6 +46,7 @@ def mse(x: Tensor, x_hat: Tensor, channel: int | None = None) -> Tensor:
     if channel is not None:
         return metric(x[:, channel : channel + 1, :, :], x_hat[:, channel : channel + 1, :, :])
     return metric(x, x_hat)
+
 
 def relative_error(x: Tensor, x_hat: Tensor, channel: int | None = None) -> Tensor:
     if x.ndimension() == _TWO:

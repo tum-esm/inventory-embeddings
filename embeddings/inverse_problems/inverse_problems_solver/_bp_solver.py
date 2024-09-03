@@ -11,7 +11,14 @@ from ._sparsity_transforms import DctTransform, DwtTransform, SparsityTransform
 _UNKNOWN_TRANSFORM_ERROR = "Set transform is not implemented!"
 
 
-def _optimize(A: np.ndarray, b: np.ndarray, error: np.ndarray | None, p: int = 1, *, verbose = True,) -> np.ndarray:  # noqa: N803
+def _optimize(
+    A: np.ndarray, # noqa: N803
+    b: np.ndarray,
+    error: np.ndarray | None,
+    p: int = 1,
+    *,
+    verbose: bool = True,
+) -> np.ndarray:
     n = A.shape[1]
 
     x_res = cp.Variable(n)
