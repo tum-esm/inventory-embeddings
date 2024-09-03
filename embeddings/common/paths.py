@@ -39,6 +39,11 @@ class OpenDataSoftPaths:
     GEONAMES_CSV = _OPEN_DATA_SOFT / "geonames-all-cities-with-a-population-1000.csv"
 
 
+class FootprintPaths:
+    _FOOTPRINT = _DATA / "Footprints"
+    SYNTHETIC_FOOTPRINTS_NC = _FOOTPRINT / "synthtetic.nc"  # Spelling error kept from original file
+
+
 class PlotPaths:
     PLOTS = _SAVES / "plots"
     CASE_STUDY_PLOT = PLOTS / "case_studies"
