@@ -2,6 +2,7 @@ import cvxpy as cp
 import numpy as np
 from torch import Tensor
 
+from embeddings.common.log import logger
 from embeddings.inverse_problems.inverse_problem import InverseProblem
 
 from ._inverse_problem_solver import InverseProblemSolver
@@ -10,18 +11,31 @@ from ._sparsity_transforms import DctTransform, DwtTransform, SparsityTransform
 _UNKNOWN_TRANSFORM_ERROR = "Set transform is not implemented!"
 
 
-def _optimize(A: np.ndarray, b: np.ndarray, error: np.ndarray | None, p: int = 1) -> np.ndarray:  # noqa: N803
+def _optimize(A: np.ndarray, b: np.ndarray, error: np.ndarray | None, p: int = 1, *, verbose = True,) -> np.ndarray:  # noqa: N803
     n = A.shape[1]
 
     x_res = cp.Variable(n)
 
     objective = cp.Minimize(cp.norm(x_res, p))
 
-    constraints = [A @ x_res == b] if error is None else [cp.sum_squares(A @ x_res - b) <= np.sum(error**2)]
+    error_sum_squares = 0 if error is None else np.sum(error**2)
+
+    constraints = [cp.sum_squares(A @ x_res - b) <= error_sum_squares]
+
+    options_gurobi = {
+        "Method": 2,  # Barrier method, which is often suitable for convex problems.
+        "BarConvTol": 1e-10,  # Convergence tolerance for barrier method.
+        "TimeLimit": 600,  # Limit the time for solving (in seconds).
+        "OutputFlag": 1 if verbose else 0,  # 0 suppresses output.
+    }
 
     prob = cp.Problem(objective, constraints)
-    prob.solve(verbose=True)
-
+    try:
+        prob.solve(solver=cp.GUROBI, verbose=verbose, **options_gurobi)
+    except (cp.error.SolverError, ImportError) as e:
+        logger.warning(f"Gurobi failed with error: {e}")
+        logger.warning("Using default solver instead!")
+        prob.solve(verbose=verbose)
     return x_res.value
 
 
