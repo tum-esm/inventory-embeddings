@@ -1,3 +1,5 @@
+import warnings
+
 import cvxpy as cp
 import numpy as np
 from torch import Tensor
@@ -39,12 +41,13 @@ def _optimize(
     }
 
     prob = cp.Problem(objective, constraints)
-    try:
-        prob.solve(solver=cp.GUROBI, verbose=verbose, **options_gurobi)
-    except (cp.error.SolverError, ImportError) as e:
-        logger.warning(f"Gurobi failed with error: {e}")
-        logger.warning("Using default solver instead!")
-        prob.solve(verbose=verbose)
+    with warnings.catch_warnings(action="ignore"):
+        try:
+            prob.solve(solver=cp.GUROBI, verbose=verbose, **options_gurobi)
+        except (cp.error.SolverError, ImportError) as e:
+            logger.warning(f"Gurobi failed with error: {e}")
+            logger.warning("Using default solver instead!")
+            prob.solve(verbose=verbose)
     return x_res.value
 
 
