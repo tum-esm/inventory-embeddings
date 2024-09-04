@@ -1,4 +1,7 @@
+import random
 from dataclasses import dataclass
+
+from torch import Tensor
 
 from embeddings.common.log import logger
 from embeddings.common.paths import TnoPaths
@@ -96,3 +99,8 @@ class TnoDatasetCollection:
 
     def get_case_study_data(self, city: str, year: int) -> TnoDataset:
         return self._case_study_datasets[city].get_sub_dataset_of_year(year)
+
+    def get_single_case_study_city_emission_field(self, city: str, year: int) -> Tensor:
+        dataset = self._case_study_datasets[city].get_sub_dataset_of_year(year)
+        dataset.disable_temporal_transforms()
+        return dataset[random.randint(0, len(dataset) - 1)]

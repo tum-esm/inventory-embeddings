@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import solve_ivp
 from scipy.ndimage import gaussian_filter
+from skimage.transform import resize
 
 
 class WindField:
@@ -18,8 +19,10 @@ class WindField:
     def __call__(self, x: np.ndarray, y: np.ndarray, t: float) -> tuple[np.ndarray, np.ndarray]:
         omega = self._omega if t > self._static_time else 0
 
-        u = 2 * self._speed * np.sin(0.1 * np.pi * x - omega * t)
-        v = self._speed * np.cos(0.1 * np.pi * y + +omega * t)
+        t_ = t - self._static_time
+
+        u = 2 * self._speed * np.sin(0.1 * np.pi * x + np.pi * omega * t_) * np.cos(omega / 2 * t_)
+        v = self._speed * np.cos(0.1 * np.pi * y + np.pi * omega * t_) * np.cos(omega / 2 * t_)
         return u, v
 
 
@@ -79,16 +82,16 @@ class AdvectionDiffusionEquation:
 class GaussianPlumeModel:
     WIDTH = HEIGHT = 32
 
-    UP_SAMPLING_FACTOR = 4
+    UP_SAMPLING_FACTOR = 2
 
     SIMULATION_WIDTH = UP_SAMPLING_FACTOR * WIDTH
     SIMULATION_HEIGHT = UP_SAMPLING_FACTOR * HEIGHT
 
     STATIC_TIME = 5
 
-    TIME_PER_MEASUREMENT = 0.4
+    TIME_PER_MEASUREMENT = 0.2
 
-    dt = 0.05
+    dt = 0.1
 
     def get_sensitivities_for_sensor(self, sensor_x: int, sensor_y: int, num_measurements: int) -> list[np.ndarray]:
         u_0_flat = np.zeros((self.SIMULATION_HEIGHT, self.SIMULATION_WIDTH)).flatten()
@@ -125,21 +128,8 @@ class GaussianPlumeModel:
             wind_field=wind_field,
         )
 
-    def _down_sample_solution(self, sol: np.ndarray, down_sampling_with_mean: bool = False) -> np.ndarray:
-        if down_sampling_with_mean:
-            # Alternative with mean of cells
-            reshaped_array = sol.reshape(
-                self.HEIGHT,
-                self.UP_SAMPLING_FACTOR,
-                self.WIDTH,
-                self.UP_SAMPLING_FACTOR,
-                sol.shape[2],
-            )
-            return reshaped_array.mean(axis=(1, 3))
-        return sol[
-            self.UP_SAMPLING_FACTOR // 2 :: self.UP_SAMPLING_FACTOR,
-            self.UP_SAMPLING_FACTOR // 2 :: self.UP_SAMPLING_FACTOR,
-        ]
+    def _down_sample_solution(self, sol: np.ndarray) -> np.ndarray:
+        return resize(sol, (self.HEIGHT, self.WIDTH), anti_aliasing=True)
 
 
 if __name__ == "__main__":
