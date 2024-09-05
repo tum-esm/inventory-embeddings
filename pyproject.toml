@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["must1d"]
 readme = "README.md"
-packages = [{include = "embeddings"}]
+packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.13"
@@ -35,9 +35,9 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-preprocess-tno = "embeddings.data_preprocessing.preprocess_tno:preprocess"
-train-vae = "embeddings.models.vae.train:train"
-finetune-vae = "embeddings.models.vae.finetune:finetune"
+preprocess-tno = "src.data_preprocessing.preprocess_tno:preprocess"
+train-vae = "src.models.vae.train:train"
+finetune-vae = "src.models.vae.finetune:finetune"
 
 [tool.ruff]
 line-length = 120
