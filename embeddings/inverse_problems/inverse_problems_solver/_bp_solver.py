@@ -34,8 +34,8 @@ def _optimize(
     options_gurobi = {
         "Method": 2,  # Barrier method, which is often suitable for convex problems.
         "BarHomogeneous": 1,
-        "BarConvTol": 1e-15,  # Convergence tolerance for barrier method.
-        "BarQCPConvTol": 1e-15,
+        "BarConvTol": 1e-8,  # Convergence tolerance for barrier method.
+        "BarQCPConvTol": 1e-8,
         "TimeLimit": 600,  # Limit the time for solving (in seconds).
         "OutputFlag": 1 if verbose else 0,  # 0 suppresses output.
     }
