@@ -71,13 +71,13 @@ class VariationalAutoEncoder(LightningModule):
         self._encoder = Encoder(latent_dim=self._latent_dimension)
         self._decoder = Decoder(latent_dim=self._latent_dimension)
 
-    @staticmethod
-    def load(model_name: str | None = None) -> Self:
+    @classmethod
+    def load(cls, model_name: str | None = None) -> Self:
         if model_name is not None:
             path = ModelPathsCreator.get_vae_model(model_name)
         else:
             path = ModelPathsCreator.get_latest_vae_model()
-        return VariationalAutoEncoder.load_from_checkpoint(checkpoint_path=path.checkpoint)
+        return cls.load_from_checkpoint(checkpoint_path=path.checkpoint)
 
     @staticmethod
     def loss(x: Tensor, x_hat: Tensor, mean: Tensor, log_var: Tensor) -> Tensor:
