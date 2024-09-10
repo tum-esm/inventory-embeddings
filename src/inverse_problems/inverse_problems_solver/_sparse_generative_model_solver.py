@@ -81,6 +81,14 @@ class SparseGenerativeModelSolver(InverseProblemSolver):
             learning_rate=learning_rate,
         )
 
+    @property
+    def learning_rate(self) -> float:
+        return self._learning_rate
+
+    @learning_rate.setter
+    def learning_rate(self, value: float) -> None:
+        self._learning_rate = value
+
     def _load_generator(self, path: ModelPaths | None) -> None:
         model_path = path if path else ModelPathsCreator.get_latest_vae_model()
         vae = VariationalAutoEncoder.load_from_checkpoint(checkpoint_path=model_path.checkpoint)
