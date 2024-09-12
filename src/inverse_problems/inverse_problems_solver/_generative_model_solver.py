@@ -107,11 +107,10 @@ class GenerativeModelSolver(InverseProblemSolver):
         a_on_device = inverse_problem.A.to(self._device)
         y_on_device = inverse_problem.y.to(self._device)
 
-        z = torch.zeros(self._latent_dimension).to(self._device) #torch.randn(self._latent_dimension).to(self._device)
+        z = torch.zeros(self._latent_dimension).to(self._device)  # torch.randn(self._latent_dimension).to(self._device)
         z.requires_grad = True
 
-        num_measurements = len(inverse_problem.y)
-        learning_rate = 2e-3  # _LEARNING_RATES[num_measurements]
+        learning_rate = 2e-3
 
         optimizer = torch.optim.Adam(params=[z], lr=learning_rate)
 

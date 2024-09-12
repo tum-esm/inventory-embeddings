@@ -28,7 +28,9 @@ def load_gaussian_plume_footprint(num_stations: int) -> np.ndarray:
             for i in range(station_data.shape[2]):
                 measurement = station_data[:, :, i]
                 measurement_resized = resize(measurement, _MEASUREMENT_SHAPE, anti_aliasing=True)
-                sensing_matrix[station_index * _NUM_MEASUREMENTS_PER_STATION + i] = measurement_resized.reshape(_MEASUREMENT_SHAPE_FLAT)
+                sensing_matrix[station_index * _NUM_MEASUREMENTS_PER_STATION + i] = measurement_resized.reshape(
+                    _MEASUREMENT_SHAPE_FLAT,
+                )
 
     return sensing_matrix
 

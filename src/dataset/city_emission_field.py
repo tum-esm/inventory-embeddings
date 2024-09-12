@@ -30,7 +30,7 @@ class CityEmissionField:
 
         for p in city_data.iter_rows(named=True):
             self.lat_lon_array[(p["x"], p["y"])] = [p["lat"], p["lon"]]
-            for i, co_2ff_sector in enumerate(p["co2_ff"].split(",")):
+            for i, co_2ff_sector in enumerate(p["co2_ff_area"].split(",")):
                 self.co2_ff_field[i, p["y"], p["x"]] = float(co_2ff_sector) * self.ROBUST_SCALING_FACTOR
 
     @property
