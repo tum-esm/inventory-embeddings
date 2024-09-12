@@ -64,14 +64,34 @@ class TnoPreprocessor:
     def _write_csv_header(self, out_csv: Path) -> None:
         with out_csv.open("w") as file:
             csv_writer = csv.writer(file, delimiter=";")
-            csv_writer.writerow(["City", "x", "y", "lat", "lon", "co2_ff", "co2_bf", "ch4"])
+            csv_writer.writerow(
+                [
+                    "City",
+                    "x",
+                    "y",
+                    "lat",
+                    "lon",
+                    "co2_ff",
+                    "co2_bf",
+                    "ch4",
+                ],
+            )
 
     def _write_cells_to_csv(self, out_csv: Path, city: City, cells: list[Cell]) -> None:
         with out_csv.open("a") as file:
             csv_writer = csv.writer(file, delimiter=";")
             for cell in cells:
                 csv_writer.writerow(
-                    [city.name, cell.x, cell.y, cell.lat, cell.lon, cell.co2_ff_str, cell.co2_bf_str, cell.ch4_str],
+                    [
+                        city.name,
+                        cell.x,
+                        cell.y,
+                        cell.lat,
+                        cell.lon,
+                        cell.co2_ff_area_str,
+                        cell.co2_bf_area_str,
+                        cell.ch4_area_str,
+                    ],
                 )
 
     def _filter_city_by_latitude_and_longitude(self, tno_data: pl.DataFrame, city: City) -> pl.DataFrame:

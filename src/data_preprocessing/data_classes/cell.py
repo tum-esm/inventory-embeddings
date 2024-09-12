@@ -16,15 +16,15 @@ class Cell:
     ch4: list[float]
 
     @property
-    def co2_ff_str(self) -> str:
+    def co2_ff_area_str(self) -> str:
         return ",".join([str(val) for val in self.co2_ff])
 
     @property
-    def co2_bf_str(self) -> str:
+    def co2_bf_area_str(self) -> str:
         return ",".join([str(val) for val in self.co2_bf])
 
     @property
-    def ch4_str(self) -> str:
+    def ch4_area_str(self) -> str:
         return ",".join([str(val) for val in self.ch4])
 
 
