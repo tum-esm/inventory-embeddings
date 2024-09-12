@@ -12,7 +12,7 @@ from src.common.log import logger
 from src.data_preprocessing.city_filtering import filter_cities_from_open_data_soft_data
 from src.data_preprocessing.data_classes.cell import Cell, CellBuilder
 from src.data_preprocessing.data_classes.city import City
-from src.data_preprocessing.data_classes.ghg_source import GhgSource
+from src.data_preprocessing.data_classes.ghg_source import GhgPointSource, GhgSource
 
 
 @dataclass
@@ -71,9 +71,12 @@ class TnoPreprocessor:
                     "y",
                     "lat",
                     "lon",
-                    "co2_ff",
-                    "co2_bf",
-                    "ch4",
+                    "co2_ff_area",
+                    "co2_ff_point",
+                    "co2_bf_area",
+                    "co2_bf_point",
+                    "ch4_area",
+                    "ch4_point",
                 ],
             )
 
@@ -89,8 +92,11 @@ class TnoPreprocessor:
                         cell.lat,
                         cell.lon,
                         cell.co2_ff_area_str,
+                        cell.co2_ff_point_str,
                         cell.co2_bf_area_str,
+                        cell.co2_bf_point_str,
                         cell.ch4_area_str,
+                        cell.ch4_point_str,
                     ],
                 )
 
@@ -109,7 +115,7 @@ class TnoPreprocessor:
                 f"Expected:{self._options.grid_width * self._options.grid_height}; Got:{len(cells)}.\n",
             )
 
-    def _extract_sources_from(self, sources_data: pl.DataFrame) -> list[GhgSource]:
+    def _extract_area_sources_from(self, sources_data: pl.DataFrame) -> list[GhgSource]:
         return [
             GhgSource(
                 sector=GnfrSector.from_str(source["GNFR_Sector"]),
@@ -120,24 +126,68 @@ class TnoPreprocessor:
             for source in sources_data.iter_rows(named=True)
         ]
 
+    def _extract_point_sources(self, sources_data: pl.DataFrame) -> list[GhgPointSource]:
+        return [
+            GhgPointSource(
+                sector=GnfrSector.from_str(source["GNFR_Sector"]),
+                co2_ff=source["CO2_ff"] if source["CO2_ff"] else 0.0,
+                co2_bf=source["CO2_bf"] if source["CO2_bf"] else 0.0,
+                ch4=source["CH4"] if source["CH4"] else 0.0,
+                lat=source["Lat"],
+                lon=source["Lon"],
+            )
+            for source in sources_data.iter_rows(named=True)
+        ]
+
+    def _assign_point_sources_to_nearest_cell(
+        self,
+        point_sources: list[GhgPointSource],
+        cell_coordinates: list[tuple[float, float]],
+    ) -> dict[tuple[float, float], list[GhgPointSource]]:
+        lon_lat_point_source: dict[tuple[float, float], list[GhgPointSource]] = {}
+        for point_source in point_sources:
+            min_distance = float("inf")
+            min_lon_lat = (-1.0, -1.0)
+            for lon, lat in cell_coordinates:
+                distance = (point_source.lat - lat) ** 2 + (point_source.lon - lon) ** 2
+                if distance < min_distance:
+                    min_distance = distance
+                    min_lon_lat = (lon, lat)
+            before = lon_lat_point_source.get(min_lon_lat, [])
+            before.append(point_source)
+            lon_lat_point_source[min_lon_lat] = before
+        return lon_lat_point_source
+
     def _extract_cells_from_city_data(self, city_data: pl.DataFrame) -> list[Cell]:
-        city_area_sources_data = city_data.filter(pl.col("SourceType") == "A")
+        area_sources_data = city_data.filter(pl.col("SourceType") == "A")
+        point_sources_data = city_data.filter(pl.col("SourceType") == "P")
 
-        min_lon = city_area_sources_data["Lon"].min()
-        max_lat = city_area_sources_data["Lat"].max()
+        point_sources = self._extract_point_sources(sources_data=point_sources_data)
 
-        cells_data = city_area_sources_data.group_by(["Lon", "Lat"])
+        min_lon = area_sources_data["Lon"].min()
+        max_lat = area_sources_data["Lat"].max()
+
+        cells_data = area_sources_data.group_by(["Lon", "Lat"])
+
+        lon_lat = [lon_lat for lon_lat, _ in cells_data]
+        lon_lat_point_source = self._assign_point_sources_to_nearest_cell(
+            point_sources=point_sources,
+            cell_coordinates=lon_lat,
+        )
 
         cells = []
 
         for (lon, lat), data in cells_data:  # type: ignore[misc]
-            sources = self._extract_sources_from(sources_data=data)
+            area_sources = self._extract_area_sources_from(sources_data=data)
+            point_sources = lon_lat_point_source.get((lon, lat), [])
             cell = (
                 CellBuilder()
-                .with_ghg_sources(sources)
+                .with_ghg_area_sources(area_sources)
+                .with_ghg_point_sources(point_sources)
                 .with_coordinates(lat=lat, lon=lon)  # type: ignore[arg-type]
                 .with_coordinates_origin(lon=min_lon, lat=max_lat)  # type: ignore[arg-type]
                 .build()
             )
             cells.append(cell)
+
         return cells
