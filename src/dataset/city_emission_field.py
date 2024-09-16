@@ -9,7 +9,7 @@ from src.common.gnfr_sector import NUM_GNFR_SECTORS
 class CityEmissionField:
     ROBUST_SCALING_FACTOR = 1 / 2_500_000  # determined using average of 95th percentile per city in training data
 
-    def __init__(self, city_data: pl.DataFrame, year: int, include_point_sources: bool = False) -> None:
+    def __init__(self, city_data: pl.DataFrame, year: int) -> None:
         """
         An emission field have dimension SxHxW (typical representations of images in numpy and torch).
 
@@ -26,15 +26,15 @@ class CityEmissionField:
         height: int = city_data["y"].max() + 1  # type: ignore[operator, assignment]
 
         self.co2_ff_field = np.zeros((NUM_GNFR_SECTORS, height, width))
+        self.co2_ff_field_point_sources = np.zeros((NUM_GNFR_SECTORS, height, width))
         self.lat_lon_array = np.zeros((width, height, 2))
 
         for p in city_data.iter_rows(named=True):
             self.lat_lon_array[(p["x"], p["y"])] = [p["lat"], p["lon"]]
-            for i, co_2ff_sector in enumerate(p["co2_ff_area"].split(",")):
-                self.co2_ff_field[i, p["y"], p["x"]] = float(co_2ff_sector)
-            if include_point_sources:
-                for i, co_2ff_sector in enumerate(p["co2_ff_point"].split(",")):
-                    self.co2_ff_field[i, p["y"], p["x"]] += float(co_2ff_sector)
+            for i, co_2_ff_sector in enumerate(p["co2_ff_area"].split(",")):
+                self.co2_ff_field[i, p["y"], p["x"]] = float(co_2_ff_sector)
+            for i, co_2_ff_sector in enumerate(p["co2_ff_point"].split(",")):
+                self.co2_ff_field_point_sources[i, p["y"], p["x"]] += float(co_2_ff_sector)
         self.co2_ff_field *= self.ROBUST_SCALING_FACTOR
 
     @property

@@ -30,7 +30,6 @@ CITIES_FOR_CASE_STUDY = [
 class TnoDatasetCollectionSettings:
     test_split: float = 0.13
     val_split: float = 0.15
-    include_point_sources: bool = False
 
 
 class TnoDatasetCollection:
@@ -44,12 +43,10 @@ class TnoDatasetCollection:
         tno_2015 = TnoDataset.from_csv(
             TnoPaths.BY_CITY_2015_CSV,
             year=2015,
-            include_point_sources=settings.include_point_sources,
         )
         tno_2018 = TnoDataset.from_csv(
             TnoPaths.BY_CITY_2018_CSV,
             year=2018,
-            include_point_sources=settings.include_point_sources,
         )
         self._complete_tno = merge(tno_2015, tno_2018)
 

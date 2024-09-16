@@ -32,20 +32,20 @@ class TnoDataset(Dataset[Tensor]):
         self._temporal_transforms_enabled = True
 
     @classmethod
-    def from_csv(cls, path: Path, year: int, include_point_sources: bool = False) -> Self:
+    def from_csv(cls, path: Path, year: int) -> Self:
         logger.info(f"Loading TNO data from '{path}'")
         tno_data = pl.read_csv(path, separator=";")
-        city_emission_fields = cls._load_data(tno_data, year, include_point_sources)
+        city_emission_fields = cls._load_data(tno_data, year)
         city_emission_fields.sort(key=attrgetter("city_name"))
         return cls(city_emission_fields)
 
     @classmethod
-    def _load_data(cls, tno_data: pl.DataFrame, year: int, include_point_sources: bool) -> list[CityEmissionField]:
+    def _load_data(cls, tno_data: pl.DataFrame, year: int) -> list[CityEmissionField]:
         city_emission_fields = []
         cities = list(tno_data["City"].unique(maintain_order=True))
         for city in tqdm(cities, desc="Loading Cities", leave=False, file=sys.stdout):
             city_data = tno_data.filter(pl.col("City") == city)
-            original = CityEmissionField(city_data=city_data, year=year, include_point_sources=include_point_sources)
+            original = CityEmissionField(city_data=city_data, year=year)
             city_emission_fields.append(original)
         return city_emission_fields
 

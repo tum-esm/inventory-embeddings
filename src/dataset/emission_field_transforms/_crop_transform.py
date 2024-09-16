@@ -6,7 +6,7 @@ from ._emission_field_transform import EmissionFieldTransform
 
 
 def _crop_emission_field(
-    emission_field: CityEmissionField,
+    field: CityEmissionField,
     start_x: int,
     start_y: int,
     width: int,
@@ -15,15 +15,16 @@ def _crop_emission_field(
     end_x = start_x + width
     end_y = start_y + height
 
-    if any([start_x < 0, start_y < 0, end_x > emission_field.width, end_y > emission_field.height]):
+    if any([start_x < 0, start_y < 0, end_x > field.width, end_y > field.height]):
         value_error = "Tried to crop beyond field border!"
         raise ValueError(value_error)
 
-    emission_field.co2_ff_field = emission_field.co2_ff_field[:, start_y:end_y, start_x:end_x]
-    emission_field.lat_lon_array = emission_field.lat_lon_array[start_x:end_x, start_y:end_y, :]
+    field.co2_ff_field = field.co2_ff_field[:, start_y:end_y, start_x:end_x]
+    field.co2_ff_field_point_sources = field.co2_ff_field_point_sources[:, start_y:end_y, start_x:end_x]
+    field.lat_lon_array = field.lat_lon_array[start_x:end_x, start_y:end_y, :]
 
-    assert emission_field.width == width, f"Expected width: {width}. Got: {emission_field.width}"
-    assert emission_field.height == height, f"Expected height: {height}. Got: {emission_field.height}"
+    assert field.width == width, f"Expected width: {width}. Got: {field.width}"
+    assert field.height == height, f"Expected height: {height}. Got: {field.height}"
 
 
 class CropTransform(EmissionFieldTransform):
@@ -41,7 +42,7 @@ class CropTransform(EmissionFieldTransform):
         start_y = center_y - self._height // 2
 
         _crop_emission_field(
-            emission_field=emission_field,
+            field=emission_field,
             start_x=start_x,
             start_y=start_y,
             width=self._width,
@@ -72,7 +73,7 @@ class RandomCropTransform(EmissionFieldTransform):
         start_y = random.randint(0, max_y)
 
         _crop_emission_field(
-            emission_field=emission_field,
+            field=emission_field,
             start_x=start_x,
             start_y=start_y,
             width=self._width,
