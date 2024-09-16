@@ -1,10 +1,9 @@
 import random
 from dataclasses import dataclass
 
-from torch import Tensor
-
 from src.common.log import logger
 from src.common.paths import TnoPaths
+from src.dataset.city_emission_field import CityEmissionField
 from src.dataset.dataset_operations import deterministic_split, merge
 from src.dataset.emission_field_transforms import (
     CenterCropTransform,
@@ -106,7 +105,7 @@ class TnoDatasetCollection:
     def get_case_study_data(self, city: str, year: int) -> TnoDataset:
         return self._case_study_datasets[city].get_sub_dataset_of_year(year)
 
-    def get_single_case_study_city_emission_field(self, city: str, year: int) -> Tensor:
+    def get_single_case_study_city_emission_field(self, city: str, year: int) -> CityEmissionField:
         dataset = self._case_study_datasets[city].get_sub_dataset_of_year(year)
         dataset.disable_temporal_transforms()
-        return dataset[random.randint(0, len(dataset) - 1)]
+        return dataset.get_city_emission_field(random.randint(0, len(dataset) - 1), apply_sampling_transforms=True)

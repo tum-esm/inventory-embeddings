@@ -19,7 +19,7 @@ def _get_all_unique_cities_sorted_by_emissions(dataset: TnoDataset) -> list[str]
     city_to_means_mapping: dict[str, list[float]] = {}
     for field in dataset.city_emission_fields:
         cur_means = city_to_means_mapping.get(field.city_name, [])
-        cur_means.append(float(field.co2_ff_field.mean()))
+        cur_means.append(float(field.co2_ff_area_sources_field.mean()))
         city_to_means_mapping[field.city_name] = cur_means
     city_to_mean_emissions_mapping = {c: np.array(means).mean() for c, means in city_to_means_mapping.items()}
 

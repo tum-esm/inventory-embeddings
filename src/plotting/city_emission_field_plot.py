@@ -22,7 +22,7 @@ def plot_emission_field(
     color_bar: bool = True,
     scale_to_real_emissions: bool = True,
 ) -> None:
-    field = emission_field.co2_ff_field
+    field = emission_field.co2_ff_area_sources_field
     to_plot = field[sector.to_index(), :, :] if sector else field.sum(0)
 
     scale = _SCALING_FACTOR if scale_to_real_emissions else 1

@@ -19,10 +19,10 @@ _EMISSION_FIELD_DEPTH = NUM_GNFR_SECTORS
 
 class CompressedSensingProblem(ABC):
     def __init__(self, inverse_problem: InverseProblem) -> None:
-        self._inverse_problem = inverse_problem
+        self.inverse_problem = inverse_problem
 
     def solve(self, solver: InverseProblemSolver) -> Tensor:
-        x_rec_vectorized = solver.solve(inverse_problem=self._inverse_problem)
+        x_rec_vectorized = solver.solve(inverse_problem=self.inverse_problem)
         return self._un_vectorize(x_rec_vectorized)
 
     @classmethod

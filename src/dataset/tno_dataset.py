@@ -143,7 +143,7 @@ class TnoDataset(Dataset[Tensor]):
     def __getitem__(self, index: int) -> Tensor:
         emission_field = self._get_emission_field_copy_at_index(index)
         emission_field = self._apply_sampling_transform(emission_field)
-        return emission_field.co2_ff_tensor
+        return emission_field.co2_ff_area_sources_tensor
 
     def __str__(self) -> str:
         return ", ".join(self._get_unique_city_names())

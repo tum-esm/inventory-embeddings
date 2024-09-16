@@ -25,6 +25,6 @@ class RandomSparseEmittersTransform(EmissionFieldTransform):
 
         random_scaling_factors = low + (high - low) * self._rng.random(size=s)
         for sector, scaling_factor, x, y in zip(random_sectors, random_scaling_factors, random_x_index, random_y_index):
-            max_value_in_sector = emission_field.co2_ff_field[sector, :, :].max()
-            emission_field.co2_ff_field[sector, y, x] = scaling_factor * max_value_in_sector
+            max_value_in_sector = emission_field.co2_ff_area_sources_field[sector, :, :].max()
+            emission_field.co2_ff_area_sources_field[sector, y, x] = scaling_factor * max_value_in_sector
         return emission_field

@@ -69,8 +69,8 @@ class HourTransform(EmissionFieldTransform):
                 self._scaling_factors[sector.to_index(), 0, 0] = factor
 
     def __call__(self, emission_field: CityEmissionField) -> CityEmissionField:
-        emission_field.co2_ff_field *= self._scaling_factors
-        emission_field.co2_ff_field_point_sources *= self._scaling_factors
+        emission_field.co2_ff_area_sources_field *= self._scaling_factors
+        emission_field.co2_ff_point_sources_field *= self._scaling_factors
         return emission_field
 
 
@@ -84,8 +84,8 @@ class DayTransform(EmissionFieldTransform):
                 self._scaling_factors[sector.to_index(), 0, 0] = factor
 
     def __call__(self, emission_field: CityEmissionField) -> CityEmissionField:
-        emission_field.co2_ff_field *= self._scaling_factors
-        emission_field.co2_ff_field_point_sources *= self._scaling_factors
+        emission_field.co2_ff_area_sources_field *= self._scaling_factors
+        emission_field.co2_ff_point_sources_field *= self._scaling_factors
         return emission_field
 
 
@@ -99,6 +99,6 @@ class MonthTransform(EmissionFieldTransform):
                 self._scaling_factors[sector.to_index(), 0, 0] = factor
 
     def __call__(self, emission_field: CityEmissionField) -> CityEmissionField:
-        emission_field.co2_ff_field *= self._scaling_factors
-        emission_field.co2_ff_field_point_sources *= self._scaling_factors
+        emission_field.co2_ff_area_sources_field *= self._scaling_factors
+        emission_field.co2_ff_point_sources_field *= self._scaling_factors
         return emission_field
