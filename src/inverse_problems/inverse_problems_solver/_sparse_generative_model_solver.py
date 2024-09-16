@@ -110,7 +110,7 @@ class SparseGenerativeModelSolver(InverseProblemSolver):
     def _target(self, A: Tensor, y: Tensor, z: Tensor, s: Tensor) -> Tensor:  # noqa: N803
         loss = torch.norm(y - A @ self._generate(z, s), p=2).pow(2)
         regularization = torch.norm(s, p=1)
-        return loss + self._lambda * regularization
+        return self._lambda * loss + regularization
 
     def _determine_if_reconstruction_is_sector_wise(self, inverse_problem: InverseProblem) -> None:
         first_row_of_sensing_matrix = inverse_problem.A[0, :]
