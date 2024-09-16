@@ -34,8 +34,9 @@ class CityEmissionField:
             for i, co_2_ff_sector in enumerate(p["co2_ff_area"].split(",")):
                 self.co2_ff_field[i, p["y"], p["x"]] = float(co_2_ff_sector)
             for i, co_2_ff_sector in enumerate(p["co2_ff_point"].split(",")):
-                self.co2_ff_field_point_sources[i, p["y"], p["x"]] += float(co_2_ff_sector)
+                self.co2_ff_field_point_sources[i, p["y"], p["x"]] = float(co_2_ff_sector)
         self.co2_ff_field *= self.ROBUST_SCALING_FACTOR
+        self.co2_ff_field_point_sources *= self.ROBUST_SCALING_FACTOR
 
     @property
     def width(self) -> int:
