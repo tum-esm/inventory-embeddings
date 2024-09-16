@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Self
+from typing import Any, Self
 
 import numpy as np
 import torch
@@ -21,8 +21,8 @@ class CompressedSensingProblem(ABC):
     def __init__(self, inverse_problem: InverseProblem) -> None:
         self.inverse_problem = inverse_problem
 
-    def solve(self, solver: InverseProblemSolver) -> Tensor:
-        x_rec_vectorized = solver.solve(inverse_problem=self.inverse_problem)
+    def solve(self, solver: InverseProblemSolver, **settings: dict[str, Any]) -> Tensor:
+        x_rec_vectorized = solver.solve(self.inverse_problem, **settings)
         return self._un_vectorize(x_rec_vectorized)
 
     @classmethod

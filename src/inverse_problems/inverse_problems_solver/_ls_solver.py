@@ -1,3 +1,5 @@
+from typing import Any
+
 from torch import Tensor
 
 from src.inverse_problems.inverse_problem import InverseProblem
@@ -12,7 +14,7 @@ class LeastSquaresSolver(InverseProblemSolver):
     def __init__(self, verbose: bool = False) -> None:
         self._verbose = verbose
 
-    def solve(self, inverse_problem: InverseProblem) -> Tensor:
+    def solve(self, inverse_problem: InverseProblem, **_settings: dict[str, Any]) -> Tensor:
         A = inverse_problem.A.numpy()  # noqa: N806
         y = inverse_problem.y.numpy()
         noise = inverse_problem.noise.numpy() if inverse_problem.noise is not None else None

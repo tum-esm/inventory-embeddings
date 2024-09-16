@@ -1,3 +1,5 @@
+from typing import Any
+
 from sklearn.linear_model import Lasso
 from torch import Tensor
 
@@ -16,7 +18,7 @@ class LassoSolver(InverseProblemSolver):
         self._alpha = alpha
         self._transform = transform
 
-    def solve(self, inverse_problem: InverseProblem) -> Tensor:
+    def solve(self, inverse_problem: InverseProblem, **_settings: dict[str, Any]) -> Tensor:
         A = inverse_problem.A.numpy()  # noqa: N806
         y = inverse_problem.y.numpy()
 

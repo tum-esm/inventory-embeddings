@@ -1,5 +1,5 @@
 from copy import copy
-from typing import Self
+from typing import Any, Self
 
 import torch
 from matplotlib import pyplot as plt
@@ -20,21 +20,6 @@ _DEPTH = NUM_GNFR_SECTORS
 
 _UNSUPPORTED_DIMENSIONS_ERROR = "Dimension for sensing matrix is not supported."
 
-# Empirically determined
-_LEARNING_RATES = {
-    10: 1.5e-4,
-    25: 5e-4,
-    50: 1e-3,
-    100: 1.8e-3,
-    250: 2.5e-3,
-    500: 4e-3,
-    1_000: 5.5e-3,
-    2_500: 7e-3,
-    5_000: 1.5e-2,
-    10_000: 3e-2,
-    12_500: 4e-2,
-}
-
 
 class SparseGenerativeModelSolver(InverseProblemSolver):
     MAX_STEPS = 20_000
@@ -45,20 +30,14 @@ class SparseGenerativeModelSolver(InverseProblemSolver):
     def __init__(
         self,
         *,
-        lambda_: float = 5e-3,
         plot_loss: bool = False,
         log_info: bool = False,
         path_to_model: ModelPaths | None = None,
-        warmup_learning_rate: float = 2e-3,
-        learning_rate: float = 1e-4,
     ) -> None:
         self._sector_wise_reconstruction = False
-        self._lambda = lambda_
         self._plot_loss = plot_loss
         self._log_info = log_info
         self._load_generator(path=path_to_model)
-        self._warmup_learning_rate = warmup_learning_rate
-        self._learning_rate = learning_rate
 
     @classmethod
     def from_vae_model_name(
@@ -67,26 +46,12 @@ class SparseGenerativeModelSolver(InverseProblemSolver):
         *,
         plot_loss: bool = False,
         log_info: bool = False,
-        lambda_: float = 5e-3,
-        warmup_learning_rate: float = 2e-3,
-        learning_rate: float = 1e-4,
     ) -> Self:
         return cls(
             path_to_model=ModelPathsCreator.get_vae_model(name),
             plot_loss=plot_loss,
             log_info=log_info,
-            lambda_=lambda_,
-            warmup_learning_rate=warmup_learning_rate,
-            learning_rate=learning_rate,
         )
-
-    @property
-    def learning_rate(self) -> float:
-        return self._learning_rate
-
-    @learning_rate.setter
-    def learning_rate(self, value: float) -> None:
-        self._learning_rate = value
 
     def _load_generator(self, path: ModelPaths | None) -> None:
         model_path = path if path else ModelPathsCreator.get_latest_vae_model()
@@ -106,10 +71,10 @@ class SparseGenerativeModelSolver(InverseProblemSolver):
             x_rec = x_rec.view(_HEIGHT * _WIDTH)
         return x_rec
 
-    def _target(self, A: Tensor, y: Tensor, z: Tensor, s: Tensor) -> Tensor:  # noqa: N803
+    def _target(self, A: Tensor, y: Tensor, z: Tensor, s: Tensor, lambda_: float) -> Tensor:  # noqa: N803
         loss = torch.norm(y - A @ self._generate(z, s), p=2).pow(2)
         regularization = torch.norm(s, p=1)
-        return self._lambda * loss + regularization
+        return lambda_ * loss + regularization
 
     def _determine_if_reconstruction_is_sector_wise(self, inverse_problem: InverseProblem) -> None:
         first_row_of_sensing_matrix = inverse_problem.A[0, :]
@@ -128,7 +93,18 @@ class SparseGenerativeModelSolver(InverseProblemSolver):
         plt.xlim(0, len(losses) - 1)
         plt.savefig(PlotPaths.PLOTS / "loss.png")
 
-    def solve(self, inverse_problem: InverseProblem) -> Tensor:
+    def solve(self, inverse_problem: InverseProblem, **settings: dict[str, Any]) -> Tensor:  # noqa: PLR0915, PLR0912
+        lambda_ = settings.pop("lambda_", 5e-3)
+        warmup_learning_rate = settings.pop("warmup_learning_rate", 2e-3)
+        learning_rate = settings.pop("learning_rate", 1e-4)
+
+        if not isinstance(lambda_, float):
+            raise TypeError
+        if not isinstance(warmup_learning_rate, float):
+            raise TypeError
+        if not isinstance(learning_rate, float):
+            raise TypeError
+
         self._determine_if_reconstruction_is_sector_wise(inverse_problem)
 
         a_on_device = inverse_problem.A.to(self._device)
@@ -143,8 +119,8 @@ class SparseGenerativeModelSolver(InverseProblemSolver):
             s = torch.zeros(_HEIGHT, _WIDTH).to(self._device)
         s.requires_grad = True
 
-        warmup_optimizer = torch.optim.Adam(params=[z], lr=self._warmup_learning_rate)
-        optimizer = torch.optim.Adam(params=[z, s], lr=self._learning_rate)
+        warmup_optimizer = torch.optim.Adam(params=[z], lr=warmup_learning_rate)
+        optimizer = torch.optim.Adam(params=[z, s], lr=learning_rate)
 
         losses = []
 
@@ -157,14 +133,14 @@ class SparseGenerativeModelSolver(InverseProblemSolver):
         stopped_at = -1
 
         for _ in range(self.WARM_UP):
-            loss = self._target(A=a_on_device, y=y_on_device, z=z, s=s)
+            loss = self._target(A=a_on_device, y=y_on_device, z=z, s=s, lambda_=lambda_)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(z, max_norm=0.5)
             warmup_optimizer.step()
             losses.append(loss.item())
 
         for iteration in range(self.WARM_UP, self.MAX_STEPS):
-            loss = self._target(A=a_on_device, y=y_on_device, z=z, s=s)
+            loss = self._target(A=a_on_device, y=y_on_device, z=z, s=s, lambda_=lambda_)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(z, max_norm=0.5)
             torch.nn.utils.clip_grad_norm_(s, max_norm=0.5)
