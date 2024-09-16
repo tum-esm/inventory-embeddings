@@ -1,7 +1,6 @@
 from copy import copy
 from typing import Self
 
-import numpy as np
 import torch
 from matplotlib import pyplot as plt
 from torch import Tensor
@@ -101,13 +100,21 @@ class GenerativeModelSolver(InverseProblemSolver):
         else:
             raise AttributeError(_UNSUPPORTED_DIMENSIONS_ERROR)
 
+    def _plot_losses(self, losses: list[float]) -> None:
+        plt.xlabel("Iteration")
+        plt.ylabel("Loss")
+        plt.yscale("log")
+        plt.plot(losses)
+        plt.xlim(0, len(losses) - 1)
+        plt.savefig(PlotPaths.PLOTS / "loss.png")
+
     def solve(self, inverse_problem: InverseProblem) -> Tensor:
         self._determine_if_reconstruction_is_sector_wise(inverse_problem)
 
         a_on_device = inverse_problem.A.to(self._device)
         y_on_device = inverse_problem.y.to(self._device)
 
-        z = torch.zeros(self._latent_dimension).to(self._device)  # torch.randn(self._latent_dimension).to(self._device)
+        z = torch.zeros(self._latent_dimension).to(self._device)
         z.requires_grad = True
 
         learning_rate = 2e-3
@@ -140,7 +147,7 @@ class GenerativeModelSolver(InverseProblemSolver):
                 cur_best_z = copy(z)
                 min_loss = loss.item()
 
-            losses.append(np.log(loss.item()))
+            losses.append(loss.item())
 
             if no_improvements == self.STOP_AFTER:
                 stopped_at = iteration
@@ -157,7 +164,6 @@ class GenerativeModelSolver(InverseProblemSolver):
                 )
 
         if self._plot_loss:
-            plt.plot(losses)
-            plt.savefig(PlotPaths.PLOTS / "loss.png")
+            self._plot_losses(losses)
 
         return self._generate(cur_best_z).cpu().detach()

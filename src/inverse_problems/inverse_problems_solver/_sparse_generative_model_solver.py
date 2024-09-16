@@ -1,7 +1,6 @@
 from copy import copy
 from typing import Self
 
-import numpy as np
 import torch
 from matplotlib import pyplot as plt
 from torch import Tensor
@@ -38,10 +37,10 @@ _LEARNING_RATES = {
 
 
 class SparseGenerativeModelSolver(InverseProblemSolver):
-    WARM_UP = 250
     MAX_STEPS = 20_000
     STOP_AFTER = 1000
     IMPROVEMENT_TOLERANCE = 1e-5
+    WARM_UP = 250
 
     def __init__(
         self,
@@ -121,6 +120,14 @@ class SparseGenerativeModelSolver(InverseProblemSolver):
         else:
             raise AttributeError(_UNSUPPORTED_DIMENSIONS_ERROR)
 
+    def _plot_losses(self, losses: list[float]) -> None:
+        plt.xlabel("Iteration")
+        plt.ylabel("Loss")
+        plt.yscale("log")
+        plt.plot(losses)
+        plt.xlim(0, len(losses) - 1)
+        plt.savefig(PlotPaths.PLOTS / "loss.png")
+
     def solve(self, inverse_problem: InverseProblem) -> Tensor:
         self._determine_if_reconstruction_is_sector_wise(inverse_problem)
 
@@ -154,7 +161,7 @@ class SparseGenerativeModelSolver(InverseProblemSolver):
             loss.backward()
             torch.nn.utils.clip_grad_norm_(z, max_norm=0.5)
             warmup_optimizer.step()
-            losses.append(np.log(loss.item()))
+            losses.append(loss.item())
 
         for iteration in range(self.WARM_UP, self.MAX_STEPS):
             loss = self._target(A=a_on_device, y=y_on_device, z=z, s=s)
@@ -175,7 +182,7 @@ class SparseGenerativeModelSolver(InverseProblemSolver):
                 cur_best_s = copy(s)
                 min_loss = loss.item()
 
-            losses.append(np.log(loss.item()))
+            losses.append(loss.item())
 
             if no_improvements == self.STOP_AFTER:
                 stopped_at = iteration
@@ -192,7 +199,6 @@ class SparseGenerativeModelSolver(InverseProblemSolver):
                 )
 
         if self._plot_loss:
-            plt.plot(losses)
-            plt.savefig(PlotPaths.PLOTS / "loss.png")
+            self._plot_losses(losses)
 
         return self._generate(z=cur_best_z, s=cur_best_s).cpu().detach()
