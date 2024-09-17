@@ -48,7 +48,7 @@ def mse(x: Tensor, x_hat: Tensor, channel: int | None = None) -> Tensor:
     return metric(x, x_hat)
 
 
-def relative_error(x: Tensor, x_hat: Tensor, channel: int | None = None) -> Tensor:
+def relative_error(x: Tensor, x_hat: Tensor, channel: int | None = None, p: int = 2) -> Tensor:
     if x.ndimension() == _TWO:
         if channel is not None:
             raise AttributeError(_CHANNEL_ERROR_MESSAGE)
@@ -61,8 +61,6 @@ def relative_error(x: Tensor, x_hat: Tensor, channel: int | None = None) -> Tens
 
     x_np = np.array(x)
     x_hat_np = np.array(x_hat)
-
-    p = 2
 
     error_norm = np.linalg.norm((x_np - x_hat_np).flatten(), ord=p)
 
