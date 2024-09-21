@@ -1,6 +1,7 @@
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.colors import LogNorm, Normalize
+from matplotlib.image import AxesImage
 from torch import Tensor
 
 from src.common.constants import LON_LAT_ASPECT_RATIO
@@ -21,7 +22,7 @@ def plot_emission_field(
     log_norm: bool = False,
     color_bar: bool = True,
     scale_to_real_emissions: bool = True,
-) -> None:
+) -> AxesImage:
     field = emission_field.co2_ff_area_sources_field
     to_plot = field[sector.to_index(), :, :] if sector else field.sum(0)
 
@@ -46,11 +47,13 @@ def plot_emission_field(
         norm=norm,
     )
     if color_bar:
-        plt.colorbar(im, ax=ax)
+        plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
 
     city_name = emission_field.city_name
     title = f"{city_name}; {sector}" if sector else f"{city_name}; sum of all sectors"
     ax.set_title(title)
+
+    return im
 
 
 def plot_emission_field_tensor(
@@ -61,7 +64,7 @@ def plot_emission_field_tensor(
     log_norm: bool = False,
     color_bar: bool = True,
     scale_to_real_emissions: bool = True,
-) -> None:
+) -> AxesImage:
     if emission_field.ndimension() == _TWO:
         if sector is not None:
             raise AssertionError(_TOTAL_EMISSIONS_ERROR)
@@ -86,4 +89,6 @@ def plot_emission_field_tensor(
     )
 
     if color_bar:
-        plt.colorbar(im, ax=ax)
+        plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+
+    return im
