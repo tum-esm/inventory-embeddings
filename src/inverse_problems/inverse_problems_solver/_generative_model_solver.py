@@ -107,7 +107,7 @@ class GenerativeModelSolver(InverseProblemSolver):
         plt.savefig(PlotPaths.PLOTS / "loss.png")
 
     def solve(self, inverse_problem: InverseProblem, **settings: dict[str, Any]) -> Tensor:
-        gamma = settings.pop("gamma", 0.01)
+        gamma = settings.pop("gamma", 0.0)
         learning_rate = settings.pop("learning_rate", None)
 
         if learning_rate is None:
