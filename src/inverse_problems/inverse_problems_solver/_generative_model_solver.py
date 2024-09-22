@@ -84,10 +84,10 @@ class GenerativeModelSolver(InverseProblemSolver):
             x_rec = x_rec.view(_HEIGHT * _WIDTH)
         return x_rec
 
-    def _target(self, A: Tensor, y: Tensor, z: Tensor, regularization_factor: float) -> Tensor:  # noqa: N803
+    def _target(self, A: Tensor, y: Tensor, z: Tensor, gamma: float) -> Tensor:  # noqa: N803
         loss = torch.norm(y - A @ self._generate(z), p=2).pow(2)
         regularization = torch.norm(z, p=2).pow(2)
-        return loss + regularization_factor * regularization
+        return loss + gamma * regularization
 
     def _determine_if_reconstruction_is_sector_wise(self, inverse_problem: InverseProblem) -> None:
         first_row_of_sensing_matrix = inverse_problem.A[0, :]
@@ -107,13 +107,13 @@ class GenerativeModelSolver(InverseProblemSolver):
         plt.savefig(PlotPaths.PLOTS / "loss.png")
 
     def solve(self, inverse_problem: InverseProblem, **settings: dict[str, Any]) -> Tensor:
-        regularization_factor = settings.pop("regularization_factor", 0.0)
+        gamma = settings.pop("gamma", 0.01)
         learning_rate = settings.pop("learning_rate", None)
 
         if learning_rate is None:
             learning_rate = _LEARNING_RATES[inverse_problem.A.shape[0]]  # type: ignore  # noqa: PGH003
 
-        if not isinstance(regularization_factor, float):
+        if not isinstance(gamma, float):
             raise TypeError
         if not isinstance(learning_rate, float):
             raise TypeError
@@ -138,7 +138,7 @@ class GenerativeModelSolver(InverseProblemSolver):
         stopped_at = -1
 
         for iteration in range(self.MAX_STEPS):
-            loss = self._target(A=a_on_device, y=y_on_device, z=z, regularization_factor=regularization_factor)
+            loss = self._target(A=a_on_device, y=y_on_device, z=z, gamma=gamma)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(z, max_norm=0.5)
             optimizer.step()
