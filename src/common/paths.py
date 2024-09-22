@@ -90,15 +90,21 @@ class ModelPathsCreator:
         return ModelPaths(base_path=cls._VAE_MODELS / "latest")
 
 
-class ExperimentPaths:
+class ExperimentPath:
     _EXPERIMENTS = _SAVES / "experiments"
-    _EVALUATIONS = _EXPERIMENTS / "evaluations"
 
-    LATENT_DIMENSION = _EVALUATIONS / "latent_dimension"
+    def __init__(self, name: str) -> None:
+        self._name = name
+        self._path = self._EXPERIMENTS / name
+        self._path.mkdir(exist_ok=True, parents=True)
 
-    @classmethod
-    def get_next_evaluation_csv(cls, path: Path) -> Path:
-        i = 0
-        while (path / f"evaluation_{i}.csv").exists():
-            i += 1
-        return path / f"evaluation_{i}.csv"
+    @property
+    def path(self) -> Path:
+        return self._path
+
+    @property
+    def csv_path(self) -> Path:
+        return self._path / f"{self._name}.csv"
+
+    def archive(self) -> None:
+        _archive_dir(self._path)

@@ -11,7 +11,7 @@ class CsvWriter:
             csv_reader = csv.writer(file)
             csv_reader.writerow(args)
 
-    def write_row(self, *args: str | float) -> None:
+    def write_row(self, *args: str | float | None) -> None:
         with self._path.open("a") as file:
             csv_reader = csv.writer(file)
             csv_reader.writerow(args)
