@@ -10,6 +10,8 @@ from src.inverse_problems.compressed_sensing_problem import SectorWiseCompressed
 from src.inverse_problems.inverse_problems_solver import InverseProblemSolver
 from src.models.common.metrics import relative_error, ssim
 
+from . import MEASUREMENTS, RELATIVE_ERROR, SNR, SOLVER, SSIM
+
 
 @dataclass
 class EvaluationSettings:
@@ -38,7 +40,7 @@ class EvaluationRunner:
     def _run_for_each_solver(self, solvers: dict[str, InverseProblemSolver]) -> None:
         evaluation_csv = CsvWriter(self._path.csv_path)
 
-        evaluation_csv.write_header("Solver", "Measurements", "SNR", "Relative Error", "SSIM")
+        evaluation_csv.write_header(SOLVER, MEASUREMENTS, SNR, RELATIVE_ERROR, SSIM)
 
         with tqdm(total=self._number_of_iterations, desc="Evaluation", file=stdout) as bar:
             for x in self._dataset:
