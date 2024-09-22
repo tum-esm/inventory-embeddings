@@ -108,7 +108,10 @@ class GenerativeModelSolver(InverseProblemSolver):
 
     def solve(self, inverse_problem: InverseProblem, **settings: dict[str, Any]) -> Tensor:
         regularization_factor = settings.pop("regularization_factor", 0.0)
-        learning_rate = settings.pop("learning_rate", 2e-3)
+        learning_rate = settings.pop("learning_rate", None)
+
+        if learning_rate is None:
+            learning_rate = _LEARNING_RATES[inverse_problem.A.shape[0]]  # type: ignore  # noqa: PGH003
 
         if not isinstance(regularization_factor, float):
             raise TypeError
