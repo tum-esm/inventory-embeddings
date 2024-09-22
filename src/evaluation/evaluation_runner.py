@@ -42,8 +42,8 @@ class EvaluationRunner:
 
         with tqdm(total=self._number_of_iterations, desc="Evaluation", file=stdout) as bar:
             for x in self._dataset:
-                for num_measurements in self._measurements:
-                    for snr in self._snr:
+                for snr in self._snr:
+                    for num_measurements in self._measurements:
                         inverse_problem = SectorWiseCompressedSensingProblem.generate_random_sector_wise_measurements(
                             x=x,
                             num_measurements=num_measurements,
@@ -54,4 +54,4 @@ class EvaluationRunner:
                             relative = relative_error(x=x, x_hat=x_rec).item()
                             s = ssim(x=x, x_hat=x_rec).item()
                             evaluation_csv.write_row(name, num_measurements, snr, relative, s)
-                        bar.update()
+                            bar.update()
