@@ -14,7 +14,7 @@ _UNKNOWN_TRANSFORM_ERROR = "Set transform is not implemented!"
 class LassoSolver(InverseProblemSolver):
     _MAX_ITER = 100_000
 
-    def __init__(self, alpha: float = 0.1, transform: SparsityTransform | None = None) -> None:
+    def __init__(self, alpha: float = 0.01, transform: SparsityTransform | None = None) -> None:
         self._alpha = alpha
         self._transform = transform
 
