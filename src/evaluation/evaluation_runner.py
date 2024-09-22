@@ -27,7 +27,7 @@ class EvaluationRunner:
         self._measurements = settings.measurements
         self._snr = settings.snr
         self._dataset = settings.dataset
-        self._number_of_iterations = len(self._dataset) * len(self._measurements) * len(self._snr)
+        self._num_problems = len(self._dataset) * len(self._measurements) * len(self._snr)
 
     def run(self, solvers: dict[str, InverseProblemSolver], iterations: int = 1) -> None:
         self._path.archive()
@@ -42,7 +42,7 @@ class EvaluationRunner:
 
         evaluation_csv.write_header(SOLVER, MEASUREMENTS, SNR, RELATIVE_ERROR, SSIM)
 
-        with tqdm(total=self._number_of_iterations, desc="Evaluation", file=stdout) as bar:
+        with tqdm(total=len(solvers) * self._num_problems, desc="Evaluation", file=stdout) as bar:
             for x in self._dataset:
                 for snr in self._snr:
                     for num_measurements in self._measurements:
