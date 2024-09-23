@@ -96,7 +96,6 @@ class ExperimentPath:
     def __init__(self, name: str) -> None:
         self._name = name
         self._path = self._EXPERIMENTS / name
-        self._path.mkdir(exist_ok=True, parents=True)
 
     @property
     def path(self) -> Path:
