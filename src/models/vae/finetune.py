@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 
 from src.common.log import logger
 from src.common.paths import ModelPathsCreator
-from src.dataset.emission_field_transforms import RandomSparseEmittersTransform
+from src.dataset.emission_field_transforms import GaussianNoiseTransform, SectorUncertaintyTransform
 from src.dataset.tno_dataset_collection import TnoDatasetCollection
 from src.models.vae.vae import VariationalAutoEncoder
 
@@ -33,7 +33,8 @@ def finetune() -> None:
     base_model = VariationalAutoEncoder.load(model_name=base_model_name)
 
     dataset_with_city = TnoDatasetCollection().get_case_study_data(city, year=2015)
-    dataset_with_city.add_sampling_transform(RandomSparseEmittersTransform(lam=100))
+    dataset_with_city.add_sampling_transform(SectorUncertaintyTransform())
+    dataset_with_city.add_sampling_transform(GaussianNoiseTransform())
 
     target_model_path = ModelPathsCreator.get_vae_model(f"{base_model_name}_{city.lower()}")
     target_model_path.archive()
