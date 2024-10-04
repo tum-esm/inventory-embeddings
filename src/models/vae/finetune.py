@@ -20,7 +20,7 @@ def finetune() -> None:
     city_help = "Name of the city the model is fine-tuned on."
     base_model_help = "Name of the base model that is fine-tuned, e.g. '1024'."
 
-    parser.add_argument("-e", "--epochs", metavar="N", default=20, type=int, help=epochs_help)
+    parser.add_argument("-e", "--epochs", metavar="N", default=30, type=int, help=epochs_help)
     parser.add_argument("-c", "--city", metavar="C", type=str, help=city_help, required=True)
     parser.add_argument("-b", "--base-model", metavar="M", type=str, help=base_model_help, required=True)
 
