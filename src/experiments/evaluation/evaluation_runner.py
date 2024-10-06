@@ -17,7 +17,7 @@ from . import MEASUREMENTS, RELATIVE_ERROR, SNR, SOLVER, SSIM
 class EvaluationSettings:
     path: ExperimentPath
     measurements: list[int]
-    snr: list[int | None]
+    snr: list[float | None]
     dataset: TnoDataset
 
 

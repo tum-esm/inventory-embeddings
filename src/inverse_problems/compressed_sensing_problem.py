@@ -34,7 +34,7 @@ class CompressedSensingProblem(ABC):
     def _un_vectorize(cls, x: Tensor) -> Tensor: ...
 
     @classmethod
-    def _compute_measurement(cls, x: Tensor, sensing_matrix: Tensor, snr: int | None) -> tuple[Tensor, Tensor | None]:
+    def _compute_measurement(cls, x: Tensor, sensing_matrix: Tensor, snr: float | None) -> tuple[Tensor, Tensor | None]:
         measurements = sensing_matrix @ cls._vectorize(x=x)
 
         if snr:
@@ -43,7 +43,7 @@ class CompressedSensingProblem(ABC):
         return measurements, None
 
     @classmethod
-    def _compute_noise(cls, snr: int, measurements: Tensor) -> Tensor:
+    def _compute_noise(cls, snr: float, measurements: Tensor) -> Tensor:
         num_measurements = len(measurements)
         measurements_np = np.array(measurements)
         signal_power = np.mean(measurements_np**2)
@@ -57,7 +57,7 @@ class CompressedSensingProblem(ABC):
         cls,
         x: Tensor,
         sensing_matrix: Tensor,
-        snr: int | None = None,
+        snr: float | None = None,
     ) -> Self:
         measurements, noise = cls._compute_measurement(x, sensing_matrix, snr)
         return cls(inverse_problem=InverseProblem(A=sensing_matrix, y=measurements, noise=noise))
@@ -76,7 +76,7 @@ class SectorWiseCompressedSensingProblem(CompressedSensingProblem):
         cls,
         x: Tensor,
         num_measurements: int,
-        snr: int | None = None,
+        snr: float | None = None,
     ) -> Self:
         """
         Sensing matrix is random Gaussian.
@@ -96,7 +96,7 @@ class SectorWiseCompressedSensingProblem(CompressedSensingProblem):
         cls,
         x: Tensor,
         num_measurements: int,
-        snr: int | None = None,
+        snr: float | None = None,
     ) -> Self:
         """
         Sensing matrix is random Gaussian with dimension:
@@ -116,7 +116,7 @@ class SectorWiseCompressedSensingProblem(CompressedSensingProblem):
         cls,
         x: Tensor,
         num_measurements: int,
-        snr: int | None = None,
+        snr: float | None = None,
     ) -> Self:
         """
         Sensing matrix is derived from a footprint randomly generated using a Gaussian plume model:
@@ -152,7 +152,7 @@ class TotalEmissionsCompressedSensingExperiment(CompressedSensingProblem):
         cls,
         x: Tensor,
         num_measurements: int,
-        snr: int | None = None,
+        snr: float | None = None,
     ) -> Self:
         """
         Sensing matrix is random Gaussian with dimension:
@@ -170,7 +170,7 @@ class TotalEmissionsCompressedSensingExperiment(CompressedSensingProblem):
         cls,
         x: Tensor,
         num_measurements: int,
-        snr: int | None = None,
+        snr: float | None = None,
     ) -> Self:
         raise NotImplementedError
 
