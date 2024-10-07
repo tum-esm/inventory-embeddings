@@ -56,18 +56,15 @@ if __name__ == "__main__":
     city_data = dataset_collection.get_single_case_study_city_emission_field(city=args.city, year=DATA_YEAR)
 
     x_a = city_data.co2_ff_area_sources_tensor.sum(0)
-    x_p = city_data.co2_ff_point_sources_tensor.sum(0)
 
     sensing_matrix = Tensor(load_gaussian_plume_footprint(NUM_MEASUREMENT_STATIONS))
 
     def create_inverse_problem(snr: float) -> TotalEmissionsCompressedSensingExperiment:
-        p = TotalEmissionsCompressedSensingExperiment.generate_from_sensing_matrix(
-            x=x_a + x_p,
+        return TotalEmissionsCompressedSensingExperiment.generate_from_sensing_matrix(
+            x=x_a,
             sensing_matrix=sensing_matrix,
             snr=snr,
         )
-        p.inverse_problem.y -= sensing_matrix @ x_p.reshape(1024)
-        return p
 
     experiment_path = ExperimentPath("gaussian_plume_snr")
     csv_path = experiment_path.path / args.city.lower() / f"{args.solver.lower()}.csv"
