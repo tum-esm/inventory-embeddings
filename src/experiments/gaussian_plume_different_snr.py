@@ -8,6 +8,7 @@ from tqdm import tqdm
 from src.common.csv_writer import CsvWriter
 from src.common.paths import ExperimentPath
 from src.dataset.tno_dataset_collection import TnoDatasetCollection
+from src.experiments.hyper_parameters import LAMBDA_PER_SNR
 from src.inverse_problems.compressed_sensing_problem import TotalEmissionsCompressedSensingExperiment
 from src.inverse_problems.footprints.footprint_loader import load_gaussian_plume_footprint
 from src.inverse_problems.inverse_problems_solver import (
@@ -30,12 +31,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     city_help = "City to run the experiment on."
-    solver_help = "Solver to use. Options: LS, DCT, DWT, 256, 512, 1024, 2048."
-    fine_tuned_help = "If a generative model is chosen, the corresponding fine-tuned model is loaded."
+    solver_help = "Solver to use. Options: LS, DCT, DWT, 256, 512, 1024, 2048, 256_munich, ..."
 
     parser.add_argument("-c", "--city", metavar="C", type=str, help=city_help, required=True)
     parser.add_argument("-s", "--solver", metavar="S", help=solver_help, type=str, required=True)
-    parser.add_argument("-fine-tuned", default=False, action="store_true", help=fine_tuned_help)
 
     args = parser.parse_args()
 
@@ -48,8 +47,7 @@ if __name__ == "__main__":
     elif args.solver == "DWT":
         solver = BasisPursuitSolver(transform=SparsityTransform.DWT)
     else:
-        model_name = args.solver if not args.fine_tuned else f"{args.solver}_{args.city.lower()}"
-        solver = SparseGenerativeModelSolver.from_vae_model_name(model_name)
+        solver = SparseGenerativeModelSolver.from_vae_model_name(args.solver)
 
     if solver is None:
         raise ValueError(SOLVER_NOT_FOUND_ERROR)
@@ -86,7 +84,10 @@ if __name__ == "__main__":
 
         for i in range(ITERATIONS_PER_PROBLEM):
             problem = create_inverse_problem(snr=10 ** (snr_db / 10))
-            x_rec = problem.solve(solver)
+            if isinstance(solver, SparseGenerativeModelSolver):
+                x_rec = problem.solve(solver, lambda_=LAMBDA_PER_SNR[args.city][args.solver][snr_db])
+            else:
+                x_rec = problem.solve(solver)
             relative_error_values[i] = relative_error(x=x_a, x_hat=x_rec).item()
             ssim_values[i] = ssim(x=x_a, x_hat=x_rec).item()
 
