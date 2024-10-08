@@ -8,7 +8,7 @@ from tqdm import tqdm
 from src.common.csv_writer import CsvWriter
 from src.common.paths import ExperimentPath
 from src.dataset.tno_dataset_collection import TnoDatasetCollection
-from src.experiments.hyper_parameters import LAMBDA_PER_SNR
+from src.experiments.hyper_parameters import LAMBDA_PER_SNR, LEARNING_RATE_PER_CITY
 from src.inverse_problems.compressed_sensing_problem import TotalEmissionsCompressedSensingExperiment
 from src.inverse_problems.footprints.footprint_loader import load_gaussian_plume_footprint
 from src.inverse_problems.inverse_problems_solver import (
@@ -82,7 +82,11 @@ if __name__ == "__main__":
         for i in range(ITERATIONS_PER_PROBLEM):
             problem = create_inverse_problem(snr=10 ** (snr_db / 10))
             if isinstance(solver, SparseGenerativeModelSolver):
-                x_rec = problem.solve(solver, lambda_=LAMBDA_PER_SNR[args.city][args.solver][snr_db])
+                x_rec = problem.solve(
+                    solver,
+                    lambda_=LAMBDA_PER_SNR[args.city][args.solver][snr_db],
+                    learning_rate=LEARNING_RATE_PER_CITY[args.city],
+                )
             else:
                 x_rec = problem.solve(solver)
             relative_error_values[i] = relative_error(x=x_a, x_hat=x_rec).item()
