@@ -31,6 +31,7 @@ settings = EvaluationSettings(
     snr=[SNR],
     dataset=dataset,
     path=ExperimentPath(EXPERIMENT_NAME),
+    repetitions=3,
 )
 
 evaluation_runner = EvaluationRunner(settings=settings)

@@ -19,6 +19,7 @@ class EvaluationSettings:
     measurements: list[int]
     snr: list[float | None]
     dataset: TnoDataset
+    repetitions: int = 1
 
 
 class EvaluationRunner:
@@ -27,7 +28,8 @@ class EvaluationRunner:
         self._measurements = settings.measurements
         self._snr = settings.snr
         self._dataset = settings.dataset
-        self._num_problems = len(self._dataset) * len(self._measurements) * len(self._snr)
+        self._repetitions = settings.repetitions
+        self._num_problems = len(self._dataset) * len(self._measurements) * len(self._snr) * self._repetitions
 
     def run(self, solvers: dict[str, InverseProblemSolver], iterations: int = 1) -> None:
         self._path.archive()
@@ -52,8 +54,9 @@ class EvaluationRunner:
                             snr=snr,
                         )
                         for name, solver in solvers.items():
-                            x_rec = inverse_problem.solve(solver)
-                            relative = relative_error(x=x, x_hat=x_rec).item()
-                            s = ssim(x=x, x_hat=x_rec).item()
-                            evaluation_csv.write_row(name, num_measurements, snr, relative, s)
-                            bar.update()
+                            for _ in range(self._repetitions):
+                                x_rec = inverse_problem.solve(solver)
+                                relative = relative_error(x=x, x_hat=x_rec).item()
+                                s = ssim(x=x, x_hat=x_rec).item()
+                                evaluation_csv.write_row(name, num_measurements, snr, relative, s)
+                                bar.update()
