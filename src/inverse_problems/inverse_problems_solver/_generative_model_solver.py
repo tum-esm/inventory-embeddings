@@ -13,27 +13,13 @@ from src.inverse_problems.inverse_problem import InverseProblem
 from src.models.vae.vae import VariationalAutoEncoder
 
 from ._inverse_problem_solver import InverseProblemSolver
+from ._learning_rates_generative_model_solver import LEARNING_RATES
 
 _WIDTH = TnoDatasetCollection.CROPPED_WIDTH
 _HEIGHT = TnoDatasetCollection.CROPPED_HEIGHT
 _DEPTH = NUM_GNFR_SECTORS
 
 _UNSUPPORTED_DIMENSIONS_ERROR = "Dimension for sensing matrix is not supported."
-
-# Empirically determined
-_LEARNING_RATES = {
-    10: 1.5e-4,
-    25: 5e-4,
-    50: 1e-3,
-    100: 1.8e-3,
-    250: 2.5e-3,
-    500: 4e-3,
-    1_000: 5.5e-3,
-    2_500: 7e-3,
-    5_000: 1.5e-2,
-    10_000: 3e-2,
-    12_500: 4e-2,
-}
 
 
 class GenerativeModelSolver(InverseProblemSolver):
@@ -111,7 +97,7 @@ class GenerativeModelSolver(InverseProblemSolver):
         learning_rate = settings.pop("learning_rate", None)
 
         if learning_rate is None:
-            learning_rate = _LEARNING_RATES[inverse_problem.A.shape[0]]  # type: ignore  # noqa: PGH003
+            learning_rate = LEARNING_RATES[self._latent_dimension][inverse_problem.A.shape[0]]
 
         if not isinstance(gamma, float):
             raise TypeError
@@ -123,7 +109,7 @@ class GenerativeModelSolver(InverseProblemSolver):
         a_on_device = inverse_problem.A.to(self._device)
         y_on_device = inverse_problem.y.to(self._device)
 
-        z = torch.zeros(self._latent_dimension).to(self._device)
+        z = torch.randn(self._latent_dimension).to(self._device)
         z.requires_grad = True
 
         optimizer = torch.optim.Adam(params=[z], lr=learning_rate)
