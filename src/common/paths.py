@@ -50,6 +50,8 @@ class PlotPaths:
 
 
 class ModelPaths:
+    MODELS = _SAVES / "models"
+
     def __init__(self, base_path: Path) -> None:
         self._base_path = base_path
 
