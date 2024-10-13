@@ -22,6 +22,9 @@ def plot_emission_field(
     log_norm: bool = False,
     color_bar: bool = True,
     scale_to_real_emissions: bool = True,
+    title: bool = False,
+    label_axis: bool = True,
+    fontsize: int = 12,
 ) -> AxesImage:
     field = emission_field.co2_ff_area_sources_field
     to_plot = field[sector.to_index(), :, :] if sector else field.sum(0)
@@ -47,11 +50,17 @@ def plot_emission_field(
         norm=norm,
     )
     if color_bar:
-        plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+        cbar = plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+        cbar.set_label(label="kg / year", fontsize=fontsize)
 
     city_name = emission_field.city_name
-    title = f"{city_name}; {sector}" if sector else f"{city_name}; sum of all sectors"
-    ax.set_title(title)
+    if title:
+        t = f"{city_name}; {sector}" if sector else f"{city_name}; sum of all sectors"
+        ax.set_title(t, fontsize=fontsize)
+
+    if label_axis:
+        ax.set_xlabel("Longitude", fontsize=fontsize)
+        ax.set_ylabel("Latitude", fontsize=fontsize)
 
     return im
 
@@ -64,6 +73,7 @@ def plot_emission_field_tensor(
     log_norm: bool = False,
     color_bar: bool = True,
     scale_to_real_emissions: bool = True,
+    fontsize: int = 12,
 ) -> AxesImage:
     if emission_field.ndimension() == _TWO:
         if sector is not None:
@@ -89,6 +99,7 @@ def plot_emission_field_tensor(
     )
 
     if color_bar:
-        plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+        cbar = plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+        cbar.set_label(label="kg / year", fontsize=fontsize)
 
     return im
