@@ -7,6 +7,7 @@ from src.common.gnfr_sector import NUM_GNFR_SECTORS
 
 
 class CityEmissionField:
+    UNIT_CONVERSION_FACTOR = 1 / 1_387_584  # kg / km^2 * a -> μmol / m^2 * s (CO2)
     ROBUST_SCALING_FACTOR = 1 / 2_500_000  # determined using average of 95th percentile per city in training data
 
     def __init__(self, city_data: pl.DataFrame, year: int) -> None:

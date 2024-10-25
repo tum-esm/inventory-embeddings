@@ -11,7 +11,8 @@ from src.dataset.city_emission_field import CityEmissionField
 _TOTAL_EMISSIONS_ERROR = "Cannot provide a sector when plotting total emissions."
 _TWO = 2
 _CMAP = "viridis"
-_SCALING_FACTOR = 1 / CityEmissionField.ROBUST_SCALING_FACTOR
+_SCALING_FACTOR = 1 / CityEmissionField.ROBUST_SCALING_FACTOR * CityEmissionField.UNIT_CONVERSION_FACTOR
+_UNIT_LABEL = r"$\mu \text{mol} \cdot \text{m}^{-2} \cdot \text{s}^{-1}$"
 
 
 def plot_emission_field(
@@ -51,7 +52,7 @@ def plot_emission_field(
     )
     if color_bar:
         cbar = plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-        cbar.set_label(label="kg / year", fontsize=fontsize)
+        cbar.set_label(label=_UNIT_LABEL, fontsize=fontsize)
 
     city_name = emission_field.city_name
     if title:
@@ -100,6 +101,6 @@ def plot_emission_field_tensor(
 
     if color_bar:
         cbar = plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-        cbar.set_label(label="kg / year", fontsize=fontsize)
+        cbar.set_label(label=_UNIT_LABEL, fontsize=fontsize)
 
     return im
