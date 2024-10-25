@@ -25,4 +25,6 @@ poetry run preprocess-tno -h
 poetry run pre-commit install
 ```
 
+# Atmospheric Inversion
 
+![](notebooks/experiments/generated_animations/gaussian_plume.gif)
