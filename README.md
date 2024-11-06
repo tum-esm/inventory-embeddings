@@ -67,9 +67,14 @@ The emission flux field of Munich from 2018 looks as follows:
 
 
 ## Installation
+
+### Dependencies
 ```bash
 poetry install
 ```
+
+### Data
+> A guide on the required datasets and how to get them will be added in the future. This includes the VAE models weights.
 
 ## Usage
 > **Note:**  
