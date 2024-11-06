@@ -46,11 +46,11 @@ The emission flux field of Munich from 2018 looks as follows:
   <tr>
     <td>
       <img src="assets/reconstructions_munich/gen_2048_fine_tuned_snr_20_db.jpg" alt="Image 1" width="300"/>
-      <p align="center">VAE</p>
+      <p align="center">VAE (Fine-tuned)</p>
     </td>
     <td>
       <img src="assets/reconstructions_munich/gen_2048_snr_20_db.jpg" alt="Image 2" width="300"/>
-      <p align="center">VAE (Fine-tuned)</p>
+      <p align="center">VAE</p>
     </td>
   </tr>
   <tr>
