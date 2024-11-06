@@ -72,13 +72,36 @@ poetry install
 ```
 
 ## Usage
-### Preprocessing of TNO Data
+### Preprocessing of TNO Data (Creation of Dataset)
 ```bash
-poetry run preprocess-tno
+poetry run preprocess-tno [-h] [-gw W] [-gh H] [-p N] [-v]
 ```
-For help on arguments, run:
+
+### Training of VAE
 ```bash
-poetry run preprocess-tno -h
+poetry run train-vae [-h] [-e N] [-d N] [-v p] [-t p] [-wandb]
+```
+
+### Fine-tuning of VAE
+```bash
+poetry run finetune-vae [-h] [-e N] -c C -b M
+```
+
+### Jupyter
+Jupyter Notebook
+```bash
+poetry run jupyter-notebook
+```
+Jupyter Lab
+```bash
+poetry run jupyter-lab
+```
+### Scripts
+There are some scripts in this repository.
+Notably, in `src/experiments`, some experiments are located.
+A script with name `<script>` can be run as follows:
+```bash
+poetry run python src/experiments/<script> <args>
 ```
 
 <a name="development"></a>
