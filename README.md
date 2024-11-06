@@ -96,8 +96,9 @@ poetry run finetune-vae [-h] [-e N] -c C -b M
 ```
 
 ### Jupyter
-There are some Jupyter notebooks, especially for plotting.
-These need to be run using either in Jupyter Notebook or Jupyter Lab if the IDE does not support Jupyter notebooks.
+There are some Jupyter notebooks, especially for plotting and visualizations.
+These need to be run either in Jupyter Notebook or Jupyter Lab if the IDE does not support Jupyter notebooks.
+They can be started as follows:
 
 Jupyter Notebook
 ```bash
