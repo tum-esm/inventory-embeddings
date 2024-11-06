@@ -72,6 +72,9 @@ poetry install
 ```
 
 ## Usage
+> **Note:**  
+> The `poetry run` prefix is not required if the virtual environment is already activated using `poetry shell`.
+
 ### Preprocessing of TNO Data (Creation of Dataset)
 ```bash
 poetry run preprocess-tno [-h] [-gw W] [-gh H] [-p N] [-v]
@@ -104,7 +107,6 @@ A script with name `<script>` can be run as follows:
 poetry run python src/experiments/<script> <args>
 ```
 
-<a name="development"></a>
 ## Development
 
 ### Installation of pre-commit hooks
