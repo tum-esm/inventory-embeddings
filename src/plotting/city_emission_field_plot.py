@@ -15,6 +15,10 @@ _SCALING_FACTOR = 1 / CityEmissionField.ROBUST_SCALING_FACTOR * CityEmissionFiel
 _UNIT_LABEL = r"$\mu \text{mol} \cdot \text{m}^{-2} \cdot \text{s}^{-1}$"
 
 
+def scale_emission_field_tensor_for_plotting(emission_field: Tensor) -> Tensor:
+    return _SCALING_FACTOR * emission_field
+
+
 def plot_emission_field(
     emission_field: CityEmissionField,
     ax: Axes,
