@@ -48,6 +48,8 @@ class PlotPaths:
     PLOTS = _SAVES / "plots"
     CASE_STUDY_PLOT = PLOTS / "case_studies"
 
+    ANIMATIONS = _SAVES / "animations"
+
 
 class ModelPaths:
     MODELS = _SAVES / "models"
